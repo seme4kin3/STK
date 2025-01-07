@@ -30,7 +30,7 @@ namespace STK.Application.Handlers
                     Id = o.Id,
                     Name = o.Name,
                     FullName = o.FullName,
-                    Adress = $"{o.Adress} {o.IndexAdress}",
+                    Adress = $"{o.Adress}, {o.IndexAdress}",
                     EconomicActivities = o.EconomicActivities.Select(e => new EconomicActivityDto
                     {
                         OKVDNnumber = e.OKVDNnumber,
@@ -42,13 +42,7 @@ namespace STK.Application.Handlers
                         KPP = o.Requisites.KPP,
                         AuthorizedCapital = o.Requisites.AuthorizedCapital
                     }
-                    //(r => new RequisiteDto
-                    //{
-                    //    INN = r.INN,
-                    //    KPP = r.KPP,
-                    //    OGRN = r.OGRN,
-                    //    AuthorizedCapital = r.AuthorizedCapital
-                    //}).ToList(),
+                    
 
                 }).ToList();
         }
