@@ -10,6 +10,6 @@ namespace STK.Persistance.Interfaces
     public interface IOrganizationRepository
     {
         Task<List<Organization>> GetAllOrganizations();
-        Task<Organization> GetOrganizationById(int id);
+        Task<Organization?> GetOrganizationById(Guid id);
     }
 }

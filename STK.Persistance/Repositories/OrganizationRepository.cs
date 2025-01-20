@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using STK.Domain.Entities;
 using STK.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace STK.Persistance.Repositories
 {
@@ -26,9 +22,15 @@ namespace STK.Persistance.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Organization> GetOrganizationById(int id)
+        public async Task<Organization?> GetOrganizationById(Guid id)
         {
-            return await _dataContext.Organizations.FindAsync(id);
+            return await _dataContext.Organizations
+                .Include(o => o.Requisites)
+                .Include(o => o.EconomicActivities)
+                .Include(o => o.Managements)
+                .Include(o => o.Certificates)
+                .DefaultIfEmpty(null)
+                .FirstOrDefaultAsync(o => o.Id == id);
         }
     }
 }
