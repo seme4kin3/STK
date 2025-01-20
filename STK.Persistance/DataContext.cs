@@ -2,6 +2,7 @@
 using STK.Domain.Entities;
 
 
+
 namespace STK.Persistance
 {
     public class DataContext: DbContext 
@@ -18,10 +19,10 @@ namespace STK.Persistance
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Requisite> Requisites { get; set; }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseNpgsql("Host=localhost;Port=5430;Database=stk;Username=stk;Password=stk");
-        //}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5430;Database=stk;Username=stk;Password=stk");
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             
@@ -31,9 +32,9 @@ namespace STK.Persistance
                 .HasForeignKey(c => c.OrganizationId);
 
             modelBuilder.Entity<EconomicActivity>()
-                .HasOne(e => e.Organization)
+                .HasMany(ea => ea.Organization)
                 .WithMany(o => o.EconomicActivities)
-                .HasForeignKey(e => e.OrganizationId);
+                .UsingEntity(j => j.ToTable("OrganizationEconomicActivity"));
 
             modelBuilder.Entity<Management>()
                 .HasOne(m => m.Organization)
