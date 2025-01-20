@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using STK.Application.DTOs;
+using STK.Application.DTOs.ListOrganizations;
 using STK.Application.Queries;
 using STK.Persistance.Interfaces;
 using System;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace STK.Application.Handlers
 {
-    public class GetOrganizationsQueryHandler: IRequestHandler<GetOrganizationsQuery, List<OrganizationDto>>
+    public class GetOrganizationsQueryHandler: IRequestHandler<GetOrganizationsQuery, List<ConciseOrganizationsDto>>
     {
         private readonly IOrganizationRepository _repository;
 
@@ -20,12 +21,12 @@ namespace STK.Application.Handlers
             _repository = repository;
         }
 
-        public async Task<List<OrganizationDto>> Handle (GetOrganizationsQuery query, CancellationToken cancellationToken)
+        public async Task<List<ConciseOrganizationsDto>> Handle (GetOrganizationsQuery query, CancellationToken cancellationToken)
         {
             var organizations = await _repository.GetAllOrganizations();
 
             return organizations
-                .Select(o => new OrganizationDto
+                .Select(o => new ConciseOrganizationsDto
                 {
                     Id = o.Id,
                     Name = o.Name,
@@ -36,14 +37,12 @@ namespace STK.Application.Handlers
                         OKVDNnumber = e.OKVDNnumber,
                         Discription = e.Discription,
                     }).ToList(),
-                    Requisites = new RequisiteDto
+                    ConciseRequisite = new ConciseRequisiteDto
                     {
                         INN = o.Requisites.INN,
                         KPP = o.Requisites.KPP,
                         AuthorizedCapital = o.Requisites.AuthorizedCapital
                     }
-                    
-
                 }).ToList();
         }
     }

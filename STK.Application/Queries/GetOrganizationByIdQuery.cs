@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using STK.Application.DTOs;
-using STK.Application.DTOs.ListOrganizations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace STK.Application.Queries
 {
-    public class GetOrganizationsQuery : IRequest<List<ConciseOrganizationsDto>>
+    public class GetOrganizationByIdQuery : IRequest<OrganizationDto>
     {
+        public Guid Id { get; set; }
+        public GetOrganizationByIdQuery(Guid id) 
+        {
+            Id = id;
+        }
     }
 }

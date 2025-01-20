@@ -15,5 +15,8 @@ namespace STK.Application.DTOs
         public DateTime DateCreation { get; set; }
         public string EstablishmentCreateName { get; set; }
         public int AuthorizedCapital { get; set; }
+        public int AvgCountEmployee { get; set; }
+        public int Proceeds { get; set; }
+        public int NetProfit { get; set; }
     }
 }
