@@ -22,6 +22,21 @@ namespace STK.Persistance.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("EconomicActivityOrganization", b =>
+                {
+                    b.Property<Guid>("EconomicActivitiesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EconomicActivitiesId", "OrganizationId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("OrganizationEconomicActivity", (string)null);
+                });
+
             modelBuilder.Entity("STK.Domain.Entities.Certificate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -77,12 +92,7 @@ namespace STK.Persistance.Migrations
                     b.Property<string>("OKVDNnumber")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
 
                     b.ToTable("EconomicActivities");
                 });
@@ -124,6 +134,9 @@ namespace STK.Persistance.Migrations
                     b.Property<string>("Adress")
                         .HasColumnType("text");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
                     b.Property<string>("FullName")
                         .HasColumnType("text");
 
@@ -133,8 +146,14 @@ namespace STK.Persistance.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("ParrentOrganizationId")
+                    b.Property<Guid?>("ParrentOrganizationId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Website")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -150,6 +169,9 @@ namespace STK.Persistance.Migrations
                     b.Property<int>("AuthorizedCapital")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("AvgCountEmployee")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("DateCreation")
                         .HasColumnType("timestamp with time zone");
 
@@ -162,11 +184,17 @@ namespace STK.Persistance.Migrations
                     b.Property<string>("KPP")
                         .HasColumnType("text");
 
+                    b.Property<int?>("NetProfit")
+                        .HasColumnType("integer");
+
                     b.Property<string>("OGRN")
                         .HasColumnType("text");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
+
+                    b.Property<int?>("Proceeds")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -176,21 +204,25 @@ namespace STK.Persistance.Migrations
                     b.ToTable("Requisites");
                 });
 
+            modelBuilder.Entity("EconomicActivityOrganization", b =>
+                {
+                    b.HasOne("STK.Domain.Entities.EconomicActivity", null)
+                        .WithMany()
+                        .HasForeignKey("EconomicActivitiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("STK.Domain.Entities.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("STK.Domain.Entities.Certificate", b =>
                 {
                     b.HasOne("STK.Domain.Entities.Organization", "Organization")
                         .WithMany("Certificates")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("STK.Domain.Entities.EconomicActivity", b =>
-                {
-                    b.HasOne("STK.Domain.Entities.Organization", "Organization")
-                        .WithMany("EconomicActivities")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -223,8 +255,6 @@ namespace STK.Persistance.Migrations
             modelBuilder.Entity("STK.Domain.Entities.Organization", b =>
                 {
                     b.Navigation("Certificates");
-
-                    b.Navigation("EconomicActivities");
 
                     b.Navigation("Managements");
 
