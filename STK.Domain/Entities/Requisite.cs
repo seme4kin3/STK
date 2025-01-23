@@ -17,10 +17,7 @@ namespace STK.Domain.Entities
         public int AuthorizedCapital {  get; set; }
         public int? AvgCountEmployee { get; set; }
         public int? Proceeds { get; set; }
-        public int? NetProfit { get; set; }
         public Guid OrganizationId { get; set; }
         public Organization Organization { get; set; }
-
-
     }
 }

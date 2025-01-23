@@ -37,6 +37,43 @@ namespace STK.Persistance.Migrations
                     b.ToTable("OrganizationEconomicActivity", (string)null);
                 });
 
+            modelBuilder.Entity("STK.Domain.Entities.BalanceSheet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetType")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("CapitalReserves")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("CurrentActive")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("LongTermLiabilities")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("NonCurrentActive")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("ShortTermLiabilities")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("BalanceSheets");
+                });
+
             modelBuilder.Entity("STK.Domain.Entities.Certificate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -95,6 +132,49 @@ namespace STK.Persistance.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EconomicActivities");
+                });
+
+            modelBuilder.Entity("STK.Domain.Entities.FinancialResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("CostOfSales")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("GrossProfitEarnings")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("GrossProfitRevenue")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("NetProfit")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("ProfitBeforeTax")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("Revenue")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("SalesProfit")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("FinancialResults");
                 });
 
             modelBuilder.Entity("STK.Domain.Entities.Management", b =>
@@ -184,9 +264,6 @@ namespace STK.Persistance.Migrations
                     b.Property<string>("KPP")
                         .HasColumnType("text");
 
-                    b.Property<int?>("NetProfit")
-                        .HasColumnType("integer");
-
                     b.Property<string>("OGRN")
                         .HasColumnType("text");
 
@@ -219,10 +296,32 @@ namespace STK.Persistance.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("STK.Domain.Entities.BalanceSheet", b =>
+                {
+                    b.HasOne("STK.Domain.Entities.Organization", "Organization")
+                        .WithMany("BalanceSheets")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("STK.Domain.Entities.Certificate", b =>
                 {
                     b.HasOne("STK.Domain.Entities.Organization", "Organization")
                         .WithMany("Certificates")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("STK.Domain.Entities.FinancialResult", b =>
+                {
+                    b.HasOne("STK.Domain.Entities.Organization", "Organization")
+                        .WithMany("FinancialResults")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -254,7 +353,11 @@ namespace STK.Persistance.Migrations
 
             modelBuilder.Entity("STK.Domain.Entities.Organization", b =>
                 {
+                    b.Navigation("BalanceSheets");
+
                     b.Navigation("Certificates");
+
+                    b.Navigation("FinancialResults");
 
                     b.Navigation("Managements");
 

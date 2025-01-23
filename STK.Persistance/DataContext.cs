@@ -18,6 +18,8 @@ namespace STK.Persistance
         public DbSet<Management> Managements { get; set; }
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Requisite> Requisites { get; set; }
+        public DbSet<BalanceSheet> BalanceSheets { get; set; }
+        public DbSet<FinancialResult> FinancialResults { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -46,6 +48,15 @@ namespace STK.Persistance
                 .WithOne(o => o.Requisites)
                 .HasForeignKey<Requisite>(r => r.OrganizationId);
 
+            modelBuilder.Entity<BalanceSheet>()
+                .HasOne(bs => bs.Organization)
+                .WithMany(o => o.BalanceSheets)
+                .HasForeignKey(bs => bs.OrganizationId);
+
+            modelBuilder.Entity<FinancialResult>()
+                .HasOne(fr => fr.Organization)
+                .WithMany(o => o.FinancialResults)
+                .HasForeignKey(fr => fr.OrganizationId);
         }
     }
 }
