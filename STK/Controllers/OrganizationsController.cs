@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs;
-using STK.Application.DTOs.ListOrganizations;
+using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 
 namespace STK.API.Controllers
@@ -19,7 +19,7 @@ namespace STK.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ConciseOrganizationsDto>>> GetAllOrganizations()
+        public async Task<ActionResult<List<SearchOrganizationDTO>>> GetAllOrganizations()
         {
             var organizations = await _mediator.Send(new GetOrganizationsQuery());
             return Ok(organizations);
@@ -30,11 +30,25 @@ namespace STK.API.Controllers
         {
             var request = new GetOrganizationByIdQuery(id);
             var organization = await _mediator.Send(request);
-            if(organization == null)
+            if (organization == null)
             {
                 return NotFound();
-            }   
+            }
             return Ok(organization);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string search)
+            
+        {
+            var query = new GetOrganizationBySearchQuery(search);
+            var organizations = await _mediator.Send(query);
+            if (organizations == null || !organizations.Any())
+            {
+                return NotFound("No organizations found.");
+            }
+
+            return Ok(organizations);
         }
     }
     

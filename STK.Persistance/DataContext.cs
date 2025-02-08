@@ -21,10 +21,10 @@ namespace STK.Persistance
         public DbSet<BalanceSheet> BalanceSheets { get; set; }
         public DbSet<FinancialResult> FinancialResults { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5430;Database=stk;Username=stk;Password=stk");
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseNpgsql("Host=localhost;Port=5430;Database=stk;Username=stk;Password=stk");
+        //}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             

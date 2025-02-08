@@ -1,4 +1,5 @@
-﻿using System;
+﻿using STK.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,13 +12,13 @@ namespace STK.Application.DTOs
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string FullName { get; set; }
-        public string Adress {  get; set; }
+        public string Adress { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string Website { get; set; }
-        public RequisiteDto Requisites { get; set; }
-        public List<ManagementDto> Management { get; set; } = new List<ManagementDto>();
-        public List<EconomicActivityDto> EconomicActivities { get; set; } = new List<EconomicActivityDto> { };
-        public List<CertificateDto> Certificate { get; set; } = new List<CertificateDto> { };
+        public Requisite Requisites { get; set; }
+        public List<Management> Management { get; set; } = new List<Management>();
+        public List<EconomicActivity> EconomicActivities { get; set; } = new List<EconomicActivity> { };
+        public List<Certificate> Certificate { get; set; } = new List<Certificate> { };
     }
 }

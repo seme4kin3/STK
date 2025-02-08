@@ -1,7 +1,8 @@
 ﻿using MediatR;
 using STK.Application.DTOs;
-using STK.Application.DTOs.ListOrganizations;
+using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
+using STK.Domain.Entities;
 using STK.Persistance.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace STK.Application.Handlers
 {
-    public class GetOrganizationsQueryHandler: IRequestHandler<GetOrganizationsQuery, List<ConciseOrganizationsDto>>
+    public class GetOrganizationsQueryHandler: IRequestHandler<GetOrganizationsQuery, List<SearchOrganizationDTO>>
     {
         private readonly IOrganizationRepository _repository;
 
@@ -21,28 +22,33 @@ namespace STK.Application.Handlers
             _repository = repository;
         }
 
-        public async Task<List<ConciseOrganizationsDto>> Handle (GetOrganizationsQuery query, CancellationToken cancellationToken)
+        public async Task<List<SearchOrganizationDTO>> Handle (GetOrganizationsQuery query, CancellationToken cancellationToken)
         {
             var organizations = await _repository.GetAllOrganizations();
 
-            return organizations
-                .Select(o => new ConciseOrganizationsDto
+            return organizations.Select
+                (o => new SearchOrganizationDTO
                 {
                     Id = o.Id,
                     Name = o.Name,
                     FullName = o.FullName,
-                    Adress = $"{o.Adress}, {o.IndexAdress}",
-                    EconomicActivities = o.EconomicActivities.Select(e => new EconomicActivityDto
+                    Address = o.Adress + o.IndexAdress,
+                    Inn = o.Requisites.INN,
+                    Ogrn = o.Requisites.OGRN,
+                    Managements = o.Managements.Select(m => new SearchManagementDTO
                     {
-                        OKVDNnumber = e.OKVDNnumber,
-                        Discription = e.Discription,
+                        FullName = m.FullName,
+                        Position = m.Position,
                     }).ToList(),
-                    ConciseRequisite = new ConciseRequisiteDto
-                    {
-                        INN = o.Requisites.INN,
-                        KPP = o.Requisites.KPP,
-                        AuthorizedCapital = o.Requisites.AuthorizedCapital
-                    }
+                    EconomicActivities = o.EconomicActivities
+                        
+                        .Select(e => new EconomicActivity
+                        {
+                            OKVDNnumber = e.OKVDNnumber
+
+                        }).ToList(),
+                            
+
                 }).ToList();
         }
     }

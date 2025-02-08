@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using STK.Application.DTOs;
 using STK.Application.Queries;
+using STK.Domain.Entities;
 using STK.Persistance.Interfaces;
 
 
@@ -26,7 +27,7 @@ namespace STK.Application.Handlers
                 Name = organization.Name,
                 FullName = organization.FullName,
                 Adress = $"{organization.Adress} {organization.IndexAdress}",
-                Requisites = new RequisiteDto
+                Requisites = new Requisite
                 {
                     INN = organization.Requisites.INN,
                     KPP = organization.Requisites.KPP,
@@ -35,19 +36,19 @@ namespace STK.Application.Handlers
                     EstablishmentCreateName = organization.Requisites.EstablishmentCreateName,
                     AuthorizedCapital = organization.Requisites.AuthorizedCapital,
                 },
-                Management = organization.Managements.Select(m => new ManagementDto
+                Management = organization.Managements.Select(m => new Management
                 {
                     FullName = $"{m.FirstName} {m.LastName}",
                     Position = m.Position,
                     INN = m.INN
 
                 }).ToList(),
-                EconomicActivities = organization.EconomicActivities.Select(e => new EconomicActivityDto
+                EconomicActivities = organization.EconomicActivities.Select(e => new EconomicActivity
                 {
                     OKVDNnumber = e.OKVDNnumber,
                     Discription = e.Discription,
                 }).ToList(),
-                Certificate = organization.Certificates.Select(c => new CertificateDto
+                Certificate = organization.Certificates.Select(c => new Certificate
                 {
                     NameOrganization = c.NameOrganization,
                     Tittle = c.Tittle,

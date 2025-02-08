@@ -8,6 +8,7 @@ namespace STK.Domain.Entities
 {
     public class Requisite
     {
+
         public Guid Id { get; set; }
         public string INN { get; set; }
         public string KPP { get; set; }
@@ -16,7 +17,6 @@ namespace STK.Domain.Entities
         public string EstablishmentCreateName { get; set; }
         public int AuthorizedCapital {  get; set; }
         public int? AvgCountEmployee { get; set; }
-        public int? Proceeds { get; set; }
         public Guid OrganizationId { get; set; }
         public Organization Organization { get; set; }
     }

@@ -11,5 +11,7 @@ namespace STK.Persistance.Interfaces
     {
         Task<List<Organization>> GetAllOrganizations();
         Task<Organization?> GetOrganizationById(Guid id);
+        Task<List<Organization>> GetOrganizationBySearch(string search);
+
     }
 }

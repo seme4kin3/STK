@@ -18,6 +18,7 @@ namespace STK.Domain.Entities
         public decimal? SalesProfit { get; set; }
         public decimal? ProfitBeforeTax { get; set; }
         public decimal? NetProfit { get; set; }
+        public decimal? IncomeTaxes { get; set; }
         public Guid OrganizationId { get; set; }
         public Organization Organization { get; set; }
     }
