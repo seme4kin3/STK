@@ -1,7 +1,9 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using STK.Application.DTOs;
 using STK.Application.Queries;
 using STK.Domain.Entities;
+using STK.Persistance;
 using STK.Persistance.Interfaces;
 
 
@@ -9,16 +11,22 @@ namespace STK.Application.Handlers
 {
     public class GetOrganizationByIdQueryHandler: IRequestHandler<GetOrganizationByIdQuery, OrganizationDto>
     {
-        private readonly IOrganizationRepository _repository;
+        private readonly DataContext _dataContext;
 
-        public GetOrganizationByIdQueryHandler(IOrganizationRepository repository)
+        public GetOrganizationByIdQueryHandler(DataContext dataContext)
         {
-            _repository = repository;
+            _dataContext = dataContext;
         }
 
         public async Task<OrganizationDto> Handle(GetOrganizationByIdQuery query, CancellationToken cancellationToken)
         {
-            var organization = await _repository.GetOrganizationById(query.Id);
+            var organization = await _dataContext.Organizations
+                .Include(o => o.Requisites)
+                .Include(o => o.EconomicActivities)
+                .Include(o => o.Managements)
+                .Include(o => o.Certificates)
+                .FirstOrDefaultAsync(o => o.Id == query.Id);
+
             if (organization == null) { return null; }
 
             var response = new OrganizationDto

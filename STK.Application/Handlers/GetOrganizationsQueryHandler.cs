@@ -1,8 +1,10 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 using STK.Domain.Entities;
+using STK.Persistance;
 using STK.Persistance.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,24 +17,23 @@ namespace STK.Application.Handlers
 {
     public class GetOrganizationsQueryHandler: IRequestHandler<GetOrganizationsQuery, List<SearchOrganizationDTO>>
     {
-        private readonly IOrganizationRepository _repository;
-
-        public GetOrganizationsQueryHandler(IOrganizationRepository repository)
+        private readonly DataContext _dataContext;
+        public GetOrganizationsQueryHandler(DataContext dataContext)
         {
-            _repository = repository;
+            _dataContext = dataContext;
         }
 
         public async Task<List<SearchOrganizationDTO>> Handle (GetOrganizationsQuery query, CancellationToken cancellationToken)
         {
-            var organizations = await _repository.GetAllOrganizations();
-
-            return organizations.Select
-                (o => new SearchOrganizationDTO
+            var organizations = await _dataContext.Organizations
+                .Include(o => o.Requisites)
+                .Include(o => o.EconomicActivities)
+                .Select(o => new SearchOrganizationDTO
                 {
                     Id = o.Id,
                     Name = o.Name,
                     FullName = o.FullName,
-                    Address = o.Adress + o.IndexAdress,
+                    Adress = o.Adress + o.IndexAdress,
                     Inn = o.Requisites.INN,
                     Ogrn = o.Requisites.OGRN,
                     Managements = o.Managements.Select(m => new SearchManagementDTO
@@ -40,16 +41,10 @@ namespace STK.Application.Handlers
                         FullName = m.FullName,
                         Position = m.Position,
                     }).ToList(),
-                    EconomicActivities = o.EconomicActivities
-                        
-                        .Select(e => new EconomicActivity
-                        {
-                            OKVDNnumber = e.OKVDNnumber
+                    EconomicActivities = o.EconomicActivities.ToList(),
+                }).ToListAsync();
 
-                        }).ToList(),
-                            
-
-                }).ToList();
+            return organizations;
         }
     }
 }

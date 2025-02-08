@@ -1,10 +1,7 @@
-
-
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Handlers;
 using STK.Persistance;
-using STK.Persistance.Interfaces;
-using STK.Persistance.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +15,6 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetOrganizationsQueryHandler>());
-builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 
 var app = builder.Build();
 

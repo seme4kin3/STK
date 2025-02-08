@@ -12,7 +12,7 @@ namespace STK.Application.DTOs.SearchOrganizations
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string FullName { get; set; }
-        public string Address { get; set; }
+        public string Adress { get; set; }
         public string Inn { get; set; }
         public string Ogrn { get; set; }
         public string Kpp { get; set; }

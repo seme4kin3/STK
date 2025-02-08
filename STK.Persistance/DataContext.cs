@@ -5,7 +5,7 @@ using STK.Domain.Entities;
 
 namespace STK.Persistance
 {
-    public class DataContext: DbContext 
+    public class DataContext: DbContext
     {
         public DataContext() { }
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
