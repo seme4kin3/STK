@@ -4,7 +4,6 @@ using STK.Application.DTOs;
 using STK.Application.Queries;
 using STK.Domain.Entities;
 using STK.Persistance;
-using STK.Persistance.Interfaces;
 
 
 namespace STK.Application.Handlers

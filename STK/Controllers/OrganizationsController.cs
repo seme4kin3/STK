@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
+using System.Text.Json;
 
 namespace STK.API.Controllers
 {
@@ -38,16 +39,26 @@ namespace STK.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string search)
+        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string search, int pageNumber = 1, int pageSize = 20)
             
         {
-            var query = new GetOrganizationBySearchQuery(search);
+            var query = new GetOrganizationBySearchQuery(search, pageNumber, pageSize);
             var organizations = await _mediator.Send(query);
             if (organizations == null || !organizations.Any())
             {
                 return NotFound("No organizations found.");
             }
 
+            var metadata = new
+            {
+                organizations.TotalCount,
+                organizations.PageSize,
+                organizations.CurrentPage,
+                organizations.TotalPages,
+                organizations.HasNext,
+                organizations.HasPrevious,
+            };
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
             return Ok(organizations);
         }
     }
