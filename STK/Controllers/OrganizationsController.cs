@@ -31,6 +31,7 @@ namespace STK.API.Controllers
         {
             var request = new GetOrganizationByIdQuery(id);
             var organization = await _mediator.Send(request);
+
             if (organization == null)
             {
                 return NotFound();
@@ -44,6 +45,7 @@ namespace STK.API.Controllers
         {
             var query = new GetOrganizationBySearchQuery(search, pageNumber, pageSize);
             var organizations = await _mediator.Send(query);
+
             if (organizations == null || !organizations.Any())
             {
                 return NotFound("No organizations found.");
@@ -51,13 +53,14 @@ namespace STK.API.Controllers
 
             var metadata = new
             {
-                organizations.TotalCount,
-                organizations.PageSize,
-                organizations.CurrentPage,
-                organizations.TotalPages,
-                organizations.HasNext,
-                organizations.HasPrevious,
+                totalCount = organizations.TotalCount,
+                limit = organizations.PageSize,
+                currentPage = organizations.CurrentPage,
+                totalPages = organizations.TotalPages,
+                hasNext = organizations.HasNext,
+                hasPrevious = organizations.HasPrevious,
             };
+
             Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
             return Ok(organizations);
         }

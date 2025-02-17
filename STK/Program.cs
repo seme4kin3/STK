@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Handlers;
+using STK.Application.Services;
 using STK.Persistance;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +17,8 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetOrganizationsQueryHandler>());
-
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

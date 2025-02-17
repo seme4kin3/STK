@@ -52,7 +52,7 @@ namespace STK.Application.Handlers
                 }).ToList(),
                 EconomicActivities = organization.EconomicActivities.Select(e => new EconomicActivity
                 {
-                    OKVDNnumber = e.OKVDNnumber,
+                    OKVDnumber = e.OKVDnumber,
                     Discription = e.Discription,
                 }).ToList(),
                 Certificate = organization.Certificates.Select(c => new Certificate
