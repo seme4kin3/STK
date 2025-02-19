@@ -1,7 +1,9 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
 using STK.Application.DTOs;
+using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
@@ -16,27 +18,59 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var command = new RegisterUserCommand { Register = registerDto };
             var result = await _mediator.Send(command);
 
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserDto authDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var command = new AuthenticateUserCommand { AuthDto = authDto };
+            var result = await _mediator.Send(command);
+    
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto refreshTokenRequest)
+        {
+            var command = new RefreshTokenCommand { RefreshTokenRequest = refreshTokenRequest };
             var result = await _mediator.Send(command);
 
             return Ok(result);
         }
-        [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] AuthTokenDto refreshTokenRequest)
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
         {
-            var command = new RefreshTokenCommand { RefreshTokenRequest = refreshTokenRequest };
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return BadRequest("Invalid user in token.");
+            }
+
+            // Создаем команду для выхода из системы
+            var command = new LogoutCommand { UserId = userId };
+
+            // Выполняем команду
             var result = await _mediator.Send(command);
 
             return Ok(result);

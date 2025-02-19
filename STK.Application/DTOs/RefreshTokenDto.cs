@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace STK.Application.DTOs
 {
-    internal class RefreshTokenDto
+    public class RefreshTokenDto
     {
+        public string RefreshToken { get; set; }
     }
 }

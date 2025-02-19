@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace STK.Application.DTOs
 {
-    public class AuthTokenDto
+    public class AuthTokenResponse
     {
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
+        public string UserName { get; set; }
     }
 }

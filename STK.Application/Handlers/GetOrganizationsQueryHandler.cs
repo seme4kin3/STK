@@ -1,9 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
-using STK.Domain.Entities;
 using STK.Persistance;
 
 namespace STK.Application.Handlers

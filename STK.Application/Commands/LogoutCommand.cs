@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using System;
 using System.Collections.Generic;
@@ -9,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace STK.Application.Commands
 {
-    public class RegisterUserCommand : IRequest<AuthUserResponse>
+    public class LogoutCommand : IRequest<AuthUserResponse>
     {
-        public RegisterDto Register { get; set; }
+        public Guid UserId { get; set; }
     }
 }
-

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Commands;
+using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Services;
 using STK.Domain.Entities;
 using STK.Persistance;
@@ -8,7 +9,7 @@ using STK.Persistance;
 
 namespace STK.Application.Handlers
 {
-    public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, bool>
+    public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, AuthUserResponse>
     {
         private readonly DataContext _dataContext;
         private readonly IPasswordHasher _passwordHasher;
@@ -19,7 +20,7 @@ namespace STK.Application.Handlers
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<bool> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        public async Task<AuthUserResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.Register.UserName);
             if (existingUser != null)
@@ -42,14 +43,13 @@ namespace STK.Application.Handlers
             {
                 role = new Role { Id = Guid.NewGuid(), Name = request.Register.RoleName};
                 _dataContext.Roles.Add(role);
-                await _dataContext.SaveChangesAsync();
             }
 
             user.UserRoles.Add(new UserRole { Role =  role });
             _dataContext.Users.Add(user);
-            await _dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return true;
+            return new AuthUserResponse { Success= true, Message = "User registered successfully" };
         }
     }
 }

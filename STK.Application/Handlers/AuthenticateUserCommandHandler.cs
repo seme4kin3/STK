@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace STK.Application.Handlers
 {
-    public class AuthenticateUserCommandHandler : IRequestHandler<AuthenticateUserCommand, AuthTokenDto>
+    public class AuthenticateUserCommandHandler : IRequestHandler<AuthenticateUserCommand, AuthTokenResponse>
     {
         private readonly DataContext _dataContext;
         private readonly IPasswordHasher _passwordHasher;
@@ -23,7 +23,7 @@ namespace STK.Application.Handlers
             _jwtService = jwtService;
             _configuration = configuration;
         }
-        public async Task<AuthTokenDto> Handle(AuthenticateUserCommand request, CancellationToken cancellationToken)
+        public async Task<AuthTokenResponse> Handle(AuthenticateUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.AuthDto.UserName);
 
@@ -44,9 +44,9 @@ namespace STK.Application.Handlers
             };
 
             _dataContext.Add(refreshTokenEntity);
-            await _dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return new AuthTokenDto { AccessToken = token, RefreshToken = refreshToken };
+            return new AuthTokenResponse { AccessToken = token, RefreshToken = refreshToken, UserName = user.Username };
         }
     }
 }

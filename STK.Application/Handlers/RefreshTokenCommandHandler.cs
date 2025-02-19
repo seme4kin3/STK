@@ -6,16 +6,11 @@ using STK.Application.DTOs;
 using STK.Application.Services;
 using STK.Domain.Entities;
 using STK.Persistance;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace STK.Application.Handlers
 {
-    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthTokenDto>
+    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthTokenResponse>
     {
         private readonly IJwtService _jwtService;
         private readonly DataContext _dataContext;
@@ -28,14 +23,14 @@ namespace STK.Application.Handlers
             _configuration = configuration;
         }
 
-        public async Task<AuthTokenDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        public async Task<AuthTokenResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            var principal = _jwtService.GetPrincipalFromExpiredToken(request.RefreshTokenRequest.AccessToken);
+            var principal = _jwtService.GetPrincipalFromExpiredToken(request.RefreshTokenRequest.RefreshToken);
             var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
             {
-                throw new Exception("Invalid user ID in token.");
+                throw new Exception("Invalid token.");
             }
 
             var user = await _dataContext.Users.Include(u => u.RefreshTokens).FirstOrDefaultAsync(u => u.Id == userId);
@@ -64,9 +59,9 @@ namespace STK.Application.Handlers
                 Created = DateTime.UtcNow
             });
 
-            await _dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return new AuthTokenDto
+            return new AuthTokenResponse
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken

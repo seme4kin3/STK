@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using STK.Domain.Entities;
 
-
-
 namespace STK.Persistance
 {
     public class DataContext: DbContext

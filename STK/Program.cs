@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using STK.Application.Handlers;
 using STK.Application.Services;
 using STK.Persistance;
+using System.Text;
 
 
 
@@ -19,8 +22,35 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetOrganizationsQueryHandler>());
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-var app = builder.Build();
 
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true, // Проверять издателя токена
+        ValidateAudience = true, // Проверять аудиторию токена
+        ValidateLifetime = true, // Проверять срок действия токена
+        ValidateIssuerSigningKey = true, // Проверять ключ подписи
+        ValidIssuer = jwtSettings["Issuer"], // Издатель токена
+        ValidAudience = jwtSettings["Audience"], // Аудитория токена
+        IssuerSigningKey = new SymmetricSecurityKey(key) // Ключ подписи
+    };
+});
+
+// Настройка авторизации
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -28,8 +58,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

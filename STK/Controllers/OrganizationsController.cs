@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
@@ -8,6 +8,7 @@ using System.Text.Json;
 
 namespace STK.API.Controllers
 {
+    [Authorize]
     [Route("api/organizations")]
     [ApiController]
     public class OrganizationsController : ControllerBase

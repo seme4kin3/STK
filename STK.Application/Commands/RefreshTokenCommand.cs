@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace STK.Application.Commands
 {
-    public class RefreshTokenCommand: IRequest<AuthTokenDto>
+    public class RefreshTokenCommand: IRequest<AuthTokenResponse>
     {
-        public AuthTokenDto RefreshTokenRequest { get; set; }
+        public RefreshTokenDto RefreshTokenRequest { get; set; }
     }
 }
