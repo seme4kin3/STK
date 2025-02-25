@@ -39,11 +39,11 @@ namespace STK.Application.Handlers
                     .Include(o => o.Requisites)
                     .Include(o => o.Managements)
                     .Include(o => o.EconomicActivities)
-                    .Where(o => o.Name.Contains(query.Search) ||
+                    .Where(o => (o.Name.Contains(query.Search) ||
                                 o.FullName.Contains(query.Search) ||
                                 o.Requisites.INN.StartsWith(query.Search) ||
-                                o.Requisites.OGRN.StartsWith(query.Search))
-                    .Where(o => o.EconomicActivities.Any(e => allowedCodes.Contains(e.OKVDnumber))); // Фильтр организаций
+                                o.Requisites.OGRN.StartsWith(query.Search)) &&
+                                o.EconomicActivities.Any(e => allowedCodes.Contains(e.OKVDnumber))); // Фильтр организаций
 
                 // Получаем общее количество организаций
                 var count = await organizationsQuery.CountAsync(cancellationToken);
@@ -54,7 +54,7 @@ namespace STK.Application.Handlers
                     Id = o.Id,
                     Name = o.Name,
                     FullName = o.FullName,
-                    Adress = o.Adress + o.IndexAdress, // Корректировка для аддреса
+                    Adress = $"{o.Adress} + {o.IndexAdress}", // Корректировка для аддреса
                     Inn = o.Requisites.INN,
                     Ogrn = o.Requisites.OGRN,
                     Kpp = o.Requisites.KPP,
@@ -69,7 +69,9 @@ namespace STK.Application.Handlers
                 });
 
                 // Применяем пагинацию и выполняем запрос
-                var pagedItems = await items.Skip((query.PageNumber - 1) * query.PageSize).Take(query.PageSize).ToListAsync();
+                var pagedItems = await items.Skip((query.PageNumber - 1) * query.PageSize)
+                    .Take(query.PageSize)
+                    .ToListAsync();
 
                 return new PagedList<SearchOrganizationDTO>(pagedItems, count, query.PageNumber, query.PageSize);
             }

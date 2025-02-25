@@ -20,6 +20,7 @@ namespace STK.Application.Handlers
         public async Task<OrganizationDto> Handle(GetOrganizationByIdQuery query, CancellationToken cancellationToken)
         {
             var organization = await _dataContext.Organizations
+                .AsNoTracking()
                 .Include(o => o.Requisites)
                 .Include(o => o.EconomicActivities)
                 .Include(o => o.Managements)

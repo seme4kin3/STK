@@ -16,6 +16,7 @@ namespace STK.Application.DTOs
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string Website { get; set; }
+        public string StatusOrg { get; set; }
         public Requisite Requisites { get; set; }
         public List<Management> Management { get; set; } = new List<Management>();
         public List<EconomicActivity> EconomicActivities { get; set; } = new List<EconomicActivity> { };
