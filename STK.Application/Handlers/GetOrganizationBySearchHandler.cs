@@ -49,31 +49,31 @@ namespace STK.Application.Handlers
                 var count = await organizationsQuery.CountAsync(cancellationToken);
 
                 // Выполняем выбор элементов с применением проекции
-                var items = organizationsQuery.Select(o => new SearchOrganizationDTO
-                {
-                    Id = o.Id,
-                    Name = o.Name,
-                    FullName = o.FullName,
-                    Adress = $"{o.Adress} + {o.IndexAdress}", // Корректировка для аддреса
-                    Inn = o.Requisites.INN,
-                    Ogrn = o.Requisites.OGRN,
-                    Kpp = o.Requisites.KPP,
-                    Managements = o.Managements.Select(m => new SearchManagementDTO
-                    {
-                        FullName = m.FullName,
-                        Position = m.Position,
-                    }).ToList(),
-                    EconomicActivities = o.EconomicActivities
-                        .Where(e => allowedCodes.Contains(e.OKVDnumber)) // Фильтр видов деятельности
-                        .ToList() // Список типов экономической деятельности
-                });
-
-                // Применяем пагинацию и выполняем запрос
-                var pagedItems = await items.Skip((query.PageNumber - 1) * query.PageSize)
+                var items = await organizationsQuery
+                    .Skip((query.PageNumber - 1) * query.PageSize)
                     .Take(query.PageSize)
-                    .ToListAsync();
+                    .Select(o => new SearchOrganizationDTO
+                    {
+                        Id = o.Id,
+                        Name = o.Name,
+                        FullName = o.FullName,
+                        Adress = $"{o.Adress} {o.IndexAdress}",
+                        Inn = o.Requisites.INN,
+                        Ogrn = o.Requisites.OGRN,
+                        Kpp = o.Requisites.KPP,
+                        Managements = o.Managements
+                            .Select(m => new SearchManagementDTO
+                            {
+                                FullName = m.FullName,
+                                Position = m.Position,
+                            }).ToList(),
+                        EconomicActivities = o.EconomicActivities
+                            .Where(e => allowedCodes.Contains(e.OKVDnumber))
+                            .ToList()
+                    })
+                    .ToListAsync(cancellationToken);
 
-                return new PagedList<SearchOrganizationDTO>(pagedItems, count, query.PageNumber, query.PageSize);
+                return new PagedList<SearchOrganizationDTO>(items, count, query.PageNumber, query.PageSize);
             }
 
             catch (Exception ex)

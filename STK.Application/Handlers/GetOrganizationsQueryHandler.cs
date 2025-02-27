@@ -17,8 +17,11 @@ namespace STK.Application.Handlers
         public async Task<List<SearchOrganizationDTO>> Handle (GetOrganizationsQuery query, CancellationToken cancellationToken)
         {
             var organizations = await _dataContext.Organizations
+                .AsNoTracking()
                 .Include(o => o.Requisites)
                 .Include(o => o.EconomicActivities)
+                .OrderByDescending(o => o.Requisites.DateCreation)
+                .Take(50)
                 .Select(o => new SearchOrganizationDTO
                 {
                     Id = o.Id,
@@ -27,13 +30,14 @@ namespace STK.Application.Handlers
                     Adress = o.Adress + o.IndexAdress,
                     Inn = o.Requisites.INN,
                     Ogrn = o.Requisites.OGRN,
+                    CreationDate = o.Requisites.DateCreation,
                     Managements = o.Managements.Select(m => new SearchManagementDTO
                     {
                         FullName = m.FullName,
                         Position = m.Position,
                     }).ToList(),
                     EconomicActivities = o.EconomicActivities.ToList(),
-                }).ToListAsync();
+                }).ToListAsync(cancellationToken);
 
             return organizations;
         }

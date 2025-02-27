@@ -9,7 +9,7 @@ using System.Text.Json;
 namespace STK.API.Controllers
 {
     [Authorize]
-    [Route("api/organizations")]
+    [Route("api")]
     [ApiController]
     public class OrganizationsController : ControllerBase
     {
@@ -20,6 +20,7 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
+        [Route("/organizations")]
         [HttpGet]
         public async Task<ActionResult<List<SearchOrganizationDTO>>> GetAllOrganizations()
         {
@@ -27,7 +28,7 @@ namespace STK.API.Controllers
             return Ok(organizations);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("/organizations/{id}")]
         public async Task<ActionResult<OrganizationDto>> GetOrganizationById(Guid id)
         {
             var request = new GetOrganizationByIdQuery(id);
@@ -39,8 +40,8 @@ namespace STK.API.Controllers
             }
             return Ok(organization);
         }
-
-        [HttpGet("search")]
+        
+        [HttpGet]
         public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string search, int pageNumber = 1, int pageSize = 20)
             
         {

@@ -25,7 +25,7 @@ namespace STK.Application.Handlers
             var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.Register.UserName);
             if (existingUser != null)
             {
-                throw new Exception("User already exists.");
+                throw new Exception("Такой пользователь уже существует.");
             }
 
             var user = new User
@@ -49,7 +49,7 @@ namespace STK.Application.Handlers
             _dataContext.Users.Add(user);
             await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return new AuthUserResponse { Success= true, Message = "User registered successfully" };
+            return new AuthUserResponse { Success = true, Message = "Пользователь успешно зарегистрирован." };
         }
     }
 }

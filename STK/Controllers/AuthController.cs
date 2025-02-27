@@ -29,7 +29,7 @@ namespace STK.API.Controllers
             var command = new RegisterUserCommand { Register = registerDto };
             var result = await _mediator.Send(command);
 
-            return Ok(result);
+            return CreatedAtAction(nameof(Register), result);
         }
 
         [AllowAnonymous]
@@ -42,6 +42,13 @@ namespace STK.API.Controllers
             }
             var command = new AuthenticateUserCommand { AuthDto = authDto };
             var result = await _mediator.Send(command);
+            if(result == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Неверный логин или пароль. Пожалуйста, проверьте введенные данные и попробуйте снова."
+                });
+            }
     
             return Ok(result);
         }

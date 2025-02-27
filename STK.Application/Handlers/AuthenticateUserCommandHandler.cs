@@ -29,7 +29,7 @@ namespace STK.Application.Handlers
 
             if (user == null || !_passwordHasher.VerifyPassword(request.AuthDto.Password, user.PasswordHash))
             {
-                throw new Exception("Invalid credentials.");
+                return null;
             }
 
             var token = _jwtService.GenerateAccessToken(user);
