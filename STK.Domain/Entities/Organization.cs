@@ -24,6 +24,8 @@ namespace STK.Domain.Entities
         public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
         public ICollection<BalanceSheet> BalanceSheets { get; set; } = new List<BalanceSheet>();
         public ICollection<FinancialResult> FinancialResults { get; set; } = new List<FinancialResult>();
+        public ICollection<License> Licenses { get; set; } = new List<License>();
+        public ICollection<TaxMode> TaxesModes { get; set; }
 
     }
 }

@@ -18,15 +18,18 @@ namespace STK.Persistance
         public DbSet<Requisite> Requisites { get; set; }
         public DbSet<BalanceSheet> BalanceSheets { get; set; }
         public DbSet<FinancialResult> FinancialResults { get; set; }
+        public DbSet<License> Licenses { get; set; }
+        public DbSet<TaxMode> TaxesModes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseNpgsql("Host=79.174.83.231;Port=5432;Database=stk;Username=postgres;Password=secret123");
-        //}
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql("Host=79.174.83.231;Port=5432;Database=stk2;Username=postgres;Password=secret123");
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -39,6 +42,11 @@ namespace STK.Persistance
                 .HasMany(ea => ea.Organization)
                 .WithMany(o => o.EconomicActivities)
                 .UsingEntity(j => j.ToTable("OrganizationEconomicActivity"));
+
+            modelBuilder.Entity<TaxMode>()
+                .HasMany(tm => tm.Organization)
+                .WithMany(o => o.TaxesModes)
+                .UsingEntity(j => j.ToTable("OrganizationTaxMode"));
 
             modelBuilder.Entity<Management>()
                 .HasOne(m => m.Organization)
@@ -59,6 +67,11 @@ namespace STK.Persistance
                 .HasOne(fr => fr.Organization)
                 .WithMany(o => o.FinancialResults)
                 .HasForeignKey(fr => fr.OrganizationId);
+
+            modelBuilder.Entity<License>()
+                .HasOne (l => l.Organization)
+                .WithMany(o => o.Licenses)
+                .HasForeignKey(l => l.OrganizationId);
 
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
