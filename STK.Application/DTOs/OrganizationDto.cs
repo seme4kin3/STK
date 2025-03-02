@@ -1,4 +1,5 @@
-﻿using STK.Domain.Entities;
+﻿using STK.Application.DTOs.SearchOrganizations;
+using STK.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +18,14 @@ namespace STK.Application.DTOs
         public string Email { get; set; }
         public string Website { get; set; }
         public string StatusOrg { get; set; }
-        public Requisite Requisites { get; set; }
-        public List<Management> Management { get; set; } = new List<Management>();
-        public List<EconomicActivity> EconomicActivities { get; set; } = new List<EconomicActivity> { };
-        public List<Certificate> Certificate { get; set; } = new List<Certificate> { };
+        public RequisiteDto Requisites { get; set; } = new RequisiteDto();
+        public List<ManagementDto> Managements { get; set; } = new List<ManagementDto>();
+        public List<SearchEconomicActivityDto> EconomicActivities { get; set; } = new List<SearchEconomicActivityDto>();
+        public List<CertificateDto> Certificate { get; set; } = new List<CertificateDto>();
+        public List<BalanceSheetDto> BalanceSheets { get; set; } = new List<BalanceSheetDto>();
+        public List<FinancialResultDto> FinancialResults { get; set; } = new List<FinancialResultDto>();
+        public List<LicenseDto> Licenses { get; set; } = new List<LicenseDto>();
+        public List<TaxModeDto> TaxModes { get; set; } = new List<TaxModeDto>();
+
     }
 }

@@ -9,9 +9,10 @@ namespace STK.Domain.Entities
     public class EconomicActivity
     {
         public Guid Id { get; set; }
-        public string OKVDnumber { get; set; }
-        public string Discription {  get; set; }
+        public string OKVDNumber { get; set; }
+        public string Description {  get; set; }
         public ICollection<Organization> Organization { get; set; } = new List<Organization>();
+        public ICollection<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; } = new List<OrganizationEconomicActivity>();
 
     }
 }

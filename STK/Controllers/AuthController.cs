@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
-using STK.Application.DTOs;
+using STK.Application.DTOs.AuthDto;
 using System.Security.Claims;
 
 namespace STK.API.Controllers

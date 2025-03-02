@@ -3,9 +3,9 @@ using STK.Application.Commands;
 using STK.Application.Services;
 using STK.Persistance;
 using Microsoft.EntityFrameworkCore;
-using STK.Application.DTOs;
 using STK.Domain.Entities;
 using Microsoft.Extensions.Configuration;
+using STK.Application.DTOs.AuthDto;
 
 namespace STK.Application.Handlers
 {

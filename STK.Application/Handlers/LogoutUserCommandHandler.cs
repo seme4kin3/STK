@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Commands;
-using STK.Application.DTOs.SearchOrganizations;
+using STK.Application.DTOs.AuthDto;
 using STK.Persistance;
 
 namespace STK.Application.Handlers

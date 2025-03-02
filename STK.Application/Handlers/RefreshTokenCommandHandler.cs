@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using STK.Application.Commands;
-using STK.Application.DTOs;
+using STK.Application.DTOs.AuthDto;
 using STK.Application.Services;
 using STK.Domain.Entities;
 using STK.Persistance;

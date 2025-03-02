@@ -42,10 +42,10 @@ namespace STK.API.Controllers
         }
         
         [HttpGet("search/")]
-        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string text, int pageNumber = 1, int pageSize = 20)
+        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string text, int page = 1, int limit = 20)
             
         {
-            var query = new GetOrganizationBySearchQuery(text, pageNumber, pageSize);
+            var query = new GetOrganizationBySearchQuery(text, page, limit);
             var organizations = await _mediator.Send(query);
 
             if (organizations == null || !organizations.Any())

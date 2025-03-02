@@ -4,18 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace STK.Domain.Entities
+namespace STK.Application.DTOs
 {
-    public class Certificate
+    public class CertificateDto
     {
-        public Guid Id { get; set; }
         public string Title { get; set; }
         public string Applicant { get; set; }
         public string Address { get; set; }
         public string Country { get; set; }
         public string CertificationObject { get; set; }
         public DateTime DateOfIssueCertificate { get; set; }
-        public DateTime? DateOfCertificateExpiration {  get; set; }
+        public DateTime? DateOfCertificateExpiration { get; set; }
         public string CertificationType { get; set; }
         public string Status { get; set; }
         public DateTime? CertificateSuspensionDate { get; set; }
@@ -26,7 +25,5 @@ namespace STK.Domain.Entities
         public string ManufacturerCity { get; set; }
         public string ManufacturerAddress { get; set; }
         public string ManufacturerCountry { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Organization Organization { get; set; }
     }
 }

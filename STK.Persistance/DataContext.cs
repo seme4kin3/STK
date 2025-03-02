@@ -24,7 +24,7 @@ namespace STK.Persistance
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-
+        public DbSet<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -32,16 +32,23 @@ namespace STK.Persistance
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<OrganizationEconomicActivity>()
+                .HasKey(oe => new { oe.OrganizationId, oe.EconomicActivityId });
+
+            modelBuilder.Entity<OrganizationEconomicActivity>()
+                .HasOne(oe => oe.Organizations)
+                .WithMany(o => o.OrganizationsEconomicActivities)
+                .HasForeignKey(oe => oe.OrganizationId);
+
+            modelBuilder.Entity<OrganizationEconomicActivity>()
+                .HasOne(oe => oe.EconomicActivities)
+                .WithMany(ea => ea.OrganizationsEconomicActivities)
+                .HasForeignKey(oe => oe.EconomicActivityId);
 
             modelBuilder.Entity<Certificate>()
                 .HasOne(c => c.Organization)
                 .WithMany(o => o.Certificates)
-                .HasForeignKey(c => c.OrganizationId);
-
-            modelBuilder.Entity<EconomicActivity>()
-                .HasMany(ea => ea.Organization)
-                .WithMany(o => o.EconomicActivities)
-                .UsingEntity(j => j.ToTable("OrganizationEconomicActivity"));
+                .HasForeignKey(c => c.OrganizationId);    
 
             modelBuilder.Entity<TaxMode>()
                 .HasMany(tm => tm.Organization)

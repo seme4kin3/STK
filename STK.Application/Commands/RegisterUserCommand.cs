@@ -1,6 +1,5 @@
 ﻿using MediatR;
-using STK.Application.DTOs;
-using STK.Application.DTOs.SearchOrganizations;
+using STK.Application.DTOs.AuthDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;

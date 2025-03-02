@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace STK.Persistance.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigrate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,8 +16,8 @@ namespace STK.Persistance.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OKVDnumber = table.Column<string>(type: "text", nullable: true),
-                    Discription = table.Column<string>(type: "text", nullable: true)
+                    OKVDNumber = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -31,9 +31,9 @@ namespace STK.Persistance.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     FullName = table.Column<string>(type: "text", nullable: true),
-                    Adress = table.Column<string>(type: "text", nullable: true),
-                    IndexAdress = table.Column<string>(type: "text", nullable: true),
-                    ParrentOrganizationId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Address = table.Column<string>(type: "text", nullable: true),
+                    IndexAddress = table.Column<string>(type: "text", nullable: true),
+                    ParentOrganizationId = table.Column<Guid>(type: "uuid", nullable: true),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
                     Website = table.Column<string>(type: "text", nullable: true),
@@ -115,15 +115,23 @@ namespace STK.Persistance.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    NameOrganization = table.Column<string>(type: "text", nullable: true),
-                    Tittle = table.Column<string>(type: "text", nullable: true),
-                    CertificationObject = table.Column<string>(type: "text", nullable: true),
-                    City = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Applicant = table.Column<string>(type: "text", nullable: true),
+                    Address = table.Column<string>(type: "text", nullable: true),
                     Country = table.Column<string>(type: "text", nullable: true),
-                    DateOfCertificateExpiration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CertificationObject = table.Column<string>(type: "text", nullable: true),
                     DateOfIssueCertificate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DeclarationOfConformity = table.Column<string>(type: "text", nullable: true),
+                    DateOfCertificateExpiration = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CertificationType = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: true),
+                    CertificateSuspensionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CertificateRenewalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    PrescriptionReason = table.Column<string>(type: "text", nullable: true),
+                    SuspensionHistory = table.Column<string>(type: "text", nullable: true),
+                    Manufacturer = table.Column<string>(type: "text", nullable: true),
+                    ManufacturerCity = table.Column<string>(type: "text", nullable: true),
+                    ManufacturerAddress = table.Column<string>(type: "text", nullable: true),
+                    ManufacturerCountry = table.Column<string>(type: "text", nullable: true),
                     OrganizationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -171,6 +179,7 @@ namespace STK.Persistance.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    NameTypeActivity = table.Column<string>(type: "text", nullable: true),
                     SeriesNumber = table.Column<string>(type: "text", nullable: true),
                     DateOfIssue = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     NameOrganizationIssued = table.Column<string>(type: "text", nullable: true),
@@ -211,23 +220,24 @@ namespace STK.Persistance.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrganizationEconomicActivity",
+                name: "OrganizationsEconomicActivities",
                 columns: table => new
                 {
-                    EconomicActivitiesId = table.Column<Guid>(type: "uuid", nullable: false),
-                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EconomicActivityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsMain = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrganizationEconomicActivity", x => new { x.EconomicActivitiesId, x.OrganizationId });
+                    table.PrimaryKey("PK_OrganizationsEconomicActivities", x => new { x.OrganizationId, x.EconomicActivityId });
                     table.ForeignKey(
-                        name: "FK_OrganizationEconomicActivity_EconomicActivities_EconomicAct~",
-                        column: x => x.EconomicActivitiesId,
+                        name: "FK_OrganizationsEconomicActivities_EconomicActivities_Economic~",
+                        column: x => x.EconomicActivityId,
                         principalTable: "EconomicActivities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrganizationEconomicActivity_Organizations_OrganizationId",
+                        name: "FK_OrganizationsEconomicActivities_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
@@ -242,10 +252,11 @@ namespace STK.Persistance.Migrations
                     INN = table.Column<string>(type: "text", nullable: true),
                     KPP = table.Column<string>(type: "text", nullable: true),
                     OGRN = table.Column<string>(type: "text", nullable: true),
-                    DateCreation = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DateCreation = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EstablishmentCreateName = table.Column<string>(type: "text", nullable: true),
-                    AuthorizedCapital = table.Column<int>(type: "integer", nullable: false),
+                    AuthorizedCapital = table.Column<int>(type: "integer", nullable: true),
                     AvgCountEmployee = table.Column<int>(type: "integer", nullable: true),
+                    TypeOfCapital = table.Column<string>(type: "text", nullable: true),
                     OrganizationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -355,9 +366,9 @@ namespace STK.Persistance.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrganizationEconomicActivity_OrganizationId",
-                table: "OrganizationEconomicActivity",
-                column: "OrganizationId");
+                name: "IX_OrganizationsEconomicActivities_EconomicActivityId",
+                table: "OrganizationsEconomicActivities",
+                column: "EconomicActivityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrganizationTaxMode_TaxesModesId",
@@ -400,7 +411,7 @@ namespace STK.Persistance.Migrations
                 name: "Managements");
 
             migrationBuilder.DropTable(
-                name: "OrganizationEconomicActivity");
+                name: "OrganizationsEconomicActivities");
 
             migrationBuilder.DropTable(
                 name: "OrganizationTaxMode");

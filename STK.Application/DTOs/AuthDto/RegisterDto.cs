@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace STK.Application.DTOs
+namespace STK.Application.DTOs.AuthDto
 {
     public class RegisterDto
     {

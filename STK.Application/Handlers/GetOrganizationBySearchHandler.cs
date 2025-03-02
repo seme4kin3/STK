@@ -42,8 +42,9 @@ namespace STK.Application.Handlers
                     .Where(o => (o.Name.Contains(query.Search) ||
                                 o.FullName.Contains(query.Search) ||
                                 o.Requisites.INN.StartsWith(query.Search) ||
-                                o.Requisites.OGRN.StartsWith(query.Search)) &&
-                                o.EconomicActivities.Any(e => allowedCodes.Contains(e.OKVDnumber))); // Фильтр организаций
+                                o.Requisites.OGRN.StartsWith(query.Search) ||
+                                o.EconomicActivities.Any(ea => ea.OKVDNumber.StartsWith(query.Search))) &&
+                                o.EconomicActivities.Any(e => allowedCodes.Contains(e.OKVDNumber))); // Фильтр организаций
 
                 // Получаем общее количество организаций
                 var count = await organizationsQuery.CountAsync(cancellationToken);
@@ -57,7 +58,7 @@ namespace STK.Application.Handlers
                         Id = o.Id,
                         Name = o.Name,
                         FullName = o.FullName,
-                        Adress = $"{o.Adress} {o.IndexAdress}",
+                        Address = $"{o.Address} {o.IndexAddress}", // Объединение адреса и индекса
                         Inn = o.Requisites.INN,
                         Ogrn = o.Requisites.OGRN,
                         Kpp = o.Requisites.KPP,
@@ -66,9 +67,16 @@ namespace STK.Application.Handlers
                             {
                                 FullName = m.FullName,
                                 Position = m.Position,
-                            }).ToList(),
-                        EconomicActivities = o.EconomicActivities
-                            .Where(e => allowedCodes.Contains(e.OKVDnumber))
+                            })
+                            .ToList(), // Преобразование Managements в DTO
+                        SearchEconomicActivities = o.EconomicActivities
+                            .Where(e => allowedCodes.Contains(e.OKVDNumber)) // Фильтрация по allowedCodes
+                            .Select(e => new SearchEconomicActivityDto // Преобразование EconomicActivities в DTO
+                            {
+                                OKVDNumber = e.OKVDNumber,
+                                Description = e.Description
+                                // Добавьте другие необходимые поля
+                            })
                             .ToList()
                     })
                     .ToListAsync(cancellationToken);

@@ -27,7 +27,7 @@ namespace STK.Application.Handlers
                     Id = o.Id,
                     Name = o.Name,
                     FullName = o.FullName,
-                    Adress = o.Adress + o.IndexAdress,
+                    Address = o.Address + o.IndexAddress,
                     Inn = o.Requisites.INN,
                     Ogrn = o.Requisites.OGRN,
                     CreationDate = o.Requisites.DateCreation,
@@ -36,7 +36,11 @@ namespace STK.Application.Handlers
                         FullName = m.FullName,
                         Position = m.Position,
                     }).ToList(),
-                    EconomicActivities = o.EconomicActivities.ToList(),
+                    SearchEconomicActivities = o.EconomicActivities.Select(ea => new SearchEconomicActivityDto
+                    {
+                        OKVDNumber = ea.OKVDNumber,
+                        Description = ea.Description
+                    }).ToList(),
                 }).ToListAsync(cancellationToken);
 
             return organizations;

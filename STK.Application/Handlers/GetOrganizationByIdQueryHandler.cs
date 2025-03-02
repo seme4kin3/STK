@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using STK.Application.DTOs;
+using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 using STK.Domain.Entities;
 using STK.Persistance;
@@ -25,6 +26,10 @@ namespace STK.Application.Handlers
                 .Include(o => o.EconomicActivities)
                 .Include(o => o.Managements)
                 .Include(o => o.Certificates)
+                .Include(o => o.Licenses)
+                .Include(o => o.FinancialResults)
+                .Include(o => o.BalanceSheets)
+                .Include(o => o.TaxesModes)
                 .FirstOrDefaultAsync(o => o.Id == query.Id);
 
             if (organization == null) { return null; }
@@ -34,8 +39,8 @@ namespace STK.Application.Handlers
                 Id = organization.Id,
                 Name = organization.Name,
                 FullName = organization.FullName,
-                Adress = $"{organization.Adress} {organization.IndexAdress}",
-                Requisites = new Requisite
+                Adress = $"{organization.Address} {organization.IndexAddress}",
+                Requisites = new RequisiteDto
                 {
                     INN = organization.Requisites.INN,
                     KPP = organization.Requisites.KPP,
@@ -44,29 +49,64 @@ namespace STK.Application.Handlers
                     EstablishmentCreateName = organization.Requisites.EstablishmentCreateName,
                     AuthorizedCapital = organization.Requisites.AuthorizedCapital,
                 },
-                Management = organization.Managements.Select(m => new Management
+                Managements = organization.Managements.Select(m => new ManagementDto
                 {
                     FullName = $"{m.FirstName} {m.LastName}",
                     Position = m.Position,
                     INN = m.INN
 
                 }).ToList(),
-                EconomicActivities = organization.EconomicActivities.Select(e => new EconomicActivity
+                EconomicActivities = organization.EconomicActivities.Select(e => new SearchEconomicActivityDto
                 {
-                    OKVDnumber = e.OKVDnumber,
-                    Discription = e.Discription,
+                    OKVDNumber = e.OKVDNumber,
+                    Description = e.Description,
                 }).ToList(),
-                Certificate = organization.Certificates.Select(c => new Certificate
+                Certificate = organization.Certificates.Select(c => new CertificateDto
                 {
-                    NameOrganization = c.NameOrganization,
-                    Tittle = c.Tittle,
+                    Applicant = c.Applicant,
+                    Title = c.Title,
                     CertificationObject = c.CertificationObject,
-                    City = c.City,
+                    Address = c.Address,
                     Country = c.Country,
                     DateOfCertificateExpiration = c.DateOfCertificateExpiration,
                     DateOfIssueCertificate = c.DateOfIssueCertificate,
-                    DeclarationOfConformity = c.DeclarationOfConformity,
                     Status = c.Status,
+                    Manufacturer = c.Manufacturer,
+                }).ToList(),
+                BalanceSheets = organization.BalanceSheets.Select(bs => new BalanceSheetDto
+                {
+                    Year = bs.Year,
+                    AssetType = bs.AssetType,
+                    NonCurrentActive = bs.NonCurrentActive,
+                    CurrentActive = bs.CurrentActive,
+                    CapitalReserves = bs.CapitalReserves,
+                    LongTermLiabilities = bs.LongTermLiabilities,
+                    ShortTermLiabilities = bs.ShortTermLiabilities
+                }).ToList(),
+                FinancialResults = organization.FinancialResults.Select(fr => new FinancialResultDto
+                {
+                    Type = fr.Type,
+                    Year = fr.Year,
+                    Revenue = fr.Revenue,
+                    CostOfSales = fr.CostOfSales,
+                    GrossProfitEarnings = fr.GrossProfitEarnings,
+                    GrossProfitRevenue = fr.GrossProfitRevenue,
+                    SalesProfit = fr.SalesProfit,
+                    ProfitBeforeTax = fr.ProfitBeforeTax,
+                    NetProfit = fr.NetProfit,
+                    IncomeTaxe = fr.IncomeTaxe,
+                    TaxFee = fr.TaxFee
+                }).ToList(),
+                Licenses = organization.Licenses.Select(fr => new LicenseDto
+                {
+                    NameTypeActivity = fr.NameTypeActivity,
+                    NameOrganizationIssued = fr.NameOrganizationIssued,
+                    SeriesNumber = fr.SeriesNumber,
+                    DateOfIssue = fr.DateOfIssue,
+                }).ToList(),
+                TaxModes = organization.TaxesModes.Select(tm => new TaxModeDto
+                {
+                    Name = tm.Name
                 }).ToList()
             };
 

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace STK.Application.DTOs.SearchOrganizations
 {
-    public class AuthUserResponse
+    public class SearchEconomicActivityDto
     {
-        public bool Success { get; set; }
-        public string Message { get; set; }
+        public string OKVDNumber { get; set; }
+        public string Description { get; set; }
     }
 }
