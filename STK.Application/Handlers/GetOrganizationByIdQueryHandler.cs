@@ -39,7 +39,7 @@ namespace STK.Application.Handlers
                 Id = organization.Id,
                 Name = organization.Name,
                 FullName = organization.FullName,
-                Adress = $"{organization.Address} {organization.IndexAddress}",
+                Address = $"{organization.Address} {organization.IndexAddress}",
                 Requisites = new RequisiteDto
                 {
                     INN = organization.Requisites.INN,
@@ -112,7 +112,5 @@ namespace STK.Application.Handlers
 
             return response;
         }
-
-
     }
 }
