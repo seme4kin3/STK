@@ -18,7 +18,8 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
-        [Authorize(Roles = "admin")]
+        //[Authorize(Roles = "admin")]
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {

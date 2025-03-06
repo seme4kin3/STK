@@ -12,8 +12,8 @@ using STK.Persistance;
 namespace STK.Persistance.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250301192819_InitialMigrate")]
-    partial class InitialMigrate
+    [Migration("20250306193521_UpdateMigrate_06.03")]
+    partial class UpdateMigrate_0603
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,21 +24,6 @@ namespace STK.Persistance.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("EconomicActivityOrganization", b =>
-                {
-                    b.Property<Guid>("EconomicActivitiesId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("EconomicActivitiesId", "OrganizationId");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("EconomicActivityOrganization");
-                });
 
             modelBuilder.Entity("OrganizationTaxMode", b =>
                 {
@@ -479,21 +464,6 @@ namespace STK.Persistance.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
-                });
-
-            modelBuilder.Entity("EconomicActivityOrganization", b =>
-                {
-                    b.HasOne("STK.Domain.Entities.EconomicActivity", null)
-                        .WithMany()
-                        .HasForeignKey("EconomicActivitiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("STK.Domain.Entities.Organization", null)
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("OrganizationTaxMode", b =>

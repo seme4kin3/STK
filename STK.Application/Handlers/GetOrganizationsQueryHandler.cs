@@ -19,7 +19,8 @@ namespace STK.Application.Handlers
             var organizations = await _dataContext.Organizations
                 .AsNoTracking()
                 .Include(o => o.Requisites)
-                .Include(o => o.EconomicActivities)
+                .Include(o => o.OrganizationsEconomicActivities)
+                    .ThenInclude(oe => oe.EconomicActivities)
                 .OrderByDescending(o => o.Requisites.DateCreation)
                 .Take(50)
                 .Select(o => new SearchOrganizationDTO
@@ -36,10 +37,10 @@ namespace STK.Application.Handlers
                         FullName = m.FullName,
                         Position = m.Position,
                     }).ToList(),
-                    SearchEconomicActivities = o.EconomicActivities.Select(ea => new SearchEconomicActivityDto
+                    SearchEconomicActivities = o.OrganizationsEconomicActivities.Select(ea => new SearchEconomicActivityDto
                     {
-                        OKVDNumber = ea.OKVDNumber,
-                        Description = ea.Description
+                        OKVDNumber = ea.EconomicActivities.OKVDNumber,
+                        Description = ea.EconomicActivities.Description
                     }).ToList(),
                 }).ToListAsync(cancellationToken);
 

@@ -35,16 +35,19 @@ namespace STK.Application.Handlers
                 }
 
                 var organizationsQuery = _dataContext.Organizations
-                    .AsNoTracking() // Отключаем отслеживание изменений
-                    .Include(o => o.Requisites)
-                    .Include(o => o.Managements)
-                    .Include(o => o.EconomicActivities)
-                    .Where(o => (o.Name.Contains(query.Search) ||
-                                o.FullName.Contains(query.Search) ||
-                                o.Requisites.INN.StartsWith(query.Search) ||
-                                o.Requisites.OGRN.StartsWith(query.Search) ||
-                                o.EconomicActivities.Any(ea => ea.OKVDNumber.StartsWith(query.Search))) &&
-                                o.EconomicActivities.Any(e => allowedCodes.Contains(e.OKVDNumber))); // Фильтр организаций
+                    .AsNoTracking() // Отключаем отслеживание изменений для повышения производительности
+                    .Include(o => o.Requisites) // Включаем связанные реквизиты
+                    .Include(o => o.Managements) // Включаем связанные управления
+                    .Include(o => o.OrganizationsEconomicActivities) // Включаем экономическую деятельность
+                        .ThenInclude(oe => oe.EconomicActivities) // Включаем связанные экономические активности
+                    .Where(o =>
+                        (o.Name.Contains(query.Search) || // Поиск по названию организации
+                         o.FullName.Contains(query.Search) || // Поиск по полному названию организации
+                         o.Requisites.INN.StartsWith(query.Search) || // Поиск по ИНН
+                         o.Requisites.OGRN.StartsWith(query.Search) || // Поиск по ОГРН
+                         o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.StartsWith(query.Search))) // Поиск по коду ОКВЭД
+                        && o.OrganizationsEconomicActivities.Any(oe => allowedCodes.Contains(oe.EconomicActivities.OKVDNumber)) // Фильтр по разрешенным кодам ОКВЭД
+                    );
 
                 // Получаем общее количество организаций
                 var count = await organizationsQuery.CountAsync(cancellationToken);
@@ -69,12 +72,12 @@ namespace STK.Application.Handlers
                                 Position = m.Position,
                             })
                             .ToList(), // Преобразование Managements в DTO
-                        SearchEconomicActivities = o.EconomicActivities
-                            .Where(e => allowedCodes.Contains(e.OKVDNumber)) // Фильтрация по allowedCodes
+                        SearchEconomicActivities = o.OrganizationsEconomicActivities
+                            .Where(e => allowedCodes.Contains(e.EconomicActivities.OKVDNumber)) // Фильтрация по allowedCodes
                             .Select(e => new SearchEconomicActivityDto // Преобразование EconomicActivities в DTO
                             {
-                                OKVDNumber = e.OKVDNumber,
-                                Description = e.Description
+                                OKVDNumber = e.EconomicActivities.OKVDNumber,
+                                Description = e.EconomicActivities.Description
                                 // Добавьте другие необходимые поля
                             })
                             .ToList()

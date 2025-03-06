@@ -20,7 +20,6 @@ namespace STK.Domain.Entities
         public string StatusOrg { get; set; }
         public Requisite Requisites { get; set; }
         public ICollection<Management> Managements { get; set; } = new List<Management>();
-        public ICollection<EconomicActivity> EconomicActivities { get; set; } = new List<EconomicActivity>();
         public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
         public ICollection<BalanceSheet> BalanceSheets { get; set; } = new List<BalanceSheet>();
         public ICollection<FinancialResult> FinancialResults { get; set; } = new List<FinancialResult>();

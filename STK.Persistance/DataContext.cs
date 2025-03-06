@@ -28,7 +28,7 @@ namespace STK.Persistance
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=79.174.83.231;Port=5432;Database=stk2;Username=postgres;Password=secret123");
+            optionsBuilder.UseNpgsql("Host=79.174.83.231;Port=5432;Database=stk3;Username=postgres;Password=secret123");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

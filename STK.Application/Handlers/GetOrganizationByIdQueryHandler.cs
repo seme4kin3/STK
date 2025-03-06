@@ -23,7 +23,7 @@ namespace STK.Application.Handlers
             var organization = await _dataContext.Organizations
                 .AsNoTracking()
                 .Include(o => o.Requisites)
-                .Include(o => o.EconomicActivities)
+                .Include(o => o.OrganizationsEconomicActivities).ThenInclude(oe => oe.EconomicActivities)
                 .Include(o => o.Managements)
                 .Include(o => o.Certificates)
                 .Include(o => o.Licenses)
@@ -56,10 +56,10 @@ namespace STK.Application.Handlers
                     INN = m.INN
 
                 }).ToList(),
-                EconomicActivities = organization.EconomicActivities.Select(e => new SearchEconomicActivityDto
+                EconomicActivities = organization.OrganizationsEconomicActivities.Select(e => new SearchEconomicActivityDto
                 {
-                    OKVDNumber = e.OKVDNumber,
-                    Description = e.Description,
+                    OKVDNumber = e.EconomicActivities.OKVDNumber,
+                    Description = e.EconomicActivities.Description,
                 }).ToList(),
                 Certificate = organization.Certificates.Select(c => new CertificateDto
                 {
