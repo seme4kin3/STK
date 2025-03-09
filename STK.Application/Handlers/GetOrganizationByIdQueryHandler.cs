@@ -61,7 +61,7 @@ namespace STK.Application.Handlers
                     OKVDNumber = e.EconomicActivities.OKVDNumber,
                     Description = e.EconomicActivities.Description,
                 }).ToList(),
-                Certificate = organization.Certificates.Select(c => new CertificateDto
+                Certificates = organization.Certificates.Select(c => new CertificateDto
                 {
                     Applicant = c.Applicant,
                     Title = c.Title,

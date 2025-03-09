@@ -41,7 +41,7 @@ namespace STK.API.Controllers
             return Ok(organization);
         }
         
-        [HttpGet("search/")]
+        [HttpGet("organizations/search/")]
         public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string text, int page = 1, int limit = 20)
             
         {
