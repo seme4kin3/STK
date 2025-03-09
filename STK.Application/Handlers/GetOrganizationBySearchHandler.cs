@@ -49,6 +49,11 @@ namespace STK.Application.Handlers
                         && o.OrganizationsEconomicActivities.Any(oe => allowedCodes.Contains(oe.EconomicActivities.OKVDNumber)) // Фильтр по разрешенным кодам ОКВЭД
                     );
 
+                if(organizationsQuery == null)
+                {
+                    return null;
+                }
+
                 // Получаем общее количество организаций
                 var count = await organizationsQuery.CountAsync(cancellationToken);
 

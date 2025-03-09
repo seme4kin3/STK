@@ -36,7 +36,7 @@ namespace STK.API.Controllers
 
             if (organization == null)
             {
-                return NotFound();
+                return Ok(new List<object>());
             }
             return Ok(organization);
         }
@@ -50,7 +50,7 @@ namespace STK.API.Controllers
 
             if (organizations == null || !organizations.Any())
             {
-                return NotFound("No organizations found.");
+                return Ok(new List<object>());
             }
 
             var metadata = new
