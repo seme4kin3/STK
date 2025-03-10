@@ -11,18 +11,18 @@ namespace STK.API.Controllers
     [Authorize]
     [Route("api/")]
     [ApiController]
-    public class OrganizationsController : ControllerBase
+    public class OrganizationController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public OrganizationsController(IMediator mediator) 
+        public OrganizationController(IMediator mediator) 
         {
             _mediator = mediator;
         }
 
         [Route("organizations")]
         [HttpGet]
-        public async Task<ActionResult<List<SearchOrganizationDTO>>> GetAllOrganizations()
+        public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetAllOrganizations()
         {
             var organizations = await _mediator.Send(new GetOrganizationsQuery());
             return Ok(organizations);

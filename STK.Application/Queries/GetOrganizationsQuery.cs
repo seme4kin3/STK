@@ -3,7 +3,7 @@ using STK.Application.DTOs.SearchOrganizations;
 
 namespace STK.Application.Queries
 {
-    public class GetOrganizationsQuery : IRequest<List<SearchOrganizationDTO>>
+    public class GetOrganizationsQuery : IRequest<IReadOnlyList<SearchOrganizationDTO>>
     {
     }
 }
