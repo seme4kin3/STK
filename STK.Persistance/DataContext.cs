@@ -25,6 +25,7 @@ namespace STK.Persistance
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; }
+        public DbSet<UserFavoriteOrganization> UsersFavoritesOrganizations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -97,6 +98,19 @@ namespace STK.Persistance
                 .HasMany(u => u.RefreshTokens)
                 .WithOne(rt => rt.User)
                 .HasForeignKey(rt => rt.UserId);
+
+            modelBuilder.Entity<UserFavoriteOrganization>()
+                .HasKey(ufo => new { ufo.UserId, ufo.OrganizationId });
+
+            modelBuilder.Entity<UserFavoriteOrganization>()
+                .HasOne(ufo => ufo.User)
+                .WithMany(u => u.FavoritesOrganizations)
+                .HasForeignKey(ufo => ufo.UserId);
+
+            modelBuilder.Entity<UserFavoriteOrganization>()
+                .HasOne(ufo => ufo.Organization)
+                .WithMany(o => o.FavoritedByUsers)
+                .HasForeignKey(ufo => ufo.OrganizationId);
         }
     }
 }
