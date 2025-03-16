@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 
 namespace STK.API.Controllers
 {
+    [Authorize]
     [ApiController]
     public class CertificateController : ControllerBase
     {

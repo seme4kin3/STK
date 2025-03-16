@@ -41,11 +41,11 @@ namespace STK.Application.Handlers
                     .Include(o => o.OrganizationsEconomicActivities) // Включаем экономическую деятельность
                         .ThenInclude(oe => oe.EconomicActivities) // Включаем связанные экономические активности
                     .Where(o =>
-                        (o.Name.Contains(query.Search) || // Поиск по названию организации
-                         o.FullName.Contains(query.Search) || // Поиск по полному названию организации
-                         o.Requisites.INN.StartsWith(query.Search) || // Поиск по ИНН
-                         o.Requisites.OGRN.StartsWith(query.Search) || // Поиск по ОГРН
-                         o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.StartsWith(query.Search))) // Поиск по коду ОКВЭД
+                        (o.Name.ToLower().Contains(query.Search.ToLower()) || // Поиск по названию организации
+                         o.FullName.ToLower().Contains(query.Search.ToLower()) || // Поиск по полному названию организации
+                         o.Requisites.INN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ИНН
+                         o.Requisites.OGRN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ОГРН
+                         o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.ToLower().StartsWith(query.Search.ToLower()))) // Поиск по коду ОКВЭД
                         && o.OrganizationsEconomicActivities.Any(oe => allowedCodes.Contains(oe.EconomicActivities.OKVDNumber)) // Фильтр по разрешенным кодам ОКВЭД
                     );
 

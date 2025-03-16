@@ -46,7 +46,13 @@ namespace STK.Application.Handlers
             _dataContext.Add(refreshTokenEntity);
             await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return new AuthTokenResponse { AccessToken = token, RefreshToken = refreshToken, UserName = user.Username };
+            return new AuthTokenResponse 
+            { 
+                AccessToken = token, 
+                RefreshToken = refreshToken, 
+                UserName = user.Username, 
+                UserId = user.Id 
+            };
         }
     }
 }

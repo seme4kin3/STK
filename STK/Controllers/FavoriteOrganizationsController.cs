@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
 using STK.Application.DTOs.SearchOrganizations;
@@ -6,6 +7,7 @@ using STK.Application.Queries;
 
 namespace STK.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/favoritesorganizations")]
     public class FavoriteOrganizationsController : Controller
