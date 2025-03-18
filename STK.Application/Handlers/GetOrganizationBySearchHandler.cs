@@ -46,10 +46,10 @@ namespace STK.Application.Handlers
                          o.Requisites.INN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ИНН
                          o.Requisites.OGRN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ОГРН
                          o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.ToLower().StartsWith(query.Search.ToLower()))) // Поиск по коду ОКВЭД
-                        && o.OrganizationsEconomicActivities.Any(oe => allowedCodes.Contains(oe.EconomicActivities.OKVDNumber)) // Фильтр по разрешенным кодам ОКВЭД
+                         // Фильтр по разрешенным кодам ОКВЭД
                     );
-
-                if(organizationsQuery == null)
+                //&& o.OrganizationsEconomicActivities.All(oea => oea.IsMain == true)
+                if (organizationsQuery == null)
                 {
                     return null;
                 }
@@ -78,12 +78,12 @@ namespace STK.Application.Handlers
                             })
                             .ToList(), // Преобразование Managements в DTO
                         SearchEconomicActivities = o.OrganizationsEconomicActivities
-                            .Where(e => allowedCodes.Contains(e.EconomicActivities.OKVDNumber)) // Фильтрация по allowedCodes
+                            .Where(oea => oea.IsMain == true) // Фильтрация по allowedCodes
                             .Select(e => new SearchEconomicActivityDto // Преобразование EconomicActivities в DTO
                             {
                                 OKVDNumber = e.EconomicActivities.OKVDNumber,
                                 Description = e.EconomicActivities.Description
-                                // Добавьте другие необходимые поля
+                      
                             })
                             .ToList()
                     })

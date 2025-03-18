@@ -8,6 +8,7 @@ namespace STK.API.Controllers
 {
     [Authorize]
     [ApiController]
+    [Route("api/certificates")]
     public class CertificateController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -17,7 +18,6 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
-        [Route("certificates")]
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ListCertificates>>> GetAllCertificates()
         {
