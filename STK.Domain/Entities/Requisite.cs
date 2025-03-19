@@ -15,7 +15,7 @@ namespace STK.Domain.Entities
         public string OGRN { get; set; }
         public DateTime? DateCreation { get; set; }
         public string EstablishmentCreateName { get; set; }
-        public int? AuthorizedCapital {  get; set; }
+        public decimal? AuthorizedCapital {  get; set; }
         public int? AvgCountEmployee { get; set; }
         public string TypeOfCapital { get; set; }
         public Guid OrganizationId { get; set; }
