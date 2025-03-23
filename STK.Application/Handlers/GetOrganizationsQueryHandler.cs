@@ -27,6 +27,7 @@ namespace STK.Application.Handlers
                     .Include(o => o.OrganizationsEconomicActivities)
                         .ThenInclude(oe => oe.EconomicActivities)
                     .OrderByDescending(o => o.Requisites.DateCreation)
+                    .Where(o => o.Requisites.INN != null && o.Name != null)
                     .Take(50)
                     .Select(o => new SearchOrganizationDTO
                     {
@@ -42,7 +43,8 @@ namespace STK.Application.Handlers
                             FullName = m.FullName,
                             Position = m.Position,
                         }).ToList(),
-                        SearchEconomicActivities = o.OrganizationsEconomicActivities.Select(ea => new SearchEconomicActivityDto
+                        SearchEconomicActivities = o.OrganizationsEconomicActivities.Where(oea => oea.IsMain)
+                        .Select(ea => new SearchEconomicActivityDto
                         {
                             OKVDNumber = ea.EconomicActivities.OKVDNumber,
                             Description = ea.EconomicActivities.Description

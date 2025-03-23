@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
+using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
+using STK.Domain.Entities;
+using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
@@ -31,10 +34,19 @@ namespace STK.API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddToFavoriteOrganization([FromBody] FavoriteOrganizationCommand command)
+        public async Task<IActionResult> AddToFavoriteOrganization([FromBody] FavoriteOrganization favoriteOrganization)
         {
             try
             {
+                FavoriteOrganizationCommand command = new FavoriteOrganizationCommand();
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+                command.UserId = Guid.Parse(userId);
+                command.OrganizationId = favoriteOrganization.OrganizationId;
                 await _mediator.Send(command);
                 return Ok();
             }
@@ -46,10 +58,19 @@ namespace STK.API.Controllers
 
         
         [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteOrganizationCommand command)
+        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteOrganization favoriteOrganization)
         {
             try
             {
+                FavoriteOrganizationCommand command = new FavoriteOrganizationCommand();
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+                command.UserId = Guid.Parse(userId);
+                command.OrganizationId = favoriteOrganization.OrganizationId;
                 await _mediator.Send(command);
                 return Ok();
             }
