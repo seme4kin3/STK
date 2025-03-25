@@ -21,11 +21,19 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetFavoritesOrganizations(Guid userId)
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetFavoritesOrganizations()
         {
-            var query = new GetFavoriteOrganizationQuery { UserId = userId };
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+            var query = new GetFavoriteOrganizationQuery { UserId = Guid.Parse(userId) };
+
             var result = await _mediator.Send(query);
+
             if (result == null)
             {
                 return Ok(new List<object>());
