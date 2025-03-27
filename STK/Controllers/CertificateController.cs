@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text.Json;
 
 namespace STK.API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/certificates")]
+    [Route("api/")]
     public class CertificateController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -18,10 +20,37 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
+        [Route("certificates")]
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ListCertificates>>> GetAllCertificates()
+        public async Task<ActionResult<IReadOnlyList<SearchCertificatesDto>>> GetAllCertificates()
         {
             var certificates = await _mediator.Send(new GetListCertificatesQuery());
+            return Ok(certificates);
+        }
+
+        [Route("certificates/search/")]
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyList<SearchCertificatesDto>>> GetCertificatesByObject([FromQuery] string objcertificate, int page = 1, int limit = 20)
+        {
+            var query = new GetCertificateBySearchQuery(objcertificate, page, limit);
+            var certificates = await _mediator.Send(query);
+
+            if (certificates == null || !certificates.Any())
+            {
+                return Ok(new List<object>());
+            }
+
+            var metadata = new
+            {
+                totalCount = certificates.TotalCount,
+                limit = certificates.PageSize,
+                currentPage = certificates.CurrentPage,
+                totalPages = certificates.TotalPages,
+                hasNext = certificates.HasNext,
+                hasPrevious = certificates.HasPrevious,
+            };
+
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
             return Ok(certificates);
         }
     }
