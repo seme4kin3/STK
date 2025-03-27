@@ -13,7 +13,16 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetOrganizationByIdQueryHandler> _logger;
-
+        static Dictionary<string, string> statusOrg = new Dictionary<string, string>
+        {
+            { "Active", "Действующая" },
+            { "active", "Действующая" },
+            { "Действующая организация", "Действующая" },
+            { "LIQUIDATING", "Ликвидируется" },
+            { "LIQUIDATED", "Ликвидирована" },
+            { "BANKRUPT", "Банкротство" },
+            { "REORGANIZING", "В процессе присоединения к другому юр.лицу, с последующей ликвидацией" }
+        };
         public GetOrganizationByIdQueryHandler(DataContext dataContext, ILogger<GetOrganizationByIdQueryHandler> logger)
         {
             _dataContext = dataContext;
@@ -34,6 +43,7 @@ namespace STK.Application.Handlers
                         Name = o.Name,
                         FullName = o.FullName,
                         Address = $"{o.Address} {o.IndexAddress}",
+                        StatusOrg = o.StatusOrg,
                         Requisites = new RequisiteDto
                         {
                             INN = o.Requisites.INN,
@@ -104,6 +114,10 @@ namespace STK.Application.Handlers
                         }).ToList()
                     }).FirstOrDefaultAsync(cancellationToken);
  
+                if(statusOrg.TryGetValue(organization.StatusOrg, out string status))
+                {
+                    organization.StatusOrg = status;
+                }
 
                 if (organization == null) { return null; }
 

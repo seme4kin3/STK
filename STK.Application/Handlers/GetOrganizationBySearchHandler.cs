@@ -36,19 +36,18 @@ namespace STK.Application.Handlers
 
                 var organizationsQuery = _dataContext.Organizations
                     .AsNoTracking() // Отключаем отслеживание изменений для повышения производительности
-                    .Include(o => o.Requisites) // Включаем связанные реквизиты
-                    .Include(o => o.Managements) // Включаем связанные управления
-                    .Include(o => o.OrganizationsEconomicActivities) // Включаем экономическую деятельность
-                        .ThenInclude(oe => oe.EconomicActivities) // Включаем связанные экономические активности
+                    .Include(o => o.Requisites) 
+                    .Include(o => o.Managements) 
+                    .Include(o => o.OrganizationsEconomicActivities) 
+                        .ThenInclude(oe => oe.EconomicActivities) 
                     .Where(o =>
                         (o.Name.ToLower().Contains(query.Search.ToLower()) || // Поиск по названию организации
                          o.FullName.ToLower().Contains(query.Search.ToLower()) || // Поиск по полному названию организации
                          o.Requisites.INN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ИНН
                          o.Requisites.OGRN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ОГРН
                          o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.ToLower().StartsWith(query.Search.ToLower()))) // Поиск по коду ОКВЭД
-                         // Фильтр по разрешенным кодам ОКВЭД
                     );
-                //&& o.OrganizationsEconomicActivities.All(oea => oea.IsMain == true)
+                
                 if (organizationsQuery == null)
                 {
                     return null;
@@ -76,10 +75,10 @@ namespace STK.Application.Handlers
                                 FullName = m.FullName,
                                 Position = m.Position,
                             })
-                            .ToList(), // Преобразование Managements в DTO
+                            .ToList(), 
                         SearchEconomicActivities = o.OrganizationsEconomicActivities
-                            .Where(oea => oea.IsMain == true) // Фильтрация по allowedCodes
-                            .Select(e => new SearchEconomicActivityDto // Преобразование EconomicActivities в DTO
+                            .Where(oea => oea.IsMain == true) 
+                            .Select(e => new SearchEconomicActivityDto 
                             {
                                 OKVDNumber = e.EconomicActivities.OKVDNumber,
                                 Description = e.EconomicActivities.Description

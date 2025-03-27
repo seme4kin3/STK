@@ -1,0 +1,18 @@
+﻿
+namespace STK.Application.DTOs.SearchOrganizations
+{
+    public class SearchCertificatesDto
+    {
+        public string Title { get; set; }
+        public string Applicant { get; set; }
+        public string Address { get; set; }
+        public string Country { get; set; }
+        public string CertificationObject { get; set; }
+        public DateTime DateOfIssueCertificate { get; set; }
+        public DateTime? DateOfCertificateExpiration { get; set; }
+        public string CertificationType { get; set; }
+        public string Status { get; set; }
+        public Guid OrganizationId { get; set; }
+ 
+    }
+}

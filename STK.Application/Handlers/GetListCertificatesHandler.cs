@@ -7,7 +7,7 @@ using STK.Persistance;
 
 namespace STK.Application.Handlers
 {
-    public class GetListCertificatesHandler : IRequestHandler<GetListCertificatesQuery, IReadOnlyList<ListCertificates>>
+    public class GetListCertificatesHandler : IRequestHandler<GetListCertificatesQuery, IReadOnlyList<SearchCertificatesDto>>
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetListCertificatesHandler> _logger;
@@ -16,7 +16,7 @@ namespace STK.Application.Handlers
             _dataContext = dataContext;
             _logger = logger;
         }
-        public async Task<IReadOnlyList<ListCertificates>> Handle(GetListCertificatesQuery query, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<SearchCertificatesDto>> Handle(GetListCertificatesQuery query, CancellationToken cancellationToken)
         {
             try
             {
@@ -24,7 +24,7 @@ namespace STK.Application.Handlers
                     .AsNoTracking()
                     .OrderByDescending(c => c.DateOfIssueCertificate)
                     .Take(50)
-                    .Select(c => new ListCertificates
+                    .Select(c => new SearchCertificatesDto
                     {
                         Title = c.Title,
                         Applicant = c.Applicant,

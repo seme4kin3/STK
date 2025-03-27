@@ -11,6 +11,7 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetOrganizationsQueryHandler> _logger;
+ 
         public GetOrganizationsQueryHandler(DataContext dataContext, ILogger<GetOrganizationsQueryHandler> logger)
         {
             _dataContext = dataContext;
