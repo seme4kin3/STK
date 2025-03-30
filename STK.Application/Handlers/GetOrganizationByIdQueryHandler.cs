@@ -94,20 +94,40 @@ namespace STK.Application.Handlers
                             LongTermLiabilities = bs.LongTermLiabilities,
                             ShortTermLiabilities = bs.ShortTermLiabilities
                         }).ToList(),
-                        FinancialResults = o.FinancialResults.Select(fr => new FinancialResultDto
-                        {
-                            Type = fr.Type,
-                            Year = fr.Year,
-                            Revenue = fr.Revenue,
-                            CostOfSales = fr.CostOfSales,
-                            GrossProfitEarnings = fr.GrossProfitEarnings,
-                            GrossProfitRevenue = fr.GrossProfitRevenue,
-                            SalesProfit = fr.SalesProfit,
-                            ProfitBeforeTax = fr.ProfitBeforeTax,
-                            NetProfit = fr.NetProfit,
-                            IncomeTaxe = fr.IncomeTaxe,
-                            TaxFee = fr.TaxFee
-                        }).ToList(),
+                        //FinancialResults = o.FinancialResults.Select(fr => new FinancialResultDto
+                        //{
+                        //    Type = fr.Type,
+                        //    Year = fr.Year,
+                        //    Revenue = fr.Revenue,
+                        //    CostOfSales = fr.CostOfSales,
+                        //    GrossProfitEarnings = fr.GrossProfitEarnings,
+                        //    GrossProfitRevenue = fr.GrossProfitRevenue,
+                        //    SalesProfit = fr.SalesProfit,
+                        //    ProfitBeforeTax = fr.ProfitBeforeTax,
+                        //    NetProfit = fr.NetProfit,
+                        //    IncomeTaxe = fr.IncomeTaxe,
+                        //    TaxFee = fr.TaxFee
+                        //}).ToList(),
+                        FinancialResultsByYear = o.FinancialResults
+                            .GroupBy(fr => fr.Year)
+                            .Select(g => new FinancialResultsByYearDto
+                            {
+                                Year = g.Key,
+                                Results = g.Select(fr => new FinancialResultDto
+                                {
+                                    Type = fr.Type,
+                                    Year = fr.Year,
+                                    Revenue = fr.Revenue,
+                                    CostOfSales = fr.CostOfSales,
+                                    GrossProfitEarnings = fr.GrossProfitEarnings,
+                                    GrossProfitRevenue = fr.GrossProfitRevenue,
+                                    SalesProfit = fr.SalesProfit,
+                                    ProfitBeforeTax = fr.ProfitBeforeTax,
+                                    NetProfit = fr.NetProfit,
+                                    IncomeTaxe = fr.IncomeTaxe,
+                                    TaxFee = fr.TaxFee
+                                }).ToList()
+                            }).ToList(),
                         Licenses = o.Licenses.Select(fr => new LicenseDto
                         {
                             NameTypeActivity = fr.NameTypeActivity,
