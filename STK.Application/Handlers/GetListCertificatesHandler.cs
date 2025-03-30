@@ -11,6 +11,13 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetListCertificatesHandler> _logger;
+
+        static Dictionary<string, string> statusCertificate = new Dictionary<string, string>
+        {
+            { "Actual", "Действующий" },
+            { "Expired", "Истекший" },
+            { "Paused", "Действие приостановалено" },
+        };
         public GetListCertificatesHandler(DataContext dataContext, ILogger<GetListCertificatesHandler> logger) 
         {
             _dataContext = dataContext;
@@ -34,7 +41,7 @@ namespace STK.Application.Handlers
                         DateOfIssueCertificate = c.DateOfIssueCertificate,
                         DateOfCertificateExpiration = c.DateOfCertificateExpiration,
                         CertificationType = c.CertificationType,
-                        Status = c.Status,
+                        Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
                         OrganizationId = c.OrganizationId,
                     }).ToListAsync(cancellationToken);
 

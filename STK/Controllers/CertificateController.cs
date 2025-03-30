@@ -30,9 +30,9 @@ namespace STK.API.Controllers
 
         [Route("certificates/search/")]
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<SearchCertificatesDto>>> GetCertificatesByObject([FromQuery] string objcertificate, int page = 1, int limit = 20)
+        public async Task<ActionResult<IReadOnlyList<SearchCertificatesDto>>> GetCertificatesByObject([FromQuery] string text, int page = 1, int limit = 20)
         {
-            var query = new GetCertificateBySearchQuery(objcertificate, page, limit);
+            var query = new GetCertificateBySearchQuery(text, page, limit);
             var certificates = await _mediator.Send(query);
 
             if (certificates == null || !certificates.Any())

@@ -23,6 +23,13 @@ namespace STK.Application.Handlers
             { "BANKRUPT", "Банкротство" },
             { "REORGANIZING", "В процессе присоединения к другому юр.лицу, с последующей ликвидацией" }
         };
+
+        static Dictionary<string, string> statusCertificate = new Dictionary<string, string>
+        {
+            { "Actual", "Действующий" },
+            { "Expired", "Истекший" },
+            { "Paused", "Действие приостановалено" },
+        };
         public GetOrganizationByIdQueryHandler(DataContext dataContext, ILogger<GetOrganizationByIdQueryHandler> logger)
         {
             _dataContext = dataContext;
@@ -74,7 +81,7 @@ namespace STK.Application.Handlers
                             Country = c.Country,
                             DateOfCertificateExpiration = c.DateOfCertificateExpiration,
                             DateOfIssueCertificate = c.DateOfIssueCertificate,
-                            Status = c.Status,
+                            Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
                             Manufacturer = c.Manufacturer,
                         }).ToList(),
                         BalanceSheets = o.BalanceSheets.Select(bs => new BalanceSheetDto
