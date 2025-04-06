@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace STK.API.Controllers
@@ -24,14 +25,18 @@ namespace STK.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetAllOrganizations()
         {
-            var organizations = await _mediator.Send(new GetOrganizationsQuery());
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var query = new GetOrganizationsQuery(userId);
+            
+            var organizations = await _mediator.Send(query);
             return Ok(organizations);
         }
 
         [HttpGet("organizations/{id}")]
         public async Task<ActionResult<OrganizationDto>> GetOrganizationById(Guid id)
         {
-            var request = new GetOrganizationByIdQuery(id);
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var request = new GetOrganizationByIdQuery(id, userId);
             var organization = await _mediator.Send(request);
 
             if (organization == null)
@@ -42,10 +47,10 @@ namespace STK.API.Controllers
         }
         
         [HttpGet("organizations/search/")]
-        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string text, int page = 1, int limit = 20)
-            
+        public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string text, int page = 1, int limit = 20)    
         {
-            var query = new GetOrganizationBySearchQuery(text, page, limit);
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var query = new GetOrganizationBySearchQuery(text, page, limit, userId);
             var organizations = await _mediator.Send(query);
 
             if (organizations == null || !organizations.Any())

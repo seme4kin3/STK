@@ -38,10 +38,11 @@ namespace STK.Application.Handlers
                         Id = ufo.Organization.Id,
                         Name = ufo.Organization.Name,
                         FullName = ufo.Organization.FullName,
-                        Address = ufo.Organization.Address,
+                        Address = $"{ufo.Organization.Address} {ufo.Organization.IndexAddress}",
                         Inn = ufo.Organization.Requisites.INN,
                         Ogrn = ufo.Organization.Requisites.OGRN,
                         Kpp = ufo.Organization.Requisites.KPP,
+                        CreationDate = ufo.Organization.Requisites.DateCreation,
                         Managements = ufo.Organization.Managements.Select(m => new SearchManagementDTO
                         {
                             FullName = m.FullName,

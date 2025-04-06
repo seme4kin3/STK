@@ -22,6 +22,7 @@ namespace STK.Application.Handlers
         {
             try
             {
+                var allowedCodes = new List<string> { "30.20.9", "30.20.31", "52.21.1" };
                 var organizations = await _dataContext.Organizations
                     .AsNoTracking()
                     .Include(o => o.Requisites)
@@ -35,16 +36,18 @@ namespace STK.Application.Handlers
                         Id = o.Id,
                         Name = o.Name,
                         FullName = o.FullName,
-                        Address = o.Address + o.IndexAddress,
+                        Address = $"{o.Address} {o.IndexAddress}",
                         Inn = o.Requisites.INN,
                         Ogrn = o.Requisites.OGRN,
                         CreationDate = o.Requisites.DateCreation,
+                        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Managements = o.Managements.Select(m => new SearchManagementDTO
                         {
                             FullName = m.FullName,
                             Position = m.Position,
                         }).ToList(),
-                        SearchEconomicActivities = o.OrganizationsEconomicActivities.Where(oea => oea.IsMain)
+                        SearchEconomicActivities = o.OrganizationsEconomicActivities
+                        .Where(oea => oea.IsMain || allowedCodes.Contains(oea.EconomicActivities.OKVDNumber))
                         .Select(ea => new SearchEconomicActivityDto
                         {
                             OKVDNumber = ea.EconomicActivities.OKVDNumber,

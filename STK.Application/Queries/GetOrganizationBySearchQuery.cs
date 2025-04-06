@@ -11,13 +11,15 @@ namespace STK.Application.Queries
         public string Search { get; set; }
         public int PageNumber { get; }
         public int PageSize { get; }
+        public Guid UserId { get; set; }
 
 
-        public GetOrganizationBySearchQuery(string search, int pageNumber, int pageSize)
+        public GetOrganizationBySearchQuery(string search, int pageNumber, int pageSize, Guid userId)
         {
             Search = search;    
             PageNumber = pageNumber;
             PageSize = pageSize;
+            UserId = userId;
         }
     }
 }

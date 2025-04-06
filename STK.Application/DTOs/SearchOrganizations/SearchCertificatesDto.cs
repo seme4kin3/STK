@@ -3,6 +3,7 @@ namespace STK.Application.DTOs.SearchOrganizations
 {
     public class SearchCertificatesDto
     {
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string Applicant { get; set; }
         public string Address { get; set; }

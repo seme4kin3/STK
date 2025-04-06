@@ -43,6 +43,7 @@ namespace STK.Application.Handlers
                 .Take(query.PageSize)
                 .Select(c => new SearchCertificatesDto
                 {
+                    Id = c.Id,
                     Title = c.Title,
                     Applicant = c.Applicant,
                     Address = c.Address,

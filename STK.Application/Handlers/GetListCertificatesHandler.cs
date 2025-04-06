@@ -33,6 +33,7 @@ namespace STK.Application.Handlers
                     .Take(50)
                     .Select(c => new SearchCertificatesDto
                     {
+                        Id = c.Id,
                         Title = c.Title,
                         Applicant = c.Applicant,
                         CertificationObject = c.CertificationObject,

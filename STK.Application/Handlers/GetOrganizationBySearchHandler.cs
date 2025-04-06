@@ -69,6 +69,8 @@ namespace STK.Application.Handlers
                         Inn = o.Requisites.INN,
                         Ogrn = o.Requisites.OGRN,
                         Kpp = o.Requisites.KPP,
+                        CreationDate = o.Requisites.DateCreation,
+                        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Managements = o.Managements
                             .Select(m => new SearchManagementDTO
                             {
@@ -77,7 +79,7 @@ namespace STK.Application.Handlers
                             })
                             .ToList(), 
                         SearchEconomicActivities = o.OrganizationsEconomicActivities
-                            .Where(oea => oea.IsMain == true) 
+                            .Where(oea => oea.IsMain == true || allowedCodes.Contains(oea.EconomicActivities.OKVDNumber)) 
                             .Select(e => new SearchEconomicActivityDto 
                             {
                                 OKVDNumber = e.EconomicActivities.OKVDNumber,

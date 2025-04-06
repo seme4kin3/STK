@@ -51,6 +51,7 @@ namespace STK.Application.Handlers
                         FullName = o.FullName,
                         Address = $"{o.Address} {o.IndexAddress}",
                         StatusOrg = o.StatusOrg,
+                        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Requisites = new RequisiteDto
                         {
                             INN = o.Requisites.INN,
@@ -74,6 +75,7 @@ namespace STK.Application.Handlers
                         }).ToList(),
                         Certificates = o.Certificates.Select(c => new CertificateDto
                         {
+                            Id = c.Id,
                             Applicant = c.Applicant,
                             Title = c.Title,
                             CertificationObject = c.CertificationObject,
@@ -94,40 +96,25 @@ namespace STK.Application.Handlers
                             LongTermLiabilities = bs.LongTermLiabilities,
                             ShortTermLiabilities = bs.ShortTermLiabilities
                         }).ToList(),
-                        //FinancialResults = o.FinancialResults.Select(fr => new FinancialResultDto
-                        //{
-                        //    Type = fr.Type,
-                        //    Year = fr.Year,
-                        //    Revenue = fr.Revenue,
-                        //    CostOfSales = fr.CostOfSales,
-                        //    GrossProfitEarnings = fr.GrossProfitEarnings,
-                        //    GrossProfitRevenue = fr.GrossProfitRevenue,
-                        //    SalesProfit = fr.SalesProfit,
-                        //    ProfitBeforeTax = fr.ProfitBeforeTax,
-                        //    NetProfit = fr.NetProfit,
-                        //    IncomeTaxe = fr.IncomeTaxe,
-                        //    TaxFee = fr.TaxFee
-                        //}).ToList(),
-                        FinancialResultsByYear = o.FinancialResults
-                            .GroupBy(fr => fr.Year)
-                            .Select(g => new FinancialResultsByYearDto
+                        FinancialResults = o.FinancialResults.Select(fr => new FinancialResultDto
+                        {
+                            Year = fr.Year,
+                            Profit = new
                             {
-                                Year = g.Key,
-                                Results = g.Select(fr => new FinancialResultDto
-                                {
-                                    Type = fr.Type,
-                                    Year = fr.Year,
-                                    Revenue = fr.Revenue,
-                                    CostOfSales = fr.CostOfSales,
-                                    GrossProfitEarnings = fr.GrossProfitEarnings,
-                                    GrossProfitRevenue = fr.GrossProfitRevenue,
-                                    SalesProfit = fr.SalesProfit,
-                                    ProfitBeforeTax = fr.ProfitBeforeTax,
-                                    NetProfit = fr.NetProfit,
-                                    IncomeTaxe = fr.IncomeTaxe,
-                                    TaxFee = fr.TaxFee
-                                }).ToList()
-                            }).ToList(),
+                                                           
+                                GrossProfitEarnings = fr.GrossProfitEarnings,
+                                SalesProfit = fr.SalesProfit,
+                                NetProfit = fr.NetProfit,
+                                IncomeTaxe = fr.IncomeTaxe,
+                                TaxFee = fr.TaxFee,
+                            },
+                            Revenue = new 
+                            {
+                                Revenue = fr.Revenue,
+                                CostOfSales = fr.CostOfSales,
+                                GrossProfitRevenue = fr.GrossProfitRevenue
+                            }
+                        }).ToList(),
                         Licenses = o.Licenses.Select(fr => new LicenseDto
                         {
                             NameTypeActivity = fr.NameTypeActivity,
