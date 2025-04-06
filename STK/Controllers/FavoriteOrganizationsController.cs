@@ -46,7 +46,7 @@ namespace STK.API.Controllers
         {
             try
             {
-                FavoriteOrganizationCommand command = new FavoriteOrganizationCommand();
+                AddFavoriteOrganizationCommand command = new AddFavoriteOrganizationCommand();
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (string.IsNullOrEmpty(userId))
@@ -70,7 +70,7 @@ namespace STK.API.Controllers
         {
             try
             {
-                FavoriteOrganizationCommand command = new FavoriteOrganizationCommand();
+                RemoveFavoriteOrganizationCommand command = new RemoveFavoriteOrganizationCommand();
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userId))

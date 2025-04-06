@@ -7,7 +7,7 @@ using STK.Persistance;
 
 namespace STK.Application.Handlers
 {
-    public class AddToFavoriteOrganizationCommandHandler : IRequestHandler<FavoriteOrganizationCommand, Unit>
+    public class AddToFavoriteOrganizationCommandHandler : IRequestHandler<AddFavoriteOrganizationCommand, Unit>
     {
         private readonly DataContext _dataContext;
         
@@ -16,7 +16,7 @@ namespace STK.Application.Handlers
             _dataContext = dataContext;
         }
 
-        public async Task<Unit> Handle(FavoriteOrganizationCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(AddFavoriteOrganizationCommand request, CancellationToken cancellationToken)
         {
             var existingFavorite = await _dataContext.UsersFavoritesOrganizations
                 .FirstOrDefaultAsync(ufo => ufo.UserId == request.UserId && ufo.OrganizationId == request.OrganizationId, cancellationToken);

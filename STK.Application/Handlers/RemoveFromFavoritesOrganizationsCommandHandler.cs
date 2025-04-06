@@ -2,15 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Commands;
 using STK.Persistance;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace STK.Application.Handlers
 {
-    public class RemoveFromFavoritesOrganizationsCommandHandler : IRequestHandler<FavoriteOrganizationCommand, Unit>
+    public class RemoveFromFavoritesOrganizationsCommandHandler : IRequestHandler<RemoveFavoriteOrganizationCommand, Unit>
     {
         private readonly DataContext _dataContext;
 
@@ -19,7 +14,7 @@ namespace STK.Application.Handlers
             _dataContext = dataContext;
         }
 
-        public async Task<Unit> Handle(FavoriteOrganizationCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(RemoveFavoriteOrganizationCommand request, CancellationToken cancellationToken)
         {
             var favorite = await _dataContext.UsersFavoritesOrganizations
                 .FirstOrDefaultAsync(ufo => ufo.UserId == request.UserId && ufo.OrganizationId == request.OrganizationId, cancellationToken);
