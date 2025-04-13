@@ -1,28 +1,28 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
-using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
+using STK.Application.DTOs;
 using STK.Application.Queries;
-using STK.Domain.Entities;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace STK.API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/favoritesorganizations")]
-    public class FavoriteOrganizationsController : Controller
+    [Route("api/favoritescertificates")]
+    public class FavoriteCertificateController : Controller
     {
         private readonly IMediator _mediator;
-        public FavoriteOrganizationsController(IMediator mediator)
+
+        public FavoriteCertificateController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetFavoritesOrganizations()
+        public async Task<ActionResult<IReadOnlyList<SearchCertificatesDto>>> GetFavoritesCertificates()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -30,7 +30,7 @@ namespace STK.API.Controllers
             {
                 return Unauthorized("User ID not found in token.");
             }
-            var query = new GetFavoriteOrganizationQuery { UserId = Guid.Parse(userId) };
+            var query = new GetFavoriteCertificateQuery { UserId = Guid.Parse(userId) };
 
             var result = await _mediator.Send(query);
 
@@ -42,19 +42,19 @@ namespace STK.API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddToFavoriteOrganization([FromBody] FavoriteOrganization favoriteOrganization)
+        public async Task<IActionResult> AddFavoriteCertificate([FromBody] FavoriteCertificateDto certificateDto)
         {
             try
             {
-                AddFavoriteOrganizationCommand command = new AddFavoriteOrganizationCommand();
+                AddFavoriteCertificateCommand command = new AddFavoriteCertificateCommand();
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                
+
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User ID not found in token.");
                 }
                 command.UserId = Guid.Parse(userId);
-                command.OrganizationId = favoriteOrganization.OrganizationId;
+                command.CertificateId = certificateDto.CertificateId;
                 await _mediator.Send(command);
                 return Ok();
             }
@@ -64,13 +64,14 @@ namespace STK.API.Controllers
             }
         }
 
-        
+
         [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteOrganization favoriteOrganization)
+        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteCertificateDto certificateDto)
         {
             try
             {
-                RemoveFavoriteOrganizationCommand command = new RemoveFavoriteOrganizationCommand();
+                RemoveFavoriteCertificateCommand command = new RemoveFavoriteCertificateCommand();
+  
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userId))
@@ -78,7 +79,7 @@ namespace STK.API.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
                 command.UserId = Guid.Parse(userId);
-                command.OrganizationId = favoriteOrganization.OrganizationId;
+                command.CertificateId = certificateDto.CertificateId;
                 await _mediator.Send(command);
                 return Ok();
             }

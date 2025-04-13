@@ -28,5 +28,6 @@ namespace STK.Domain.Entities
         public string ManufacturerCountry { get; set; }
         public Guid OrganizationId { get; set; }
         public Organization Organization { get; set; }
+        public ICollection<UserFavoriteCertificate> FavoritedByUsers { get; set; }
     }
 }

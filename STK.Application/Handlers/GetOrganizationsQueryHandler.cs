@@ -23,39 +23,101 @@ namespace STK.Application.Handlers
             try
             {
                 var allowedCodes = new List<string> { "30.20.9", "30.20.31", "52.21.1" };
+
+                var organizationStatuses = await _dataContext.AuditLog
+                      .AsNoTracking()
+                      .Where(log => new[] { "Organizations", "Requisites", "Managements" }.Contains(log.TableName))
+                      .Where(log => new[] { "INSERT", "UPDATE" }.Contains(log.Operation))
+                      .Where(log => log.ChangedAt >= DateTime.Today.AddMonths(-1) && log.ChangedAt <= DateTime.Now)
+                      .Where(log => log.RelatedOrganizationId != null || log.TableName == "Organizations")
+                      .GroupBy(log => log.TableName == "Organizations" ? log.RecordId : log.RelatedOrganizationId!.Value)
+                      .Select(g => new
+                      {
+                          OrganizationId = g.Key,
+                          Status = g.OrderByDescending(log => log.ChangedAt)
+                                    .First()
+                                    .Operation == "INSERT" ? "Новая" : "Изменённая"
+                      })
+                      .ToDictionaryAsync(
+                          x => x.OrganizationId,
+                          x => x.Status);
+
+                var organizationIds = organizationStatuses.Keys;
+
+                // Получаем организации
                 var organizations = await _dataContext.Organizations
                     .AsNoTracking()
                     .Include(o => o.Requisites)
                     .Include(o => o.OrganizationsEconomicActivities)
                         .ThenInclude(oe => oe.EconomicActivities)
-                    .OrderByDescending(o => o.Requisites.DateCreation)
+                    .Include(o => o.Managements)
+                    .Include(o => o.FavoritedByUsers)
+                    .Where(o => organizationIds.Contains(o.Id))
                     .Where(o => o.Requisites.INN != null && o.Name != null)
+                    .OrderByDescending(o => o.Requisites.DateCreation)
                     .Take(50)
-                    .Select(o => new SearchOrganizationDTO
+                    .ToListAsync();
+
+                // Формируем DTO
+                var dtos = organizations.Select(o => new SearchOrganizationDTO
+                {
+                    Id = o.Id,
+                    Name = o.Name,
+                    FullName = o.FullName,
+                    Address = $"{o.Address} {o.IndexAddress}",
+                    Inn = o.Requisites.INN,
+                    Ogrn = o.Requisites.OGRN,
+                    CreationDate = o.Requisites.DateCreation,
+                    IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
+                    StatusChange = organizationStatuses.ContainsKey(o.Id) ? organizationStatuses[o.Id] : "Неизвестно",
+                    Managements = o.Managements.Select(m => new SearchManagementDTO
                     {
-                        Id = o.Id,
-                        Name = o.Name,
-                        FullName = o.FullName,
-                        Address = $"{o.Address} {o.IndexAddress}",
-                        Inn = o.Requisites.INN,
-                        Ogrn = o.Requisites.OGRN,
-                        CreationDate = o.Requisites.DateCreation,
-                        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
-                        Managements = o.Managements.Select(m => new SearchManagementDTO
-                        {
-                            FullName = m.FullName,
-                            Position = m.Position,
-                        }).ToList(),
-                        SearchEconomicActivities = o.OrganizationsEconomicActivities
+                        FullName = m.FullName,
+                        Position = m.Position
+                    }).ToList(),
+                    SearchEconomicActivities = o.OrganizationsEconomicActivities
                         .Where(oea => oea.IsMain || allowedCodes.Contains(oea.EconomicActivities.OKVDNumber))
                         .Select(ea => new SearchEconomicActivityDto
                         {
                             OKVDNumber = ea.EconomicActivities.OKVDNumber,
                             Description = ea.EconomicActivities.Description
-                        }).ToList(),
-                    }).ToListAsync(cancellationToken);
+                        }).ToList()
+                }).ToList();
 
-                return organizations;
+                //var organizations = await _dataContext.Organizations
+                //    .AsNoTracking()
+                //    .Include(o => o.Requisites)
+                //    .Include(o => o.OrganizationsEconomicActivities)
+                //        .ThenInclude(oe => oe.EconomicActivities)
+                //    .OrderByDescending(o => o.Requisites.DateCreation)
+                //    .Where(o => o.Requisites.INN != null && o.Name != null)
+                //    .Take(50)
+                //    .Select(o => new SearchOrganizationDTO
+                //    {
+                //        Id = o.Id,
+                //        Name = o.Name,
+                //        FullName = o.FullName,
+                //        Address = $"{o.Address} {o.IndexAddress}",
+                //        Inn = o.Requisites.INN,
+                //        Ogrn = o.Requisites.OGRN,
+                //        CreationDate = o.Requisites.DateCreation,
+                //        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
+                //        Managements = o.Managements.Select(m => new SearchManagementDTO
+                //        {
+                //            FullName = m.FullName,
+                //            Position = m.Position,
+                //        }).ToList(),
+                //        StatusChange = "",
+                //        SearchEconomicActivities = o.OrganizationsEconomicActivities
+                //        .Where(oea => oea.IsMain || allowedCodes.Contains(oea.EconomicActivities.OKVDNumber))
+                //        .Select(ea => new SearchEconomicActivityDto
+                //        {
+                //            OKVDNumber = ea.EconomicActivities.OKVDNumber,
+                //            Description = ea.EconomicActivities.Description
+                //        }).ToList(),
+                //    }).ToListAsync(cancellationToken);
+
+                return dtos;
             }
             catch (Exception ex) 
             {

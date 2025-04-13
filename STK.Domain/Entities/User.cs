@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace STK.Domain.Entities
 {
     public class User
@@ -18,5 +13,6 @@ namespace STK.Domain.Entities
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public ICollection<UserFavoriteOrganization> FavoritesOrganizations { get; set; } = new List<UserFavoriteOrganization>();
+        public ICollection<UserFavoriteCertificate> FavoritesCertificates { get; set;} = new List<UserFavoriteCertificate>();
     }
 }

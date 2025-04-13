@@ -96,25 +96,25 @@ namespace STK.Application.Handlers
                             LongTermLiabilities = bs.LongTermLiabilities,
                             ShortTermLiabilities = bs.ShortTermLiabilities
                         }).ToList(),
-                        FinancialResults = o.FinancialResults.Select(fr => new FinancialResultDto
+                        FinancialResults = o.FinancialResults
+                        .Select(fr => new FinancialResultDto
                         {
                             Year = fr.Year,
                             Profit = new
-                            {
-                                                           
-                                GrossProfitEarnings = fr.GrossProfitEarnings,
-                                SalesProfit = fr.SalesProfit,
-                                NetProfit = fr.NetProfit,
-                                IncomeTaxe = fr.IncomeTaxe,
-                                TaxFee = fr.TaxFee,
+                            {                         
+                                fr.GrossProfitEarnings,
+                                fr.SalesProfit,
+                                fr.NetProfit,
+                                fr.IncomeTaxe,
+                                fr.TaxFee,
                             },
                             Revenue = new 
                             {
-                                Revenue = fr.Revenue,
-                                CostOfSales = fr.CostOfSales,
-                                GrossProfitRevenue = fr.GrossProfitRevenue
+                                fr.Revenue,
+                                fr.CostOfSales,
+                                fr.GrossProfitRevenue
                             }
-                        }).ToList(),
+                        }).OrderBy(fr => fr.Year).ToList(),
                         Licenses = o.Licenses.Select(fr => new LicenseDto
                         {
                             NameTypeActivity = fr.NameTypeActivity,

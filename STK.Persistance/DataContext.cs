@@ -26,6 +26,8 @@ namespace STK.Persistance
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; }
         public DbSet<UserFavoriteOrganization> UsersFavoritesOrganizations { get; set; }
+        public DbSet<UserFavoriteCertificate> UsersFavoritesCertificates { get; set; }
+        public DbSet<AuditLog> AuditLog { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -111,6 +113,31 @@ namespace STK.Persistance
                 .HasOne(ufo => ufo.Organization)
                 .WithMany(o => o.FavoritedByUsers)
                 .HasForeignKey(ufo => ufo.OrganizationId);
+
+            modelBuilder.Entity<UserFavoriteCertificate>()
+                .HasKey(ufo => new { ufo.UserId, ufo.CertificateId });
+
+            modelBuilder.Entity<UserFavoriteCertificate>()
+                .HasOne(ufo => ufo.User)
+                .WithMany(u => u.FavoritesCertificates)
+                .HasForeignKey(ufo => ufo.UserId);
+
+            modelBuilder.Entity<UserFavoriteCertificate>()
+                .HasOne(ufo => ufo.Certificate)
+                .WithMany(o => o.FavoritedByUsers)
+                .HasForeignKey(ufo => ufo.CertificateId);
+
+            modelBuilder.Entity<AuditLog>()
+                .ToTable("AuditLog")
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(x => x.OldData)
+                .HasColumnType("jsonb");
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(x => x.NewData)
+                .HasColumnType("jsonb");
         }
     }
 }
