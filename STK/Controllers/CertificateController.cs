@@ -5,6 +5,7 @@ using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 using static System.Net.Mime.MediaTypeNames;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
@@ -24,7 +25,9 @@ namespace STK.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<SearchCertificatesDto>>> GetAllCertificates()
         {
-            var certificates = await _mediator.Send(new GetListCertificatesQuery());
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var query = new GetListCertificatesQuery(userId);
+            var certificates = await _mediator.Send(query);
             return Ok(certificates);
         }
 

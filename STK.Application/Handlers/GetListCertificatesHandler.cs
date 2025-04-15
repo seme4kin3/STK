@@ -27,8 +27,30 @@ namespace STK.Application.Handlers
         {
             try
             {
+                var certificateStatuses = await _dataContext.AuditLog
+                    .AsNoTracking()
+                    .Where(log => log.TableName == "Certificates")
+                    .Where(log => new[] { "INSERT", "UPDATE" }.Contains(log.Operation))
+                    .Where(log => log.ChangedAt >= DateTime.Today.AddMonths(-1) && log.ChangedAt <= DateTime.Now)
+                    .GroupBy(log => log.RecordId)
+                    .Select(g => new
+                    {
+                        CertificateId = g.Key,
+                        Status = g.OrderByDescending(log => log.ChangedAt)
+                                  .First()
+                                  .Operation == "INSERT" ? "Новая" : "Изменённая"
+                    })
+                    .ToDictionaryAsync(
+                        x => x.CertificateId,
+                        x => x.Status);
+
+                var certificateIds = certificateStatuses.Keys;
+
+                // Получаем сертификаты
                 var certificates = await _dataContext.Certificates
                     .AsNoTracking()
+                    .Include(c => c.FavoritedByUsers)
+                    .Where(c => certificateIds.Contains(c.Id))
                     .OrderByDescending(c => c.DateOfIssueCertificate)
                     .Take(50)
                     .Select(c => new SearchCertificatesDto
@@ -43,8 +65,29 @@ namespace STK.Application.Handlers
                         DateOfCertificateExpiration = c.DateOfCertificateExpiration,
                         CertificationType = c.CertificationType,
                         Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
+                        IsFavorite = c.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         OrganizationId = c.OrganizationId,
-                    }).ToListAsync(cancellationToken);
+                        StatusChange = certificateStatuses.ContainsKey(c.Id) ? certificateStatuses[c.Id] : "Неизвестно"
+                    })
+                    .ToListAsync();
+                //var certificates = await _dataContext.Certificates
+                //    .AsNoTracking()
+                //    .OrderByDescending(c => c.DateOfIssueCertificate)
+                //    .Take(50)
+                //    .Select(c => new SearchCertificatesDto
+                //    {
+                //        Id = c.Id,
+                //        Title = c.Title,
+                //        Applicant = c.Applicant,
+                //        CertificationObject = c.CertificationObject,
+                //        Address = c.Address,
+                //        Country = c.Country,
+                //        DateOfIssueCertificate = c.DateOfIssueCertificate,
+                //        DateOfCertificateExpiration = c.DateOfCertificateExpiration,
+                //        CertificationType = c.CertificationType,
+                //        Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
+                //        OrganizationId = c.OrganizationId,
+                //    }).ToListAsync(cancellationToken);
 
                 if (certificates == null)
                 {
