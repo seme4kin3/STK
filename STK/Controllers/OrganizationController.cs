@@ -71,6 +71,15 @@ namespace STK.API.Controllers
             Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
             return Ok(organizations);
         }
+
+        [HttpGet("organizationchanges/{organizationId}")]
+        public async Task<IActionResult> GetOrganizationChanges(Guid organizationId)
+        {
+            var query = new GetOrganizationChangesQuery(organizationId);
+
+            var changes = await _mediator.Send(query);
+            return Ok(changes);
+        }
     }
     
 }
