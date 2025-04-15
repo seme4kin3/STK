@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
-using static System.Net.Mime.MediaTypeNames;
 using System.Text.Json;
 using System.Security.Claims;
 
