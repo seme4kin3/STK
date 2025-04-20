@@ -65,7 +65,7 @@ namespace STK.Application.Handlers
                         Id = o.Id,
                         Name = o.Name,
                         FullName = o.FullName,
-                        Address = $"{o.Address} {o.IndexAddress}", // Объединение адреса и индекса
+                        Address = $"{o.Address} {o.IndexAddress}", 
                         Inn = o.Requisites.INN,
                         Ogrn = o.Requisites.OGRN,
                         Kpp = o.Requisites.KPP,

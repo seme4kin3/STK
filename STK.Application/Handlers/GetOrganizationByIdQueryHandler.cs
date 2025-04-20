@@ -13,7 +13,7 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetOrganizationByIdQueryHandler> _logger;
-        static Dictionary<string, string> statusOrg = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> statusOrg = new Dictionary<string, string>
         {
             { "Active", "Действующая" },
             { "active", "Действующая" },
@@ -24,7 +24,7 @@ namespace STK.Application.Handlers
             { "REORGANIZING", "В процессе присоединения к другому юр.лицу, с последующей ликвидацией" }
         };
 
-        static Dictionary<string, string> statusCertificate = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> statusCertificate = new Dictionary<string, string>
         {
             { "Actual", "Действующий" },
             { "Expired", "Истекший" },
@@ -122,10 +122,7 @@ namespace STK.Application.Handlers
                             SeriesNumber = fr.SeriesNumber,
                             DateOfIssue = fr.DateOfIssue,
                         }).ToList(),
-                        TaxModes = o.TaxesModes.Select(tm => new TaxModeDto
-                        {
-                            Name = tm.Name
-                        }).ToList()
+                        TaxMode = o.TaxesModes.FirstOrDefault().Name
                     }).FirstOrDefaultAsync(cancellationToken);
  
                 if(statusOrg.TryGetValue(organization.StatusOrg, out string status))

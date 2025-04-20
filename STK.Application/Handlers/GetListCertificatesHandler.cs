@@ -12,7 +12,7 @@ namespace STK.Application.Handlers
         private readonly DataContext _dataContext;
         private readonly ILogger<GetListCertificatesHandler> _logger;
 
-        static Dictionary<string, string> statusCertificate = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> statusCertificate = new Dictionary<string, string>
         {
             { "Actual", "Действующий" },
             { "Expired", "Истекший" },
@@ -27,11 +27,14 @@ namespace STK.Application.Handlers
         {
             try
             {
+                var monthAgo = DateTime.UtcNow.Date.AddMonths(-1);
+                var now = DateTime.UtcNow;
+
                 var certificateStatuses = await _dataContext.AuditLog
                     .AsNoTracking()
                     .Where(log => log.TableName == "Certificates")
                     .Where(log => new[] { "INSERT", "UPDATE" }.Contains(log.Operation))
-                    .Where(log => log.ChangedAt >= DateTime.Today.AddMonths(-1) && log.ChangedAt <= DateTime.Now)
+                    .Where(log => log.ChangedAt >= monthAgo && log.ChangedAt <= now)
                     .GroupBy(log => log.RecordId)
                     .Select(g => new
                     {
@@ -40,9 +43,7 @@ namespace STK.Application.Handlers
                                   .First()
                                   .Operation == "INSERT" ? "Новая" : "Изменённая"
                     })
-                    .ToDictionaryAsync(
-                        x => x.CertificateId,
-                        x => x.Status);
+                    .ToDictionaryAsync(x => x.CertificateId,x => x.Status, cancellationToken);
 
                 var certificateIds = certificateStatuses.Keys;
 
@@ -69,7 +70,7 @@ namespace STK.Application.Handlers
                         OrganizationId = c.OrganizationId,
                         StatusChange = certificateStatuses.ContainsKey(c.Id) ? certificateStatuses[c.Id] : "Неизвестно"
                     })
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
                 //var certificates = await _dataContext.Certificates
                 //    .AsNoTracking()
                 //    .OrderByDescending(c => c.DateOfIssueCertificate)
