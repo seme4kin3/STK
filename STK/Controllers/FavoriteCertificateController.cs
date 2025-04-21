@@ -42,7 +42,7 @@ namespace STK.API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddFavoriteCertificate([FromBody] FavoriteCertificateDto certificateDto)
+        public async Task<IActionResult> AddFavoriteCertificate([FromBody] FavoriteDto certificateDto)
         {
             try
             {
@@ -54,7 +54,7 @@ namespace STK.API.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
                 command.UserId = Guid.Parse(userId);
-                command.CertificateId = certificateDto.CertificateId;
+                command.CertificateId = certificateDto.Id;
                 await _mediator.Send(command);
                 return Ok();
             }
@@ -66,7 +66,7 @@ namespace STK.API.Controllers
 
 
         [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteCertificateDto certificateDto)
+        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteDto certificateDto)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace STK.API.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
                 command.UserId = Guid.Parse(userId);
-                command.CertificateId = certificateDto.CertificateId;
+                command.CertificateId = certificateDto.Id;
                 await _mediator.Send(command);
                 return Ok();
             }

@@ -41,7 +41,7 @@ namespace STK.API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddToFavoriteOrganization([FromBody] FavoriteOrganization favoriteOrganization)
+        public async Task<IActionResult> AddToFavoriteOrganization([FromBody] FavoriteDto favoriteOrganization)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace STK.API.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
                 command.UserId = Guid.Parse(userId);
-                command.OrganizationId = favoriteOrganization.OrganizationId;
+                command.OrganizationId = favoriteOrganization.Id;
                 await _mediator.Send(command);
                 return Ok();
             }
@@ -65,7 +65,7 @@ namespace STK.API.Controllers
 
         
         [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteOrganization favoriteOrganization)
+        public async Task<IActionResult> RemoveFromFavoriteOrganization([FromBody] FavoriteDto favoriteOrganization)
         {
             try
             {
@@ -77,7 +77,7 @@ namespace STK.API.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
                 command.UserId = Guid.Parse(userId);
-                command.OrganizationId = favoriteOrganization.OrganizationId;
+                command.OrganizationId = favoriteOrganization.Id;
                 await _mediator.Send(command);
                 return Ok();
             }
