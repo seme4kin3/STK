@@ -20,6 +20,7 @@ namespace STK.Domain.Entities
         public ICollection<FinancialResult> FinancialResults { get; set; } = new List<FinancialResult>();
         public ICollection<License> Licenses { get; set; } = new List<License>();
         public ICollection<TaxMode> TaxesModes { get; set; } = new List<TaxMode>();
+        public ICollection<Stamp> Stamps { get; set; } = new List<Stamp>();
         public ICollection<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; } = new List<OrganizationEconomicActivity>();
         public ICollection<UserFavoriteOrganization> FavoritedByUsers { get; set;} = new List<UserFavoriteOrganization>();
     }

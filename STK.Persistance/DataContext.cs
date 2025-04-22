@@ -28,6 +28,8 @@ namespace STK.Persistance
         public DbSet<UserFavoriteOrganization> UsersFavoritesOrganizations { get; set; }
         public DbSet<UserFavoriteCertificate> UsersFavoritesCertificates { get; set; }
         public DbSet<AuditLog> AuditLog { get; set; }
+        public DbSet<Stamp> Stamps { get; set; }
+        public DbSet<Tender> Tenders { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -51,7 +53,12 @@ namespace STK.Persistance
             modelBuilder.Entity<Certificate>()
                 .HasOne(c => c.Organization)
                 .WithMany(o => o.Certificates)
-                .HasForeignKey(c => c.OrganizationId);    
+                .HasForeignKey(c => c.OrganizationId);
+
+            modelBuilder.Entity<Stamp>()
+                .HasOne(s => s.Organization)
+                .WithMany(o => o.Stamps)
+                .HasForeignKey(s => s.OrganizationId);
 
             modelBuilder.Entity<TaxMode>()
                 .HasMany(tm => tm.Organization)
@@ -138,6 +145,9 @@ namespace STK.Persistance
             modelBuilder.Entity<AuditLog>()
                 .Property(x => x.NewData)
                 .HasColumnType("jsonb");
+
+            modelBuilder.Entity<Tender>()
+                .HasKey(x => x.Id);
         }
     }
 }

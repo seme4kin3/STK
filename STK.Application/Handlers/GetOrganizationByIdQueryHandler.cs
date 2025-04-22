@@ -131,7 +131,7 @@ namespace STK.Application.Handlers
                                     TaxFee = fr.TaxFee
                                 })
                                 .FirstOrDefault(),
-                            }).ToList(),
+                            }).OrderBy(fr => fr.Year).ToList(),
                         Licenses = o.Licenses.Select(fr => new LicenseDto
                         {
                             NameTypeActivity = fr.NameTypeActivity,
@@ -139,7 +139,21 @@ namespace STK.Application.Handlers
                             SeriesNumber = fr.SeriesNumber,
                             DateOfIssue = fr.DateOfIssue,
                         }).ToList(),
-                        TaxMode = o.TaxesModes.FirstOrDefault().Name
+                        TaxMode = o.TaxesModes.FirstOrDefault().Name,
+                        Stamps = o.Stamps.Select(s => new StampDto
+                        {
+                            Id = s.Id,
+                            Title = s.Title,
+                            StampNum = s.StampNum,
+                            StampStatus = s.StampStatus,
+                            Contragent = s.Contragent,
+                            Place = s.Place,
+                            Status = s.Status,
+                            Registration = s.Registration,
+                            Validity = s.Validity,
+                            Usage = s.Usage,
+                            OrganizationId = s.OrganizationId,
+                        }).ToList()
                     }).FirstOrDefaultAsync(cancellationToken);
  
                 if(statusOrg.TryGetValue(organization.StatusOrg, out string status))

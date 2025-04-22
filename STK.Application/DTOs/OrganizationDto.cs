@@ -22,6 +22,7 @@ namespace STK.Application.DTOs
         //public List<FinancialResultDto> FinancialResults { get; set; } = new List<FinancialResultDto>();
         public List<FinancialResultsByYearDto> FinancialResultsByYear { get; set; } = new List<FinancialResultsByYearDto> { };
         public List<LicenseDto> Licenses { get; set; } = new List<LicenseDto>();
+        public List<StampDto> Stamps { get; set; } = new List<StampDto> { };
 
     }
 }
