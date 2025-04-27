@@ -27,6 +27,10 @@ namespace STK.API.Controllers
             var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var query = new GetListCertificatesQuery(userId);
             var certificates = await _mediator.Send(query);
+            if(certificates == null)
+            {
+                return Ok(new List<object>());
+            }
             return Ok(certificates);
         }
 
