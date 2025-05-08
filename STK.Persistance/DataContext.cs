@@ -30,6 +30,7 @@ namespace STK.Persistance
         public DbSet<AuditLog> AuditLog { get; set; }
         public DbSet<Stamp> Stamps { get; set; }
         public DbSet<Tender> Tenders { get; set; }
+        public DbSet<ArbitrationCase> ArbitrationsCases { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -59,6 +60,11 @@ namespace STK.Persistance
                 .HasOne(s => s.Organization)
                 .WithMany(o => o.Stamps)
                 .HasForeignKey(s => s.OrganizationId);
+
+            modelBuilder.Entity<ArbitrationCase>()
+                .HasOne(ac => ac.Organization)
+                .WithMany(o => o.ArbitrationsCases)
+                .HasForeignKey(ac => ac.OrganizationId);
 
             modelBuilder.Entity<TaxMode>()
                 .HasMany(tm => tm.Organization)

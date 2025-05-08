@@ -72,13 +72,26 @@ namespace STK.API.Controllers
             return Ok(organizations);
         }
 
-        [HttpGet("organizationchanges/{organizationId}")]
+        [HttpGet("organizations/organizationchanges/{organizationId}")]
         public async Task<IActionResult> GetOrganizationChanges(Guid organizationId)
         {
             var query = new GetOrganizationChangesQuery(organizationId);
 
             var changes = await _mediator.Send(query);
             return Ok(changes);
+        }
+
+        [HttpGet("organizations/arbitration/{organizationId}")]
+        public async Task<IActionResult> GetArbitrationOfOrganization(Guid organizationId)
+        {
+            var query = new GetArbitrationCaseQuery(organizationId);
+
+            var arbitration = await _mediator.Send(query);
+            if(arbitration == null || !arbitration.Any())
+            {
+                return Ok(new List<object>());
+            }
+            return Ok(arbitration);
         }
     }
     
