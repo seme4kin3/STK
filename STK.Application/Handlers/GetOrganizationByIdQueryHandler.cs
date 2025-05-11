@@ -131,7 +131,7 @@ namespace STK.Application.Handlers
                                     TaxFee = fr.TaxFee
                                 })
                                 .FirstOrDefault(),
-                            }).OrderBy(fr => fr.Year).ToList(),
+                            }).OrderByDescending(fr => fr.Year).ToList(),
                         Licenses = o.Licenses.Select(fr => new LicenseDto
                         {
                             NameTypeActivity = fr.NameTypeActivity,

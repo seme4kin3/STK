@@ -12,7 +12,7 @@ namespace STK.Domain.Entities
         public string Url { get; set; }
         public decimal AmountOfClaim { get; set; }
         public string Status { get; set; }
-        public DateTime DateOfStatus { get; set; }
+        public DateTime? DateOfStatus { get; set; }
         public string Authority { get; set; }
         public string CourtJudgment { get; set; }
         public string CaseRegisterNumber { get; set; }
@@ -20,7 +20,7 @@ namespace STK.Domain.Entities
         public string NameOfJudicialAct { get; set; }
         public string UrlOfJudicialAct { get; set; }
         public string AdditionalInformation { get; set; }
-        public DateTime DateOfJudicialAct { get; set; }
+        public DateTime? DateOfJudicialAct { get; set; }
         public Guid OrganizationId { get; set; }
         public Organization Organization { get; set; }
     }
