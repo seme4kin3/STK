@@ -23,10 +23,10 @@ namespace STK.API.Controllers
 
         [Route("organizations")]
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetAllOrganizations()
+        public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetAllOrganizations([FromQuery] bool? isNew, [FromQuery] bool? isChange)
         {
             var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var query = new GetOrganizationsQuery(userId);
+            var query = new GetOrganizationsQuery(userId, isNew, isChange);
             
             var organizations = await _mediator.Send(query);
             return Ok(organizations);

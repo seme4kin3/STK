@@ -54,6 +54,14 @@ namespace STK.Application.Handlers
                               .Operation == "INSERT" ? "Новая" : "Изменённая"
                     );
 
+                if (query.IsNew == true || query.IsChange == true)
+                {
+                    statusesDict = statusesDict
+                        .Where(kvp => (query.IsNew == true && kvp.Value == "Новая") ||
+                                     (query.IsChange == true && kvp.Value == "Изменённая"))
+                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                }
+
                 if (statusesDict.Count == 0)
                     return new List<SearchOrganizationDTO>();
 
@@ -114,41 +122,6 @@ namespace STK.Application.Handlers
                         SearchEconomicActivities = activities
                     };
                 }).ToList();
-
-                //var organizations = await _dataContext.Organizations
-                //    .AsNoTracking()
-                //    .Include(o => o.Requisites)
-                //    .Include(o => o.OrganizationsEconomicActivities)
-                //        .ThenInclude(oe => oe.EconomicActivities)
-                //    .OrderByDescending(o => o.Requisites.DateCreation)
-                //    .Where(o => o.Requisites.INN != null && o.Name != null)
-                //    .Take(50)
-                //    .Select(o => new SearchOrganizationDTO
-                //    {
-                //        Id = o.Id,
-                //        Name = o.Name,
-                //        FullName = o.FullName,
-                //        Address = $"{o.Address} {o.IndexAddress}",
-                //        Inn = o.Requisites.INN,
-                //        Ogrn = o.Requisites.OGRN,
-                //        CreationDate = o.Requisites.DateCreation,
-                //        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
-                //        Managements = o.Managements.Select(m => new SearchManagementDTO
-                //        {
-                //            FullName = m.FullName,
-                //            Position = m.Position,
-                //        }).ToList(),
-                //        StatusChange = "",
-                //        SearchEconomicActivities = o.OrganizationsEconomicActivities
-                //        .Where(oea => oea.IsMain || allowedCodes.Contains(oea.EconomicActivities.OKVDNumber))
-                //        .Select(ea => new SearchEconomicActivityDto
-                //        {
-                //            OKVDNumber = ea.EconomicActivities.OKVDNumber,
-                //            Description = ea.EconomicActivities.Description
-                //        }).ToList(),
-                //    }).ToListAsync(cancellationToken);
-
-                //return dtos;
             }
             catch (Exception ex) 
             {
