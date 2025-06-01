@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using STK.API.SignalR;
 using STK.Application.Handlers;
 using STK.Application.Services;
 using STK.Persistance;
@@ -21,7 +22,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetOrganizationsQueryHandler>());
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
+builder.Services.AddHostedService<NotificationBackgroundService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
@@ -46,6 +49,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+
 // Настройка авторизации
 builder.Services.AddAuthorization();
 
@@ -63,6 +68,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapControllers();
 
 app.Run();

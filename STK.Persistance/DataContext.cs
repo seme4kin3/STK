@@ -31,6 +31,7 @@ namespace STK.Persistance
         public DbSet<Stamp> Stamps { get; set; }
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<ArbitrationCase> ArbitrationsCases { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -153,6 +154,9 @@ namespace STK.Persistance
                 .HasColumnType("jsonb");
 
             modelBuilder.Entity<Tender>()
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<Notification>()
                 .HasKey(x => x.Id);
         }
     }
