@@ -13,7 +13,8 @@ namespace STK.Application.Services
     {
         private readonly IServiceProvider _services;
         private readonly ILogger<NotificationBackgroundService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5); // Уменьшил интервал для тестирования
+        private DateTime _lastCheckTime = DateTime.UtcNow;
 
         public NotificationBackgroundService(
             IServiceProvider services,
@@ -50,38 +51,55 @@ namespace STK.Application.Services
 
         private async Task CheckChangesAndNotify(IMediator mediator, DataContext context, CancellationToken cancellationToken)
         {
+            var currentCheckTime = DateTime.UtcNow;
+
+            _logger.LogInformation("Checking for changes since {LastCheckTime}", _lastCheckTime);
+
             var users = await context.Users.ToListAsync(cancellationToken);
 
             foreach (var user in users)
             {
-                await ProcessUserChanges(mediator, context, user.Id, cancellationToken);
+                await ProcessUserChanges(mediator, context, user.Id, _lastCheckTime, cancellationToken);
             }
+
+            _lastCheckTime = currentCheckTime;
         }
 
-        private async Task ProcessUserChanges(IMediator mediator, DataContext context, Guid userId, CancellationToken cancellationToken)
+        private async Task ProcessUserChanges(IMediator mediator, DataContext context, Guid userId, DateTime lastCheckTime, CancellationToken cancellationToken)
         {
-            var lastCheckTime = DateTime.UtcNow.AddHours(-1);
-
-            // Получаем изменения организаций
-            var orgChanges = await GetOrganizationChanges(context, userId, lastCheckTime, cancellationToken);
-            foreach (var org in orgChanges)
+            try
             {
-                await mediator.Send(new SendNotificationCommand(
-                    userId,
-                    $"Изменение в организации",
-                    org.FullName),
-                    cancellationToken);
+                // Получаем изменения организаций
+                var orgChanges = await GetOrganizationChanges(context, userId, lastCheckTime, cancellationToken);
+                foreach (var org in orgChanges)
+                {
+                    await mediator.Send(new SendNotificationCommand(
+                        userId,
+                        "Изменение в организации",
+                        org.FullName),
+                        cancellationToken);
+                }
+
+                // Получаем изменения сертификатов
+                var certChanges = await GetCertificateChanges(context, userId, lastCheckTime, cancellationToken);
+                foreach (var cert in certChanges)
+                {
+                    await mediator.Send(new SendNotificationCommand(
+                        userId,
+                        "Изменение в сертификате",
+                        cert.Title),
+                        cancellationToken);
+                }
+
+                if (orgChanges.Any() || certChanges.Any())
+                {
+                    _logger.LogInformation("Processed {OrgCount} org changes and {CertCount} cert changes for user {UserId}",
+                        orgChanges.Count, certChanges.Count, userId);
+                }
             }
-
-            // Получаем изменения сертификатов
-            var certChanges = await GetCertificateChanges(context, userId, lastCheckTime, cancellationToken);
-            foreach (var cert in certChanges)
+            catch (Exception ex)
             {
-                await mediator.Send(new SendNotificationCommand(
-                    userId,
-                    $"Изменение в сертификате",
-                    cert.Title),
-                    cancellationToken);
+                _logger.LogError(ex, "Error processing changes for user {UserId}", userId);
             }
         }
 
@@ -112,7 +130,7 @@ namespace STK.Application.Services
                 .Select(a => new NotificationOrgDto
                 {
                     Id = a.RecordId,
-                    FullName = ExtractNameFromJson(a.NewData ?? a.OldData)
+                    FullName = ExtractFieldFromJson(a.NewData ?? a.OldData, "FullName") ?? "Неизвестная организация"
                 })
                 .ToList();
         }
@@ -144,29 +162,30 @@ namespace STK.Application.Services
                 .Select(a => new NotificationCertDto
                 {
                     Id = a.RecordId,
-                    Title = ExtractNameFromJson(a.NewData ?? a.OldData)
+                    Title = ExtractFieldFromJson(a.NewData ?? a.OldData, "Title") ?? "Неизвестный сертификат"
                 })
                 .ToList();
         }
 
-        private string ExtractNameFromJson(string jsonData)
+        private string ExtractFieldFromJson(string jsonData, string fieldName)
         {
             if (string.IsNullOrEmpty(jsonData))
-                return "Unknown";
+                return null;
 
             try
             {
                 using var doc = JsonDocument.Parse(jsonData);
-                if (doc.RootElement.TryGetProperty("FullName", out var nameProp) &&
-                    nameProp.ValueKind == JsonValueKind.String)
+                if (doc.RootElement.TryGetProperty(fieldName, out var prop) &&
+                    prop.ValueKind == JsonValueKind.String)
                 {
-                    return nameProp.GetString() ?? "Unknown";
+                    return prop.GetString();
                 }
-                return "Unknown";
+                return null;
             }
-            catch
+            catch (Exception ex)
             {
-                return "Unknown";
+                _logger.LogWarning(ex, "Failed to extract {FieldName} from JSON: {JsonData}", fieldName, jsonData);
+                return null;
             }
         }
     }

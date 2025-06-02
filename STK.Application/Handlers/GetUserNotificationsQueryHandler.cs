@@ -9,31 +9,29 @@ namespace STK.Application.Handlers
 {
     public class GetUserNotificationsQueryHandler : IRequestHandler<GetUserNotificationsQuery, List<NotificationDto>>
     {
-        private readonly DataContext _dataContext;
+        private readonly DataContext _context;
 
-        public GetUserNotificationsQueryHandler(DataContext dataContext)
+        public GetUserNotificationsQueryHandler(DataContext context)
         {
-            _dataContext = dataContext;
+            _context = context;
         }
 
         public async Task<List<NotificationDto>> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
         {
-            var notification = await _dataContext.Notifications
+            var notifications = await _context.Notifications
                 .Where(n => n.UserId == request.UserId)
                 .OrderByDescending(n => n.CreatedDate)
                 .Select(n => new NotificationDto
                 {
-                    UserId = n.UserId,
                     Id = n.Id,
+                    UserId = n.UserId,
                     Message = n.Message,
                     CreatedDate = n.CreatedDate,
                     IsRead = n.IsRead
                 })
-                .Take(50)
                 .ToListAsync(cancellationToken);
 
-            return notification;
-            
+            return notifications;
         }
     }
 }
