@@ -32,6 +32,7 @@ namespace STK.Persistance
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<ArbitrationCase> ArbitrationsCases { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<PredictAi> PredictAi { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -158,6 +159,9 @@ namespace STK.Persistance
 
             modelBuilder.Entity<Notification>()
                 .HasKey(x => x.Id);
+
+            modelBuilder.Entity<PredictAi>()
+                .HasKey(pa =>  pa.Id);
         }
     }
 }
