@@ -13,7 +13,7 @@ namespace STK.Application.Services
     {
         private readonly IServiceProvider _services;
         private readonly ILogger<NotificationBackgroundService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5); // Уменьшил интервал для тестирования
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(30); // Уменьшил интервал для тестирования
         private DateTime _lastCheckTime = DateTime.UtcNow;
 
         public NotificationBackgroundService(

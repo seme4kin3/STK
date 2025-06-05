@@ -33,6 +33,7 @@ namespace STK.Persistance
         public DbSet<ArbitrationCase> ArbitrationsCases { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<PredictAi> PredictAi { get; set; }
+        public DbSet<Bankruptcy> Bankruptcy { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -62,6 +63,11 @@ namespace STK.Persistance
                 .HasOne(s => s.Organization)
                 .WithMany(o => o.Stamps)
                 .HasForeignKey(s => s.OrganizationId);
+
+            modelBuilder.Entity<Bankruptcy>()
+                .HasOne(b => b.Organization)
+                .WithMany(o => o.Bankruptcies)
+                .HasForeignKey(b => b.OrganizationId);
 
             modelBuilder.Entity<ArbitrationCase>()
                 .HasOne(ac => ac.Organization)

@@ -153,6 +153,14 @@ namespace STK.Application.Handlers
                             Validity = s.Validity,
                             Usage = s.Usage,
                             OrganizationId = s.OrganizationId,
+                        }).ToList(),
+                        Bankruptcies = o.Bankruptcies.Select(b => new BankruptcyDto
+                        {
+                            Id = b.Id,
+                            Status = b.Status,
+                            StatusCase = b.StatusCase,
+                            NumberCase = b.NumberCase,
+                            OrganizationId = b.OrganizationId
                         }).ToList()
                     }).FirstOrDefaultAsync(cancellationToken);
  
