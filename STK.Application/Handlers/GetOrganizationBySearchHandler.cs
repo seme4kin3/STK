@@ -45,7 +45,9 @@ namespace STK.Application.Handlers
                          o.FullName.ToLower().Contains(query.Search.ToLower()) || // Поиск по полному названию организации
                          o.Requisites.INN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ИНН
                          o.Requisites.OGRN.ToLower().StartsWith(query.Search.ToLower()) || // Поиск по ОГРН
-                         o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.ToLower().StartsWith(query.Search.ToLower()))) // Поиск по коду ОКВЭД
+                         o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.OKVDNumber.ToLower().StartsWith(query.Search.ToLower())) ||
+                         o.OrganizationsEconomicActivities.Any(oe => oe.EconomicActivities.Description.ToLower().StartsWith(query.Search.ToLower()))
+                         ) // Поиск по коду ОКВЭД
                     );
                 
                 if (organizationsQuery == null)
@@ -56,7 +58,7 @@ namespace STK.Application.Handlers
                 // Получаем общее количество организаций
                 var count = await organizationsQuery.CountAsync(cancellationToken);
 
-                // Выполняем выбор элементов с применением проекции
+                // Выполняем выбор элементов с применением маппинга
                 var items = await organizationsQuery
                     .Skip((query.PageNumber - 1) * query.PageSize)
                     .Take(query.PageSize)

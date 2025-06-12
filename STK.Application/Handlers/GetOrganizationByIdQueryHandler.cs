@@ -50,6 +50,8 @@ namespace STK.Application.Handlers
                         Name = o.Name,
                         FullName = o.FullName,
                         Address = $"{o.Address} {o.IndexAddress}",
+                        Email = o.Email,
+                        Website = o.Website,
                         StatusOrg = o.StatusOrg,
                         IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Requisites = new RequisiteDto
