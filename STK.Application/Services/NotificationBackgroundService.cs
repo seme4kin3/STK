@@ -13,7 +13,7 @@ namespace STK.Application.Services
     {
         private readonly IServiceProvider _services;
         private readonly ILogger<NotificationBackgroundService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(30); // Уменьшил интервал для тестирования
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1); // Уменьшил интервал для тестирования
         private DateTime _lastCheckTime = DateTime.UtcNow;
 
         public NotificationBackgroundService(
@@ -103,6 +103,38 @@ namespace STK.Application.Services
             }
         }
 
+        //private async Task<List<NotificationOrgDto>> GetOrganizationChanges(
+        //    DataContext context,
+        //    Guid userId,
+        //    DateTime since,
+        //    CancellationToken cancellationToken)
+        //{
+        //    var orgIds = await context.UsersFavoritesOrganizations
+        //        .Where(ufo => ufo.UserId == userId)
+        //        .Select(ufo => ufo.OrganizationId)
+        //        .ToListAsync(cancellationToken);
+
+        //    if (!orgIds.Any())
+        //        return new List<NotificationOrgDto>();
+
+        //    var auditLogs = await context.AuditLog
+        //       .Where(a => a.ChangedAt >= since &&
+        //                  a.TableName == "Organizations" &&
+        //                  orgIds.Contains(a.RecordId))
+        //       .OrderByDescending(a => a.ChangedAt)
+        //       .ToListAsync(cancellationToken);
+
+        //    return auditLogs
+        //        .GroupBy(a => a.RecordId)
+        //        .Select(g => g.First())
+        //        .Select(a => new NotificationOrgDto
+        //        {
+        //            Id = a.RecordId,
+        //            FullName = ExtractFieldFromJson(a.NewData ?? a.OldData, "FullName") ?? "Неизвестная организация"
+        //        })
+        //        .ToList();
+        //}
+
         private async Task<List<NotificationOrgDto>> GetOrganizationChanges(
             DataContext context,
             Guid userId,
@@ -117,21 +149,49 @@ namespace STK.Application.Services
             if (!orgIds.Any())
                 return new List<NotificationOrgDto>();
 
-            var auditLogs = await context.AuditLog
-               .Where(a => a.ChangedAt >= since &&
-                          a.TableName == "Organizations" &&
-                          orgIds.Contains(a.RecordId))
-               .OrderByDescending(a => a.ChangedAt)
-               .ToListAsync(cancellationToken);
+            // Получаем изменения в основной таблице Organizations
+            var organizationAuditLogs = await context.AuditLog
+                .Where(a => a.ChangedAt >= since &&
+                           a.TableName == "Organizations" &&
+                           orgIds.Contains(a.RecordId))
+                .ToListAsync(cancellationToken);
 
-            return auditLogs
-                .GroupBy(a => a.RecordId)
-                .Select(g => g.First())
-                .Select(a => new NotificationOrgDto
+            // Получаем изменения в связанных таблицах Requisites и Managements
+            var relatedAuditLogs = await context.AuditLog
+                .Where(a => a.ChangedAt >= since &&
+                           (a.TableName == "Requisites" || a.TableName == "Managements") &&
+                           a.RelatedOrganizationId.HasValue &&
+                           orgIds.Contains(a.RelatedOrganizationId.Value))
+                .ToListAsync(cancellationToken);
+
+            // Объединяем все логи изменений
+            var allAuditLogs = organizationAuditLogs.Concat(relatedAuditLogs);
+
+            // Группируем по организации (используем RecordId для Organizations и RelatedOrgId для связанных таблиц)
+            var groupedLogs = allAuditLogs
+                .GroupBy(a => a.TableName == "Organizations" ? a.RecordId : a.RelatedOrganizationId.Value)
+                .Select(g => new
                 {
-                    Id = a.RecordId,
-                    FullName = ExtractFieldFromJson(a.NewData ?? a.OldData, "FullName") ?? "Неизвестная организация"
+                    OrganizationId = g.Key,
+                    LatestChange = g.OrderByDescending(a => a.ChangedAt).First()
                 })
+                .ToList();
+
+            // Получаем названия организаций
+            var organizationNames = await context.Organizations
+                .Where(o => groupedLogs.Select(gl => gl.OrganizationId).Contains(o.Id))
+                .Select(o => new { o.Id, o.FullName })
+                .ToDictionaryAsync(o => o.Id, o => o.FullName, cancellationToken);
+
+            return groupedLogs
+                .Select(gl => new NotificationOrgDto
+                {
+                    Id = gl.OrganizationId,
+                    FullName = organizationNames.TryGetValue(gl.OrganizationId, out var name)
+                        ? name
+                        : "Неизвестная организация"
+                })
+                .OrderByDescending(n => groupedLogs.First(gl => gl.OrganizationId == n.Id).LatestChange.ChangedAt)
                 .ToList();
         }
 

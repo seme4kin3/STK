@@ -26,6 +26,16 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
 
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowSpecificOrigin",
+//        builder => builder.WithOrigins("http://localhost:5173")
+//                          .AllowAnyHeader()
+//                          .AllowAnyMethod()
+//                          .AllowCredentials());
+//});
+
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
 
