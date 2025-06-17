@@ -76,7 +76,7 @@ namespace STK.Application.Services
                     await mediator.Send(new SendNotificationCommand(
                         userId,
                         "Изменение в организации",
-                        org.FullName),
+                        org.FullName, "Организация", org.Id),
                         cancellationToken);
                 }
 
@@ -87,7 +87,7 @@ namespace STK.Application.Services
                     await mediator.Send(new SendNotificationCommand(
                         userId,
                         "Изменение в сертификате",
-                        cert.Title),
+                        cert.Title, "Сертификат", cert.OrgId),
                         cancellationToken);
                 }
 
@@ -102,38 +102,6 @@ namespace STK.Application.Services
                 _logger.LogError(ex, "Error processing changes for user {UserId}", userId);
             }
         }
-
-        //private async Task<List<NotificationOrgDto>> GetOrganizationChanges(
-        //    DataContext context,
-        //    Guid userId,
-        //    DateTime since,
-        //    CancellationToken cancellationToken)
-        //{
-        //    var orgIds = await context.UsersFavoritesOrganizations
-        //        .Where(ufo => ufo.UserId == userId)
-        //        .Select(ufo => ufo.OrganizationId)
-        //        .ToListAsync(cancellationToken);
-
-        //    if (!orgIds.Any())
-        //        return new List<NotificationOrgDto>();
-
-        //    var auditLogs = await context.AuditLog
-        //       .Where(a => a.ChangedAt >= since &&
-        //                  a.TableName == "Organizations" &&
-        //                  orgIds.Contains(a.RecordId))
-        //       .OrderByDescending(a => a.ChangedAt)
-        //       .ToListAsync(cancellationToken);
-
-        //    return auditLogs
-        //        .GroupBy(a => a.RecordId)
-        //        .Select(g => g.First())
-        //        .Select(a => new NotificationOrgDto
-        //        {
-        //            Id = a.RecordId,
-        //            FullName = ExtractFieldFromJson(a.NewData ?? a.OldData, "FullName") ?? "Неизвестная организация"
-        //        })
-        //        .ToList();
-        //}
 
         private async Task<List<NotificationOrgDto>> GetOrganizationChanges(
             DataContext context,
@@ -222,7 +190,8 @@ namespace STK.Application.Services
                 .Select(a => new NotificationCertDto
                 {
                     Id = a.RecordId,
-                    Title = ExtractFieldFromJson(a.NewData ?? a.OldData, "Title") ?? "Неизвестный сертификат"
+                    Title = ExtractFieldFromJson(a.NewData ?? a.OldData, "Title") ?? "Неизвестный сертификат",
+                    OrgId = a.RelatedOrganizationId
                 })
                 .ToList();
         }
@@ -261,5 +230,6 @@ namespace STK.Application.Services
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
+        public Guid? OrgId { get; set; }
     }
 }

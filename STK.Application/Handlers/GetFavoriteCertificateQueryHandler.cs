@@ -57,26 +57,7 @@ namespace STK.Application.Handlers
 
                 }).ToList();
 
-                //var certificates = await _dataContext.Certificates
-                //    .AsNoTracking()
-                //    .OrderByDescending(c => c.DateOfIssueCertificate)
-                //    .Where()
-                //    .Select(c => new SearchCertificatesDto
-                //    {
-                //        Id = c.Id,
-                //        Title = c.Title,
-                //        Applicant = c.Applicant,
-                //        CertificationObject = c.CertificationObject,
-                //        Address = c.Address,
-                //        Country = c.Country,
-                //        DateOfIssueCertificate = c.DateOfIssueCertificate,
-                //        DateOfCertificateExpiration = c.DateOfCertificateExpiration,
-                //        CertificationType = c.CertificationType,
-                //        Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
-                //        OrganizationId = c.OrganizationId,
-                //    }).ToListAsync(cancellationToken);
-
-
+ 
                 return favoriteCertificate;
             }
             catch (Exception ex)

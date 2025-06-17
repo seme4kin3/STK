@@ -35,10 +35,6 @@ namespace STK.Persistance
         public DbSet<PredictAi> PredictAi { get; set; }
         public DbSet<Bankruptcy> Bankruptcy { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Host=79.174.83.231;Port=5432;Database=stk3;Username=postgres;Password=secret123");
-        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OrganizationEconomicActivity>()

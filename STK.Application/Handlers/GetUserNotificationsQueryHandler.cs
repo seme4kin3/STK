@@ -27,7 +27,9 @@ namespace STK.Application.Handlers
                     UserId = n.UserId,
                     Message = n.Message,
                     CreatedDate = n.CreatedDate,
-                    IsRead = n.IsRead
+                    IsRead = n.IsRead,
+                    OrgId = n.RelatedOrganizationId,
+                    TableName = n.TableName
                 })
                 .ToListAsync(cancellationToken);
 

@@ -40,9 +40,10 @@ namespace STK.API.SignalR
                 {
                     await Clients.Client(Context.ConnectionId).SendAsync("ReceiveNotification",
                         new NotificationMessage(
+                            notification.Id,
                             "Непрочитанное уведомление",
                             notification.Message,
-                            notification.CreatedDate));
+                            notification.CreatedDate, notification.OrgId, notification.TableName));
                     unreadCount++;
                 }
 

@@ -71,24 +71,6 @@ namespace STK.Application.Handlers
                         StatusChange = certificateStatuses.ContainsKey(c.Id) ? certificateStatuses[c.Id] : "Неизвестно"
                     })
                     .ToListAsync(cancellationToken);
-                //var certificates = await _dataContext.Certificates
-                //    .AsNoTracking()
-                //    .OrderByDescending(c => c.DateOfIssueCertificate)
-                //    .Take(50)
-                //    .Select(c => new SearchCertificatesDto
-                //    {
-                //        Id = c.Id,
-                //        Title = c.Title,
-                //        Applicant = c.Applicant,
-                //        CertificationObject = c.CertificationObject,
-                //        Address = c.Address,
-                //        Country = c.Country,
-                //        DateOfIssueCertificate = c.DateOfIssueCertificate,
-                //        DateOfCertificateExpiration = c.DateOfCertificateExpiration,
-                //        CertificationType = c.CertificationType,
-                //        Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
-                //        OrganizationId = c.OrganizationId,
-                //    }).ToListAsync(cancellationToken);
 
                 if (certificates == null)
                 {

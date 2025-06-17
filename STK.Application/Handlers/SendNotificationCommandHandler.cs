@@ -34,7 +34,9 @@ namespace STK.Application.Handlers
                 UserId = request.UserId,
                 Message = $"{request.Title}: {request.Content}",
                 CreatedDate = DateTime.UtcNow,
-                IsRead = false
+                IsRead = false, 
+                RelatedOrganizationId = request.OrgId,
+                TableName = request.TableName
             };
 
             _context.Notifications.Add(notification);
@@ -42,9 +44,12 @@ namespace STK.Application.Handlers
 
             // Отправляем в real-time через SignalR
             var notificationMessage = new NotificationMessage(
+                notification.Id,
                 request.Title,
                 request.Content,
-                notification.CreatedDate);
+                notification.CreatedDate,
+                notification.RelatedOrganizationId,
+                request.TableName);
 
             await _connectionManager.SendNotificationAsync(request.UserId, notificationMessage);
 

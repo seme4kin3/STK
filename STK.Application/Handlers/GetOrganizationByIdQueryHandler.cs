@@ -83,6 +83,7 @@ namespace STK.Application.Handlers
                             CertificationObject = c.CertificationObject,
                             Address = c.Address,
                             Country = c.Country,
+                            CertificationType = c.CertificationType,
                             DateOfCertificateExpiration = c.DateOfCertificateExpiration,
                             DateOfIssueCertificate = c.DateOfIssueCertificate,
                             Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),

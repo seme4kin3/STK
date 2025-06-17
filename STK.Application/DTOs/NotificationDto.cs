@@ -8,5 +8,7 @@ namespace STK.Application.DTOs
         public string Message { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool IsRead { get; set; }
+        public Guid? OrgId { get; set; }
+        public string TableName { get; set; }
     }
 }
