@@ -12,6 +12,7 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetOrganizationBySearchHandler> _logger;
+        private static readonly HashSet<string> AllowedOkvdCodes = new() { "30.20.9", "30.20.31", "52.21.1" };
         public GetOrganizationBySearchHandler(DataContext dataContext, ILogger<GetOrganizationBySearchHandler> logger)
         {
             _dataContext = dataContext;
@@ -22,7 +23,7 @@ namespace STK.Application.Handlers
         {
             try
             {
-                var allowedCodes = new List<string> { "30.20.9", "30.20.31", "52.21.1" };
+                //var allowedCodes = new List<string> { "30.20.9", "30.20.31", "52.21.1" };
 
                 if (string.IsNullOrWhiteSpace(query.Search))
                 {
@@ -81,7 +82,7 @@ namespace STK.Application.Handlers
                             })
                             .ToList(), 
                         SearchEconomicActivities = o.OrganizationsEconomicActivities
-                            .Where(oea => oea.IsMain == true || allowedCodes.Contains(oea.EconomicActivities.OKVDNumber)) 
+                            .Where(oea => oea.IsMain == true || AllowedOkvdCodes.Contains(oea.EconomicActivities.OKVDNumber)) 
                             .Select(e => new SearchEconomicActivityDto 
                             {
                                 OKVDNumber = e.EconomicActivities.OKVDNumber,

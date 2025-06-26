@@ -13,6 +13,8 @@ namespace STK.Domain.Entities
         public string Email { get; set; }
         public string Website { get; set; }
         public string StatusOrg { get; set; }
+        public DateTime? CreatedAtDate { get; set; }
+        public DateTime? LastChangedAtDate { get; set; }
         public Requisite Requisites { get; set; }
         public ICollection<Management> Managements { get; set; } = new List<Management>();
         public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
