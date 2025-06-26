@@ -183,7 +183,9 @@ namespace STK.Application.Handlers
                     .Include(o => o.Managements)
                     .Include(o => o.FavoritedByUsers.Where(f => f.UserId == query.UserId))
                     .AsSplitQuery()
-                    .OrderByDescending(o => GetLatestDate(o.CreatedAtDate, o.LastChangedAtDate))
+                    .OrderByDescending(o => o.LastChangedAtDate.HasValue
+                        ? (o.CreatedAtDate > o.LastChangedAtDate ? o.CreatedAtDate : o.LastChangedAtDate)
+                        : o.CreatedAtDate)
                     .Take(50)
                     .ToListAsync(cancellationToken);
 
@@ -247,9 +249,6 @@ namespace STK.Application.Handlers
             }
         }
 
-        /// <summary>
-        /// Определяет статус организации на основе дат создания и изменения
-        /// </summary>
         private string DetermineOrganizationStatus(Organization organization, DateTime monthAgo)
         {
             var createdDate = organization.CreatedAtDate;
@@ -272,23 +271,6 @@ namespace STK.Application.Handlers
             }
 
             return "Неопределено";
-        }
-
-        /// <summary>
-        /// Возвращает более позднюю из двух дат для сортировки
-        /// </summary>
-        private DateTime GetLatestDate(DateTime? createdDate, DateTime? changedDate)
-        {
-            if (!createdDate.HasValue && !changedDate.HasValue)
-                return DateTime.MinValue;
-
-            if (!createdDate.HasValue)
-                return changedDate.Value;
-
-            if (!changedDate.HasValue)
-                return createdDate.Value;
-
-            return createdDate > changedDate ? createdDate.Value : changedDate.Value;
         }
     }
 }
