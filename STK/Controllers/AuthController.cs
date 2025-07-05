@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
 using STK.Application.DTOs.AuthDto;
+using STK.Application.Middleware;
 using System.Security.Claims;
 
 namespace STK.API.Controllers
@@ -23,35 +24,64 @@ namespace STK.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var command = new RegisterUserCommand { Register = registerDto };
-            var result = await _mediator.Send(command);
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+            //var command = new RegisterUserCommand { Register = registerDto };
+            //var result = await _mediator.Send(command);
 
-            return CreatedAtAction(nameof(Register), result);
+            //return CreatedAtAction(nameof(Register), result);
+
+            try
+            {
+                var command = new RegisterUserCommand(registerDto);
+                var userId = await _mediator.Send(command);
+                return Ok(new { UserEmail = userId }); // 200 OK
+            }
+            catch (DomainException ex)
+            {
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "An error occurred during registration.", Detail = ex.Message }); // 400 Bad Request
+            }
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserDto authDto)
         {
-            if (!ModelState.IsValid)
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+            //var command = new AuthenticateUserCommand { AuthDto = authDto };
+            //var result = await _mediator.Send(command);
+            //if(result == null)
+            //{
+            //    return Unauthorized(new
+            //    {
+            //        message = "Неверный логин или пароль. Пожалуйста, проверьте введенные данные и попробуйте снова."
+            //    });
+            //}
+
+            //return Ok(result);
+            try
             {
-                return BadRequest(ModelState);
+                var command = new AuthenticateUserCommand(authDto);
+                var response = await _mediator.Send(command);
+                return Ok(response); // 200 OK
             }
-            var command = new AuthenticateUserCommand { AuthDto = authDto };
-            var result = await _mediator.Send(command);
-            if(result == null)
+            catch (DomainException ex)
             {
-                return Unauthorized(new
-                {
-                    message = "Неверный логин или пароль. Пожалуйста, проверьте введенные данные и попробуйте снова."
-                });
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
             }
-    
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "An error occurred during authentication.", Detail = ex.Message }); // 400 Bad Request
+            }
         }
 
         [Authorize]
@@ -61,7 +91,7 @@ namespace STK.API.Controllers
             var command = new RefreshTokenCommand { RefreshTokenRequest = refreshTokenRequest };
             var result = await _mediator.Send(command);
 
-            return Ok(result);
+            return Ok(new {result.AccessToken, result.RefreshToken});
         }
 
         [Authorize]
@@ -75,13 +105,21 @@ namespace STK.API.Controllers
                 return BadRequest("Invalid user in token.");
             }
 
-            // Создаем команду для выхода из системы
-            var command = new LogoutCommand { UserId = userId };
+            try
+            {
+                // Создаем команду для выхода из системы
+                var command = new LogoutCommand { UserId = userId };
 
-            // Выполняем команду
-            var result = await _mediator.Send(command);
+                // Выполняем команду
+                var result = await _mediator.Send(command);
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (DomainException ex)
+            {
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
+            }
+
         }
     }
 }

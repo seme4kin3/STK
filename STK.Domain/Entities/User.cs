@@ -9,7 +9,9 @@ namespace STK.Domain.Entities
         public string PasswordHash { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public bool IsActive { get; set; } = true;     
+        public bool IsActive { get; set; } = true;   
+        public string SubscriptionType { get; set; }
+        public int? CountRequestAI { get; set; }
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public ICollection<UserFavoriteOrganization> FavoritesOrganizations { get; set; } = new List<UserFavoriteOrganization>();

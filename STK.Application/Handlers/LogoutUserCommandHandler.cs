@@ -2,11 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Commands;
 using STK.Application.DTOs.AuthDto;
+using STK.Application.Middleware;
 using STK.Persistance;
 
 namespace STK.Application.Handlers
 {
-    public class LogoutUserCommandHandler : IRequestHandler<LogoutCommand, AuthUserResponse>
+    public class LogoutUserCommandHandler : IRequestHandler<LogoutCommand, string>
     {
         private readonly DataContext _dataContext;
 
@@ -15,7 +16,7 @@ namespace STK.Application.Handlers
             _dataContext = dataContext;
         }
 
-        public async Task<AuthUserResponse> Handle(LogoutCommand request, CancellationToken cancellationToken)
+        public async Task<string> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
             var user = await _dataContext.Users
                         .Include(u => u.RefreshTokens) // Загружаем refresh токены
@@ -23,7 +24,7 @@ namespace STK.Application.Handlers
 
             if (user == null)
             {
-                throw new Exception("User not found.");
+                throw DomainException.UserNotFound("Пользователь не найден.");
             }
 
             // Отзываем все активные refresh токены
@@ -38,7 +39,7 @@ namespace STK.Application.Handlers
             // Сохраняем изменения в базе данных
             await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return new AuthUserResponse { Success = true, Message = "User logout succesfully"};
+            return "Успешный выход";
         }
     }
 }

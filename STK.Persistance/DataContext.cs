@@ -118,6 +118,18 @@ namespace STK.Persistance
                 .WithOne(rt => rt.User)
                 .HasForeignKey(rt => rt.UserId);
 
+            //modelBuilder.Entity<User>(entity =>
+            //{
+            //    // 1. Настройка свойства SubscriptionType (конвертация в строку)
+            //    entity.Property(u => u.SubscriptionType)
+            //          .HasConversion<string>();  // Хранится как строка в БД
+
+            //    // 2. Настройка связи с RefreshTokens
+            //    entity.HasMany(u => u.RefreshTokens)
+            //          .WithOne(rt => rt.User)
+            //          .HasForeignKey(rt => rt.UserId);
+            //});
+
             modelBuilder.Entity<UserFavoriteOrganization>()
                 .HasKey(ufo => new { ufo.UserId, ufo.OrganizationId });
 

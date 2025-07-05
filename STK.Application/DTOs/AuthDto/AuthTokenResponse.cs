@@ -7,5 +7,7 @@ namespace STK.Application.DTOs.AuthDto
         public string RefreshToken { get; set; }
         public string UserName { get; set; }
         public Guid UserId { get; set; }
+        public string UserTypeSubscription {  get; set; }
+        public int CountRequest { get; set; }
     }
 }

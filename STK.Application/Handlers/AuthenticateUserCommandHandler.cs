@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using STK.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using STK.Application.DTOs.AuthDto;
+using STK.Application.Middleware;
 
 namespace STK.Application.Handlers
 {
@@ -25,11 +26,16 @@ namespace STK.Application.Handlers
         }
         public async Task<AuthTokenResponse> Handle(AuthenticateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.AuthDto.UserName);
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.AuthDto.Email, cancellationToken);
 
             if (user == null || !_passwordHasher.VerifyPassword(request.AuthDto.Password, user.PasswordHash))
             {
-                return null;
+                throw DomainException.Unauthorized("Неверный пароль или электронная почта.");
+            }
+
+            if (!user.IsActive)
+            {
+                throw DomainException.Forbidden($"У пользователя закончилась подписка.");
             }
 
             var token = _jwtService.GenerateAccessToken(user);
@@ -46,12 +52,15 @@ namespace STK.Application.Handlers
             _dataContext.Add(refreshTokenEntity);
             await _dataContext.SaveChangesAsync(cancellationToken);
 
-            return new AuthTokenResponse 
-            { 
-                AccessToken = token, 
-                RefreshToken = refreshToken, 
-                UserName = user.Username, 
-                UserId = user.Id 
+            return new AuthTokenResponse
+            {
+                AccessToken = token,
+                RefreshToken = refreshToken,
+                UserName = user.Username,
+                UserId = user.Id,
+                UserTypeSubscription =  user.SubscriptionType ?? "NoSubscription",
+                //UserTypeSubscription = Enum.GetName(typeof(SubscriptionType),user.SubscriptionType) ?? ,
+                CountRequest = user.CountRequestAI ?? 0
             };
         }
     }
