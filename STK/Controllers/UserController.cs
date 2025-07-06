@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using STK.Application.DTOs;
 using STK.Application.Handlers;
 using System.Security.Claims;
 
@@ -18,7 +19,7 @@ namespace STK.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("{userId}/decrementrequest")]
+        [HttpPost("/decrementrequest")]
         public async Task<IActionResult> DecrementCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -33,10 +34,10 @@ namespace STK.API.Controllers
             return Ok(new { NumOfRemainingRequests = result });
         }
 
-        [HttpPut("{userId}/subscription")]
-        public async Task<IActionResult> UpdateSubscription([FromBody] string userEmail, [FromBody] string subscriptionType)
+        [HttpPut("/subscription")]
+        public async Task<IActionResult> UpdateSubscription([FromBody] UpdateSubscriptionDto updateSubscription)
         {
-            var command = new UpdateUserSubscriptionCommand(userEmail, subscriptionType);
+            var command = new UpdateUserSubscriptionCommand(updateSubscription.UserEmail, updateSubscription.SubscriptionType);
             var result = await _mediator.Send(command);
             return Ok(new {Message = "Подписка продлена", DateOfStopSub = result});
         }
