@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
-using STK.Application.DTOs.AuthDto;
+//using STK.Application.DTOs.AuthDto;
+using STK.Application.DTOs.AuthDtoTest;
 using STK.Application.Middleware;
 using System.Security.Claims;
 
@@ -22,22 +23,14 @@ namespace STK.API.Controllers
         //[Authorize(Roles = "admin")]
         [AllowAnonymous]
         [HttpPost("register")]
+
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            //var command = new RegisterUserCommand { Register = registerDto };
-            //var result = await _mediator.Send(command);
-
-            //return CreatedAtAction(nameof(Register), result);
-
             try
             {
                 var command = new RegisterUserCommand(registerDto);
-                var userId = await _mediator.Send(command);
-                return Ok(new { UserEmail = userId }); // 200 OK
+                var userEmail = await _mediator.Send(command);
+                return Ok(new { Email = userEmail }); // 200 OK
             }
             catch (DomainException ex)
             {
@@ -48,26 +41,55 @@ namespace STK.API.Controllers
                 return BadRequest(new { Message = "An error occurred during registration.", Detail = ex.Message }); // 400 Bad Request
             }
         }
+        //public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        //{
+        //    //if (!ModelState.IsValid)
+        //    //{
+        //    //    return BadRequest(ModelState);
+        //    //}
+        //    //var command = new RegisterUserCommand { Register = registerDto };
+        //    //var result = await _mediator.Send(command);
+
+        //    //return CreatedAtAction(nameof(Register), result);
+
+        //    try
+        //    {
+        //        var command = new RegisterUserCommand(registerDto);
+        //        var userId = await _mediator.Send(command);
+        //        return Ok(new { UserEmail = userId }); // 200 OK
+        //    }
+        //    catch (DomainException ex)
+        //    {
+        //        return StatusCode(ex.StatusCode, new { Message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { Message = "An error occurred during registration.", Detail = ex.Message }); // 400 Bad Request
+        //    }
+        //}
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto authDto)
-        {
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            //var command = new AuthenticateUserCommand { AuthDto = authDto };
-            //var result = await _mediator.Send(command);
-            //if(result == null)
-            //{
-            //    return Unauthorized(new
-            //    {
-            //        message = "Неверный логин или пароль. Пожалуйста, проверьте введенные данные и попробуйте снова."
-            //    });
-            //}
+        //public async Task<IActionResult> Login([FromBody] UserDto authDto)
+        //{
+        //    try
+        //    {
+        //        var command = new AuthenticateUserCommand(authDto);
+        //        var response = await _mediator.Send(command);
+        //        return Ok(response); // 200 OK
+        //    }
+        //    catch (DomainException ex)
+        //    {
+        //        return StatusCode(ex.StatusCode, new { Message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { Message = "An error occurred during authentication.", Detail = ex.Message }); // 400 Bad Request
+        //    }
+        //}
 
-            //return Ok(result);
+        public async Task<IActionResult> Login([FromBody] BaseUserDto authDto)
+        {
             try
             {
                 var command = new AuthenticateUserCommand(authDto);
@@ -86,12 +108,30 @@ namespace STK.API.Controllers
 
         [Authorize]
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto refreshTokenRequest)
-        {
-            var command = new RefreshTokenCommand { RefreshTokenRequest = refreshTokenRequest };
-            var result = await _mediator.Send(command);
+        //public async Task<IActionResult> Refresh([FromBody] string refreshTokenRequest)
+        //{
+        //    var command = new RefreshTokenCommand { RefreshTokenRequest = refreshTokenRequest };
+        //    var result = await _mediator.Send(command);
 
-            return Ok(new {result.AccessToken, result.RefreshToken});
+        //    return Ok(new {result.AccessToken, result.RefreshToken});
+        //}
+
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto refreshTokenRequest)
+        {
+            try
+            {
+                var command = new RefreshTokenCommand(refreshTokenRequest);
+                var result = await _mediator.Send(command);
+                return Ok(new { result.AccessToken, result.RefreshToken});
+            }
+            catch (DomainException ex)
+            {
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "An error occurred during token refresh.", Detail = ex.Message });
+            }
         }
 
         [Authorize]

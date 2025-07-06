@@ -1,5 +1,6 @@
 ﻿using MediatR;
-using STK.Application.DTOs.AuthDto;
+//using STK.Application.DTOs.AuthDto;
+using STK.Application.DTOs.AuthDtoTest;
 
 namespace STK.Application.Commands
 {
