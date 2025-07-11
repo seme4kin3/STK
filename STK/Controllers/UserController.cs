@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-//using STK.Application.DTOs;
 using STK.Application.Handlers;
 using System.Security.Claims;
-using STK.Application.DTOs.AuthDtoTest;
+using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
 
 namespace STK.API.Controllers

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace STK.Application.DTOs.AuthDtoTest
+
+namespace STK.Application.DTOs.AuthDto
 {
     public class RefreshTokenRequestDto
     {

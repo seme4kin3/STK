@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using STK.Application.DTOs.AuthDtoTest;
+using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
 using STK.Persistance;
 

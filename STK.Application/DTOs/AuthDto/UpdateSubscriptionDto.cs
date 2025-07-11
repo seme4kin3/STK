@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace STK.Application.DTOs.AuthDtoTest
+namespace STK.Application.DTOs.AuthDto
 {
     public class UpdateSubscriptionDto
     {

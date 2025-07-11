@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
+using STK.Domain.Entities;
 using System.Security.Claims;
 using System.Text.Json;
 
 namespace STK.API.Controllers
 {
-    [Authorize]
+
     [Route("api/")]
     [ApiController]
     public class OrganizationController : ControllerBase
@@ -21,6 +22,7 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
+        [Authorize]
         [Route("organizations")]
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<SearchOrganizationDTO>>> GetAllOrganizations([FromQuery] bool? isNew, [FromQuery] bool? isChange)
@@ -32,8 +34,9 @@ namespace STK.API.Controllers
             return Ok(organizations);
         }
 
+        [Authorize]
         [HttpGet("organizations/{id}")]
-        public async Task<ActionResult<OrganizationDto>> GetOrganizationById(Guid id)
+        public async Task<ActionResult<OrganizationDto>> GetOrganizationById([FromRoute] Guid id)
         {
             var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var request = new GetOrganizationByIdQuery(id, userId);
@@ -45,7 +48,8 @@ namespace STK.API.Controllers
             }
             return Ok(organization);
         }
-        
+
+        [Authorize]
         [HttpGet("organizations/search/")]
         public async Task<ActionResult<List<SearchOrganizationDTO>>> Search([FromQuery] string text, int page = 1, int limit = 20)    
         {
@@ -72,6 +76,7 @@ namespace STK.API.Controllers
             return Ok(organizations);
         }
 
+        [Authorize]
         [HttpGet("organizations/organizationchanges/{organizationId}")]
         public async Task<IActionResult> GetOrganizationChanges(Guid organizationId)
         {
@@ -81,6 +86,7 @@ namespace STK.API.Controllers
             return Ok(changes);
         }
 
+        [Authorize]
         [HttpGet("organizations/arbitration/{organizationId}")]
         public async Task<IActionResult> GetArbitrationOfOrganization(Guid organizationId)
         {
@@ -92,6 +98,19 @@ namespace STK.API.Controllers
                 return Ok(new List<object>());
             }
             return Ok(arbitration);
+        }
+
+        [HttpGet("demo/{organizationId}")]
+        public async Task<IActionResult> GetDemoOrganization([FromRoute] Guid organizationId)
+        {
+            var request = new GetOrganizationByIdQuery(organizationId, null);
+            var organization = await _mediator.Send(request);
+
+            if (organization == null)
+            {
+                return Ok(new List<object>());
+            }
+            return Ok(organization);
         }
     }
     

@@ -1,11 +1,9 @@
 ﻿
 namespace STK.Application.DTOs.AuthDto
 {
-    public class RegisterDto
+    public class RegisterDto : BaseUserDto
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string RoleName { get; set; }
-        public string SubscriptionType { get; set; }
+        public RoleName Role { get; set; }
+        public SubscriptionType Subscription { get; set; }
     }
 }

@@ -2,8 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
-//using STK.Application.DTOs.AuthDto;
-using STK.Application.DTOs.AuthDtoTest;
+using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
 using System.Security.Claims;
 

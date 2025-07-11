@@ -53,7 +53,8 @@ namespace STK.Application.Handlers
                         Email = o.Email,
                         Website = o.Website,
                         StatusOrg = o.StatusOrg,
-                        IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
+                        IsFavorite = query.UserId != null ? o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId) : false,
+                        //IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Requisites = new RequisiteDto
                         {
                             INN = o.Requisites.INN,
