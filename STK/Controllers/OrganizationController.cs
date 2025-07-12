@@ -99,19 +99,6 @@ namespace STK.API.Controllers
             }
             return Ok(arbitration);
         }
-
-        [HttpGet("demo/{organizationId}")]
-        public async Task<IActionResult> GetDemoOrganization([FromRoute] Guid organizationId)
-        {
-            var request = new GetOrganizationByIdQuery(organizationId, null);
-            var organization = await _mediator.Send(request);
-
-            if (organization == null)
-            {
-                return Ok(new List<object>());
-            }
-            return Ok(organization);
-        }
     }
     
 }

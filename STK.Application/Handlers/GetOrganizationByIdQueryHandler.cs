@@ -168,7 +168,7 @@ namespace STK.Application.Handlers
                         }).ToList()
                     }).FirstOrDefaultAsync(cancellationToken);
  
-                if(statusOrg.TryGetValue(organization.StatusOrg, out string status))
+                if(organization.StatusOrg != null && statusOrg.TryGetValue(organization.StatusOrg, out string status))
                 {
                     organization.StatusOrg = status;
                 }
