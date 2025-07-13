@@ -5,10 +5,15 @@ namespace STK.Application.Middleware
     public class DomainException : Exception
     {
         public int StatusCode { get; }
+        public string ErrorCode { get; }
+        public Dictionary<string, object> Details { get; }
 
-        public DomainException(string message, int statusCode) : base(message)
+        public DomainException(string message, int statusCode, string errorCode = null, Dictionary<string, object> details = null)
+            : base(message)
         {
             StatusCode = statusCode;
+            ErrorCode = errorCode ?? "DOMAIN_ERROR";
+            Details = details ?? new Dictionary<string, object>();
         }
 
         public static DomainException Conflict(string message) =>
@@ -25,5 +30,7 @@ namespace STK.Application.Middleware
 
         public static DomainException UserNotFound(string message) =>
             new DomainException(message, StatusCodes.Status204NoContent);
+        public static DomainException TooManyAttempts(string message) =>
+            new DomainException(message, StatusCodes.Status429TooManyRequests, "TOO_MANY_ATTEMPTS");
     }
 }

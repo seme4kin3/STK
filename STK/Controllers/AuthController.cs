@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using STK.Application.Commands;
 using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
@@ -22,6 +23,7 @@ namespace STK.API.Controllers
         //[Authorize(Roles = "admin")]
         [AllowAnonymous]
         [HttpPost("register")]
+        [EnableRateLimiting("RegisterPolicy")]
 
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -40,60 +42,32 @@ namespace STK.API.Controllers
                 return BadRequest(new { Message = "An error occurred during registration.", Detail = ex.Message }); // 400 Bad Request
             }
         }
-        //public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
-        //{
-        //    //if (!ModelState.IsValid)
-        //    //{
-        //    //    return BadRequest(ModelState);
-        //    //}
-        //    //var command = new RegisterUserCommand { Register = registerDto };
-        //    //var result = await _mediator.Send(command);
-
-        //    //return CreatedAtAction(nameof(Register), result);
-
-        //    try
-        //    {
-        //        var command = new RegisterUserCommand(registerDto);
-        //        var userId = await _mediator.Send(command);
-        //        return Ok(new { UserEmail = userId }); // 200 OK
-        //    }
-        //    catch (DomainException ex)
-        //    {
-        //        return StatusCode(ex.StatusCode, new { Message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { Message = "An error occurred during registration.", Detail = ex.Message }); // 400 Bad Request
-        //    }
-        //}
 
         [AllowAnonymous]
         [HttpPost("login")]
-        //public async Task<IActionResult> Login([FromBody] UserDto authDto)
-        //{
-        //    try
-        //    {
-        //        var command = new AuthenticateUserCommand(authDto);
-        //        var response = await _mediator.Send(command);
-        //        return Ok(response); // 200 OK
-        //    }
-        //    catch (DomainException ex)
-        //    {
-        //        return StatusCode(ex.StatusCode, new { Message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { Message = "An error occurred during authentication.", Detail = ex.Message }); // 400 Bad Request
-        //    }
-        //}
-
+        [EnableRateLimiting("LoginPolicy")]
         public async Task<IActionResult> Login([FromBody] BaseUserDto authDto)
         {
             try
             {
                 var command = new AuthenticateUserCommand(authDto);
                 var response = await _mediator.Send(command);
-                return Ok(response); // 200 OK
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(7)
+                };
+
+                Response.Cookies.Append("refreshToken", response.RefreshToken, cookieOptions);
+
+                // Не возвращать refresh token в response body
+                return Ok(new
+                {
+                    AccessToken = response.AccessToken,
+                    UserInfo = response.UserInfo
+                });
             }
             catch (DomainException ex)
             {
@@ -107,21 +81,23 @@ namespace STK.API.Controllers
 
         [Authorize]
         [HttpPost("refresh")]
-        //public async Task<IActionResult> Refresh([FromBody] string refreshTokenRequest)
-        //{
-        //    var command = new RefreshTokenCommand { RefreshTokenRequest = refreshTokenRequest };
-        //    var result = await _mediator.Send(command);
 
-        //    return Ok(new {result.AccessToken, result.RefreshToken});
-        //}
-
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto refreshTokenRequest)
+        public async Task<IActionResult> Refresh()
         {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest(new { message = "Refresh token отсутствует" });
+            }
+
             try
             {
-                var command = new RefreshTokenCommand(refreshTokenRequest);
+
+                var command = new RefreshTokenCommand(refreshToken);
                 var result = await _mediator.Send(command);
-                return Ok(new { result.AccessToken, result.RefreshToken});
+                SetRefreshTokenCookie(result.RefreshToken);
+
+                return Ok(new { AccessToken = result.AccessToken });
             }
             catch (DomainException ex)
             {
@@ -159,6 +135,19 @@ namespace STK.API.Controllers
                 return StatusCode(ex.StatusCode, new { Message = ex.Message });
             }
 
+        }
+
+        private void SetRefreshTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
     }
 }

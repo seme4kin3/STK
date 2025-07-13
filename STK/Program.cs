@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using STK.API.SignalR;
@@ -6,6 +7,7 @@ using STK.Application.Handlers;
 using STK.Application.Services;
 using STK.Persistance;
 using System.Text;
+using System.Threading.RateLimiting;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,10 +24,11 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetOrganizationsQueryHandler>());
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<LoginAttemptTracker>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
-
+builder.Services.AddMemoryCache();
 
 //builder.Services.AddCors(options =>
 //{
@@ -39,6 +42,15 @@ builder.Services.AddHostedService<NotificationBackgroundService>();
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("LoginPolicy", options =>
+    {
+        options.Window = TimeSpan.FromMinutes(1);
+        options.PermitLimit = 5;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
 
 builder.Services.AddAuthentication(options =>
 {

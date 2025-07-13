@@ -6,11 +6,11 @@ namespace STK.Application.Commands
 {
     public class RefreshTokenCommand : IRequest<AuthTokenResponse>
     {
-        public RefreshTokenRequestDto RefreshTokenRequest { get; set; }
+        public string RefreshToken { get; set; }
 
-        public RefreshTokenCommand(RefreshTokenRequestDto refreshTokenRequest)
+        public RefreshTokenCommand(string refreshTokenRequest)
         {
-            RefreshTokenRequest = refreshTokenRequest;
+            this.RefreshToken = refreshTokenRequest;
         }
     }
 }

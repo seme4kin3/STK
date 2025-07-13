@@ -23,37 +23,49 @@ namespace STK.Application.Handlers
 
         public async Task<string> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.RegisterDto.Email, cancellationToken);
-            if (existingUser != null)
+            using var transaction = await _dataContext.Database.BeginTransactionAsync(cancellationToken);
+
+            try
             {
-                throw DomainException.Conflict("Пользователь с таким email уже существует.");
+                var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.RegisterDto.Email, cancellationToken);
+                if (existingUser != null)
+                {
+                    throw DomainException.Conflict("Пользователь с таким email уже существует.");
+                }
+
+                int initialRequestCount = GetInitialRequestCount(request.RegisterDto.Subscription);
+
+                var user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Username = request.RegisterDto.Email,
+                    PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password),
+                    Email = request.RegisterDto.Email,
+                    CreatedAt = DateTime.UtcNow,
+                    SubscriptionType = request.RegisterDto.Subscription.ToString().ToLower(),
+                    CountRequestAI = initialRequestCount
+                };
+
+                var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == request.RegisterDto.Role.ToString(), cancellationToken);
+                if (role == null)
+                {
+                    role = new Role { Id = Guid.NewGuid(), Name = request.RegisterDto.Role.ToString() };
+                    _dataContext.Roles.Add(role);
+                }
+
+                user.UserRoles.Add(new UserRole { Role = role });
+                _dataContext.Users.Add(user);
+                await _dataContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                return user.Email;
             }
 
-            int initialRequestCount = GetInitialRequestCount(request.RegisterDto.Subscription);
-
-            var user = new User
+            catch
             {
-                Id = Guid.NewGuid(),
-                Username = request.RegisterDto.Email,
-                PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password),
-                Email = request.RegisterDto.Email,
-                CreatedAt = DateTime.UtcNow,
-                SubscriptionType = request.RegisterDto.Subscription.ToString().ToLower(),
-                CountRequestAI = initialRequestCount
-            };
-
-            var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == request.RegisterDto.Role.ToString(), cancellationToken);
-            if (role == null)
-            {
-                role = new Role { Id = Guid.NewGuid(), Name = request.RegisterDto.Role.ToString() };
-                _dataContext.Roles.Add(role);
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
             }
-
-            user.UserRoles.Add(new UserRole { Role = role });
-            _dataContext.Users.Add(user);
-            await _dataContext.SaveChangesAsync(cancellationToken);
-
-            return user.Email;
         }
 
         private int GetInitialRequestCount(SubscriptionType subscriptionType)
