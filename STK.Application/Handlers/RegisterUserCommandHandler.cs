@@ -14,11 +14,13 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IMediator _mediator;
 
-        public RegisterUserCommandHandler(DataContext dataContext, IPasswordHasher passwordHasher)
+        public RegisterUserCommandHandler(DataContext dataContext, IPasswordHasher passwordHasher, IMediator mediator)
         {
             _dataContext = dataContext;
             _passwordHasher = passwordHasher;
+            _mediator = mediator;
         }
 
         public async Task<string> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -43,7 +45,8 @@ namespace STK.Application.Handlers
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
                     SubscriptionType = request.RegisterDto.Subscription.ToString().ToLower(),
-                    CountRequestAI = initialRequestCount
+                    CountRequestAI = initialRequestCount,
+                    CustomerType = request.RegisterDto.CustomerType.ToString().ToLower()
                 };
 
                 var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == request.RegisterDto.Role.ToString(), cancellationToken);
@@ -51,6 +54,13 @@ namespace STK.Application.Handlers
                 {
                     role = new Role { Id = Guid.NewGuid(), Name = request.RegisterDto.Role.ToString() };
                     _dataContext.Roles.Add(role);
+                }
+
+                if(request.RegisterDto.CustomerType == CustomerTypeEnum.Legal)
+                {
+                    await _mediator.Publish(new UserRegisteredEvent(
+                        user.Email,
+                        user.CreatedAt), cancellationToken);
                 }
 
                 user.UserRoles.Add(new UserRole { Role = role });

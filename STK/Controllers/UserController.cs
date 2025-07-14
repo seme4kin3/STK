@@ -5,6 +5,7 @@ using STK.Application.Handlers;
 using System.Security.Claims;
 using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
+using STK.Application.Commands;
 
 namespace STK.API.Controllers
 {
@@ -67,6 +68,14 @@ namespace STK.API.Controllers
             var command = new UpdateUserSubscriptionCommand(updateSubscription);
             var result = await _mediator.Send(command);
             return Ok(new {Message = "Подписка продлена", DateOfStopSub = result});
+        }
+
+        [HttpPut("/changepassword")]
+        public async Task<IActionResult> ChangePasswordUser([FromBody] BaseUserDto user)
+        {
+            var command = new ChangeUserPasswordCommand(user);
+            var result = await _mediator.Send(command);
+            return Ok(new { Message = "Пароль успешно изменен"});
         }
     }
 }

@@ -25,6 +25,8 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Ge
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<LoginAttemptTracker>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
@@ -84,8 +86,6 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-
-
 
 // Настройка авторизации
 builder.Services.AddAuthorization();

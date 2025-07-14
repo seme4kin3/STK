@@ -12,6 +12,7 @@ namespace STK.Domain.Entities
         public bool IsActive { get; set; } = true;   
         public string SubscriptionType { get; set; }
         public int? CountRequestAI { get; set; }
+        public string CustomerType { get; set; }
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public ICollection<UserFavoriteOrganization> FavoritesOrganizations { get; set; } = new List<UserFavoriteOrganization>();
