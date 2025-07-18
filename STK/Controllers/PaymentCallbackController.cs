@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using STK.Application.Commands;
-using STK.Application.DTOs;
+using STK.Application.DTOs.TBank;
 
 namespace STK.API.Controllers
 {
@@ -13,7 +13,7 @@ namespace STK.API.Controllers
         public PaymentCallbackController(IMediator mediator) => _mediator = mediator;
 
         [HttpPost()]
-        public async Task<IActionResult> Callback([FromBody] TBankCallbackDto payload)
+        public async Task<IActionResult> Callback([FromBody] TBankInitResponseDto payload)
         {
             var cmd = new PaymentCallbackCommand
             {

@@ -7,6 +7,8 @@ namespace STK.Application.DTOs.AuthDto
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-        public SubscriptionType Subscription { get; set; }
+        public SubscriptionType? Subscription { get; set; }
+        public bool IsAdditionalFeature { get; set; }
+        public int CountRequestAI { get; set; } = 3;
     }
 }

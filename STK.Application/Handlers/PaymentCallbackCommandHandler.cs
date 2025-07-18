@@ -17,6 +17,8 @@ namespace STK.Application.Handlers
         public async Task<Unit> Handle(PaymentCallbackCommand request, CancellationToken cancellationToken)
         {
             var payReq = await _dataContext.PaymentRequests.FindAsync(request.OrderId);
+            var timeUpdate = DateTime.UtcNow;
+
             if (payReq == null)
                 throw new Exception("Payment request not found");
 
@@ -24,6 +26,8 @@ namespace STK.Application.Handlers
             {
                 payReq.IsPaid = true;
                 var user = await _dataContext.Users.FindAsync(payReq.UserId);
+                user.UpdatedAt = timeUpdate;
+                //user.CountRequestAI = 3;
                 user.IsActive = true;
                 await _dataContext.SaveChangesAsync();
             }

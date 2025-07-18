@@ -40,7 +40,7 @@ namespace STK.Application.Handlers
                 UserId = user.Id,
                 Subscription = Enum.TryParse<SubscriptionType>(user.SubscriptionType, true, out var subscriptionType)
                     ? subscriptionType
-                    : SubscriptionType.NoSubscription,
+                    : SubscriptionType.BaseQuarter,
                 CountRequest = user.CountRequestAI ?? 0
             };
         }

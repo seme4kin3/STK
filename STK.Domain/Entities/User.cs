@@ -9,7 +9,8 @@ namespace STK.Domain.Entities
         public string PasswordHash { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public bool IsActive { get; set; } = true;   
+        public DateTime SubscriptionEndTime {get; set; }
+        public bool IsActive { get; set; }   
         public string SubscriptionType { get; set; }
         public int? CountRequestAI { get; set; }
         public string CustomerType { get; set; }

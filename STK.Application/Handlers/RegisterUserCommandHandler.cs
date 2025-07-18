@@ -38,8 +38,6 @@ namespace STK.Application.Handlers
                     throw DomainException.Conflict("Пользователь с таким email уже существует.");
                 }
 
-//                int initialRequestCount = GetInitialRequestCount(request.RegisterDto.Subscription);
-
                 var user = new User
                 {
                     Id = Guid.NewGuid(),
@@ -47,9 +45,7 @@ namespace STK.Application.Handlers
                     PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password),
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
-                    SubscriptionType = SubscriptionType.NoSubscription.ToString(),
-                    //SubscriptionType = request.RegisterDto.Subscription.ToString().ToLower(),
-                    //CountRequestAI = initialRequestCount,
+                    SubscriptionType = request.RegisterDto.SubscriptionType.ToString(),
                     CountRequestAI = 3,
                     CustomerType = request.RegisterDto.CustomerType.ToString().ToLower(),
                     IsActive = false
@@ -75,15 +71,19 @@ namespace STK.Application.Handlers
 
                 var orderId = Guid.NewGuid().ToString();
                 var notificationUrl = $"https://lbzw3n2sr.localto.net/api/payment-callback";
-                var paymentUrl = await _payment.InitPaymentAsync(orderId, request.RegisterDto.Amount, "Доступ к сервису", notificationUrl, user.Email);
+                var amount = GetInitialRequestCount(request.RegisterDto.SubscriptionType);
+
+                var payment = await _payment.InitPaymentAsync(orderId, amount, "Доступ к сервису", notificationUrl, user.Email);
 
                 var payRequest = new PaymentRequest
                 {
                     Id = Guid.Parse(orderId),
                     UserId = user.Id,
                     Amount = request.RegisterDto.Amount,
-                    PaymentUrl = paymentUrl,
-                    CreatedAt = DateTime.UtcNow
+                    PaymentUrl = payment.PaymentURL,
+                    CreatedAt = DateTime.UtcNow,
+                    PaymentId = payment.PaymentId,
+                    Description = "Доступ к сервису"
                 };
                 _dataContext.PaymentRequests.Add(payRequest);
 
@@ -91,7 +91,7 @@ namespace STK.Application.Handlers
 
                 await transaction.CommitAsync(cancellationToken);
 
-                return paymentUrl;
+                return payment.PaymentURL;
             }
 
             catch
@@ -105,10 +105,8 @@ namespace STK.Application.Handlers
         {
             return subscriptionType switch
             {
-                SubscriptionType.NoSubscription => 0,
-                SubscriptionType.Free => 0,
-                SubscriptionType.Standard => 3,
-                SubscriptionType.Premium => 15,
+                SubscriptionType.BaseQuarter => 30000,
+                SubscriptionType.BaseYear => 60000,
                 _ => throw new ArgumentOutOfRangeException(nameof(subscriptionType), "Некорректно задан тип подписки.")
             };
         }

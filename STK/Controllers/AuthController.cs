@@ -34,7 +34,7 @@ namespace STK.API.Controllers
             {
                 var command = new RegisterUserCommand(registerDto);
                 var result = await _mediator.Send(command);
-                return Ok(new { userId = result }); // 200 OK
+                return Ok(new { PaymentUrl = result }); // 200 OK
             }
             catch (DomainException ex)
             {

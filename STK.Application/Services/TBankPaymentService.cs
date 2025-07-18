@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using STK.Application.DTOs.AuthDto;
+using STK.Application.DTOs.TBank;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -23,52 +25,7 @@ namespace STK.Application.Services
             _emailService = emailService;
         }
 
-        //public async Task<string> InitPaymentAsync(string orderId, decimal amount, string description, string notificationUrl, string email)
-        //{
-        //    var url = "https://securepay.tinkoff.ru/v2/Init";
-        //    var amountKop = (int)(amount * 100);
-
-        //    // Токен согласно документации: TerminalKey+Amount+OrderId+Password (MD5)
-        //    //var tokenStr = $"{_terminalKey}{amountKop}{orderId}{_password}";
-        //    //var md5 = System.Security.Cryptography.MD5.Create();
-        //    //var tokenBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(tokenStr));
-        //    //var token = BitConverter.ToString(tokenBytes).Replace("-", "").ToLower();
-
-        //    var token = GenerateTinkoffToken(_terminalKey, amountKop.ToString(), orderId, _password);
-
-        //    var body = new
-        //    {
-        //        TerminalKey = _terminalKey,
-        //        Amount = amountKop,
-        //        OrderId = orderId,
-        //        Description = description,
-        //        NotificationURL = notificationUrl,
-        //        DATA = new { Email = email },
-        //        Token = token
-        //    };
-
-        //    var json = JsonConvert.SerializeObject(body);
-
-        //    var response = await _client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json"));
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        throw new HttpRequestException($"HTTP error: {response.StatusCode}");
-        //    }
-        //    var respBody = await response.Content.ReadAsStringAsync();
-        //    dynamic resp = JsonConvert.DeserializeObject(respBody);
-
-        //    if (resp.Success != true)
-        //        throw new Exception("Ошибка при инициализации платежа: " + resp.Message);
-
-        //    return resp.PaymentURL;
-        //}
-
-        //public async Task SendPaymentUrlToEmail(string email, string url)
-        //{
-        //    await _emailService.SendAsync(email, "Оплата за сервис", $"Ваша ссылка для оплаты: {url}");
-        //}
-
-        public async Task<string> InitPaymentAsync(string orderId, decimal amount, string description, string notificationUrl, string email)
+        public async Task<TBankInitResponseDto> InitPaymentAsync(string orderId, decimal amount, string description, string notificationUrl, string email)
         {
             //var url = "https://securepay.tinkoff.ru/v2/Init";
 
@@ -104,16 +61,16 @@ namespace STK.Application.Services
             }
 
             var respBody = await response.Content.ReadAsStringAsync();
-            var resp = JsonConvert.DeserializeObject<dynamic>(respBody);
+            var resp = JsonConvert.DeserializeObject<TBankInitResponseDto>(respBody);
 
             if (resp?.Success != true)
             {
-                throw new Exception($"Ошибка при инициализации платежа: {resp?.Message ?? "Unknown error"}");
+                throw new Exception($"Ошибка при инициализации платежа: {resp.ErrorMessage ?? "Unknown error"}");
             }
 
-            return resp.PaymentURL;
+            return resp;
         }
-        public static string GenerateToken(Dictionary<string, object> parameters, string password)
+        private static string GenerateToken(Dictionary<string, object> parameters, string password)
         {
             // 1. Добавляем пароль к параметрам
             var tokenData = new Dictionary<string, object>(parameters)
