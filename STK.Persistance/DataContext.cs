@@ -34,6 +34,7 @@ namespace STK.Persistance
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<PredictAi> PredictAi { get; set; }
         public DbSet<Bankruptcy> Bankruptcy { get; set; }
+        public DbSet<PaymentRequest> PaymentRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

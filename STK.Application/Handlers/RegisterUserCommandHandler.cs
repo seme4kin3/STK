@@ -15,12 +15,15 @@ namespace STK.Application.Handlers
         private readonly DataContext _dataContext;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IMediator _mediator;
+        private readonly TBankPaymentService _payment;
 
-        public RegisterUserCommandHandler(DataContext dataContext, IPasswordHasher passwordHasher, IMediator mediator)
+        public RegisterUserCommandHandler(DataContext dataContext, IPasswordHasher passwordHasher,
+            IMediator mediator, TBankPaymentService payment)
         {
             _dataContext = dataContext;
             _passwordHasher = passwordHasher;
             _mediator = mediator;
+            _payment = payment;
         }
 
         public async Task<string> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -35,7 +38,7 @@ namespace STK.Application.Handlers
                     throw DomainException.Conflict("Пользователь с таким email уже существует.");
                 }
 
-                int initialRequestCount = GetInitialRequestCount(request.RegisterDto.Subscription);
+//                int initialRequestCount = GetInitialRequestCount(request.RegisterDto.Subscription);
 
                 var user = new User
                 {
@@ -44,31 +47,51 @@ namespace STK.Application.Handlers
                     PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password),
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
-                    SubscriptionType = request.RegisterDto.Subscription.ToString().ToLower(),
-                    CountRequestAI = initialRequestCount,
-                    CustomerType = request.RegisterDto.CustomerType.ToString().ToLower()
+                    SubscriptionType = SubscriptionType.NoSubscription.ToString(),
+                    //SubscriptionType = request.RegisterDto.Subscription.ToString().ToLower(),
+                    //CountRequestAI = initialRequestCount,
+                    CountRequestAI = 3,
+                    CustomerType = request.RegisterDto.CustomerType.ToString().ToLower(),
+                    IsActive = false
                 };
 
-                var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == request.RegisterDto.Role.ToString(), cancellationToken);
-                if (role == null)
-                {
-                    role = new Role { Id = Guid.NewGuid(), Name = request.RegisterDto.Role.ToString() };
-                    _dataContext.Roles.Add(role);
-                }
+                //var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == request.RegisterDto.Role.ToString(), cancellationToken);
+                //if (role == null)
+                //{
+                //    role = new Role { Id = Guid.NewGuid(), Name = request.RegisterDto.Role.ToString() };
+                //    _dataContext.Roles.Add(role);
+                //}
 
-                if(request.RegisterDto.CustomerType == CustomerTypeEnum.Legal)
-                {
-                    await _mediator.Publish(new UserRegisteredEvent(
-                        user.Email,
-                        user.CreatedAt), cancellationToken);
-                }
+                //if(request.RegisterDto.CustomerType == CustomerTypeEnum.Legal)
+                //{
+                //    await _mediator.Publish(new UserRegisteredEvent(
+                //        user.Email,
+                //        user.CreatedAt), cancellationToken);
+                //}
 
-                user.UserRoles.Add(new UserRole { Role = role });
+                //user.UserRoles.Add(new UserRole { Role = role });
                 _dataContext.Users.Add(user);
+                //await _dataContext.SaveChangesAsync(cancellationToken);
+
+                var orderId = Guid.NewGuid().ToString();
+                var notificationUrl = $"https://lbzw3n2sr.localto.net/api/payment-callback";
+                var paymentUrl = await _payment.InitPaymentAsync(orderId, request.RegisterDto.Amount, "Доступ к сервису", notificationUrl, user.Email);
+
+                var payRequest = new PaymentRequest
+                {
+                    Id = Guid.Parse(orderId),
+                    UserId = user.Id,
+                    Amount = request.RegisterDto.Amount,
+                    PaymentUrl = paymentUrl,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _dataContext.PaymentRequests.Add(payRequest);
+
                 await _dataContext.SaveChangesAsync(cancellationToken);
+
                 await transaction.CommitAsync(cancellationToken);
 
-                return user.Email;
+                return paymentUrl;
             }
 
             catch

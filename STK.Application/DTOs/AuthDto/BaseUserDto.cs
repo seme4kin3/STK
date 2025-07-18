@@ -6,6 +6,7 @@ namespace STK.Application.DTOs.AuthDto
     public class BaseUserDto
     {
         [Required]
+        [EmailAddress]
         public string Email { get; set; }
 
         [Required]

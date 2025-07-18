@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using STK.Application.Commands;
 using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
+using STK.Application.Queries;
 using STK.Application.Services;
 using System.Security.Claims;
 
@@ -32,8 +33,8 @@ namespace STK.API.Controllers
             try
             {
                 var command = new RegisterUserCommand(registerDto);
-                var userEmail = await _mediator.Send(command);
-                return Ok(new { Email = userEmail }); // 200 OK
+                var result = await _mediator.Send(command);
+                return Ok(new { userId = result }); // 200 OK
             }
             catch (DomainException ex)
             {
@@ -137,6 +138,13 @@ namespace STK.API.Controllers
                 return StatusCode(ex.StatusCode, new { Message = ex.Message });
             }
 
+        }
+
+        [HttpGet("payment-url/{userId}")]
+        public async Task<IActionResult> GetPaymentUrl(Guid userId)
+        {
+            var url = await _mediator.Send(new GetPaymentUrlQuery { UserId = userId });
+            return Ok(new { url });
         }
 
         //[HttpPost("test-email")]

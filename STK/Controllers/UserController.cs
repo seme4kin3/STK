@@ -47,7 +47,7 @@ namespace STK.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("/decrementrequest")]
+        [HttpPost("decrementrequest")]
         public async Task<IActionResult> DecrementCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -62,7 +62,7 @@ namespace STK.API.Controllers
             return Ok(new { NumOfRemainingRequests = result });
         }
 
-        [HttpPut("/subscription")]
+        [HttpPut("subscription")]
         public async Task<IActionResult> UpdateSubscription([FromBody] UpdateSubscriptionDto updateSubscription)
         {
             var command = new UpdateUserSubscriptionCommand(updateSubscription);
@@ -70,7 +70,7 @@ namespace STK.API.Controllers
             return Ok(new {Message = "Подписка продлена", DateOfStopSub = result});
         }
 
-        [HttpPut("/changepassword")]
+        [HttpPut("changepassword")]
         public async Task<IActionResult> ChangePasswordUser([FromBody] BaseUserDto user)
         {
             var command = new ChangeUserPasswordCommand(user);
