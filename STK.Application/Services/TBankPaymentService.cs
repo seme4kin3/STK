@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using STK.Application.DTOs.AuthDto;
 using STK.Application.DTOs.TBank;
 using System.Security.Cryptography;
 using System.Text;
