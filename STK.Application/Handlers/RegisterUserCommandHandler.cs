@@ -42,12 +42,12 @@ namespace STK.Application.Handlers
                 {
                     Id = Guid.NewGuid(),
                     Username = request.RegisterDto.Email,
-                    PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password),
+                    PasswordHash = string.Empty, // будет установлен позже
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
-                    SubscriptionType = request.RegisterDto.SubscriptionType.ToString(),
+                    SubscriptionType = CustomerTypeEnum.Individual.ToString().ToLower(),
                     CountRequestAI = 3,
-                    CustomerType = request.RegisterDto.CustomerType.ToString().ToLower(),
+                    //CustomerType = request.RegisterDto.CustomerType.ToString().ToLower(),
                     IsActive = false
                 };
 
@@ -66,6 +66,7 @@ namespace STK.Application.Handlers
                 //}
 
                 //user.UserRoles.Add(new UserRole { Role = role });
+                user.PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password);
                 _dataContext.Users.Add(user);
                 //await _dataContext.SaveChangesAsync(cancellationToken);
 

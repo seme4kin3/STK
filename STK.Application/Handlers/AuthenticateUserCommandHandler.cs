@@ -7,7 +7,6 @@ using STK.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using STK.Application.Middleware;
 using STK.Application.DTOs.AuthDto;
-using Newtonsoft.Json.Linq;
 
 namespace STK.Application.Handlers
 {
