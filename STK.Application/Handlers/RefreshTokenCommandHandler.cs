@@ -160,16 +160,7 @@ namespace STK.Application.Handlers
                 return new AuthTokenResponse
                 {
                     AccessToken = newAccessToken,
-                    RefreshToken = newRefreshToken,
-                    UserInfo = new UserInfoDto
-                    {
-                        Email = user.Email,
-                        UserId = user.Id,
-                        Subscription = Enum.TryParse<SubscriptionType>(user.SubscriptionType, true, out var subscriptionType)
-                            ? subscriptionType
-                            : SubscriptionType.BaseQuarter,
-                        CountRequest = user.CountRequestAI ?? 0
-                    }
+                    RefreshToken = newRefreshToken
                 };
             }
             catch (DomainException)

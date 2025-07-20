@@ -38,9 +38,12 @@ namespace STK.Application.Handlers
             {
                 Email = user.Email,
                 UserId = user.Id,
-                Subscription = Enum.TryParse<SubscriptionType>(user.SubscriptionType, true, out var subscriptionType)
-                    ? subscriptionType
-                    : SubscriptionType.BaseQuarter,
+                //Subscription = Enum.TryParse<SubscriptionType>(user.SubscriptionType, true, out var subscriptionType)
+                //      ? subscriptionType
+                //      : SubscriptionType.BaseQuarter,
+                SubscriptionType = user.SubscriptionType,
+                SubscriptionEndTime = user.SubscriptionEndTime,
+                CustomerType = user.CustomerType,
                 CountRequest = user.CountRequestAI ?? 0
             };
         }
