@@ -47,6 +47,26 @@ namespace STK.API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("register-legal")]
+        public async Task<IActionResult> RegisterLegal([FromBody] LegalRegisterDto dto)
+        {
+            try
+            {
+                var command = new RegisterLegalUserCommand(dto);
+                await _mediator.Send(command);
+                return Ok();
+            }
+            catch (DomainException ex)
+            {
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "An error occurred during registration.", Detail = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
         [HttpPost("login")]
         [EnableRateLimiting("LoginPolicy")]
         public async Task<IActionResult> Login([FromBody] BaseUserDto authDto)

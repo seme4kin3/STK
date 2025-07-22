@@ -1,0 +1,82 @@
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using STK.Application.Commands;
+using STK.Application.DTOs.AuthDto;
+using STK.Application.Middleware;
+using STK.Application.Services;
+using STK.Domain.Entities;
+using STK.Persistance;
+
+
+namespace STK.Application.Handlers
+{
+    public class RegisterLegalUserCommandHandler : IRequestHandler<RegisterLegalUserCommand, Unit>
+    {
+        private readonly DataContext _dataContext;
+        private readonly IMediator _mediator;
+        private readonly IPasswordHasher _passwordHasher;
+
+        public RegisterLegalUserCommandHandler(DataContext dataContext, IMediator mediator, IPasswordHasher passwordHasher)
+        {
+            _dataContext = dataContext;
+            _mediator = mediator;
+            _passwordHasher = passwordHasher;
+        }
+
+        public async Task<Unit> Handle(RegisterLegalUserCommand request, CancellationToken cancellationToken)
+        {
+            var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Username == request.LegalRegisterDto.Email, cancellationToken);
+            if (existingUser != null)
+            {
+                throw DomainException.Conflict("Пользователь с таким email уже существует.");
+            }
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = request.LegalRegisterDto.Email,
+                Email = request.LegalRegisterDto.Email,
+                PasswordHash = string.Empty, // будет установлен позже
+                CreatedAt = DateTime.UtcNow,
+                IsActive = false,
+                CustomerType = CustomerTypeEnum.Legal.ToString().ToLower(),
+                SubscriptionType = request.LegalRegisterDto.SubscriptionType.ToString(),
+                CountRequestAI = 3
+            };
+
+            user.PasswordHash = _passwordHasher.HashPassword(request.LegalRegisterDto.Password);
+
+            _dataContext.Users.Add(user);
+
+            var registration = new LegalRegistration
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                OrganizationName = request.LegalRegisterDto.OrganizationName,
+                INN = request.LegalRegisterDto.INN,
+                KPP = request.LegalRegisterDto.KPP,
+                OGRN = request.LegalRegisterDto.OGRN,
+                Address = request.LegalRegisterDto.Address,
+                Phone = request.LegalRegisterDto.Phone,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _dataContext.LegalRegistrations.Add(registration);
+
+            await _dataContext.SaveChangesAsync(cancellationToken);
+
+            await _mediator.Publish(new LegalUserRegisteredEvent(
+                request.LegalRegisterDto.Email,
+                request.LegalRegisterDto.OrganizationName,
+                request.LegalRegisterDto.INN,
+                request.LegalRegisterDto.KPP,
+                request.LegalRegisterDto.OGRN,
+                request.LegalRegisterDto.Address,
+                request.LegalRegisterDto.Phone,
+                request.LegalRegisterDto.SubscriptionType,
+                registration.CreatedAt), cancellationToken);
+
+            return Unit.Value;
+        }
+    }
+}

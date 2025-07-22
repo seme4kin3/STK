@@ -35,6 +35,7 @@ namespace STK.Persistance
         public DbSet<PredictAi> PredictAi { get; set; }
         public DbSet<Bankruptcy> Bankruptcy { get; set; }
         public DbSet<PaymentRequest> PaymentRequests { get; set; }
+        public DbSet<LegalRegistration> LegalRegistrations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -119,18 +120,6 @@ namespace STK.Persistance
                 .WithOne(rt => rt.User)
                 .HasForeignKey(rt => rt.UserId);
 
-            //modelBuilder.Entity<User>(entity =>
-            //{
-            //    // 1. Настройка свойства SubscriptionType (конвертация в строку)
-            //    entity.Property(u => u.SubscriptionType)
-            //          .HasConversion<string>();  // Хранится как строка в БД
-
-            //    // 2. Настройка связи с RefreshTokens
-            //    entity.HasMany(u => u.RefreshTokens)
-            //          .WithOne(rt => rt.User)
-            //          .HasForeignKey(rt => rt.UserId);
-            //});
-
             modelBuilder.Entity<UserFavoriteOrganization>()
                 .HasKey(ufo => new { ufo.UserId, ufo.OrganizationId });
 
@@ -177,6 +166,14 @@ namespace STK.Persistance
 
             modelBuilder.Entity<PredictAi>()
                 .HasKey(pa =>  pa.Id);
+
+            modelBuilder.Entity<LegalRegistration>()
+                .HasKey(lr => lr.Id);
+
+            modelBuilder.Entity<LegalRegistration>()
+                .HasOne(lr => lr.User)
+                .WithOne()
+                .HasForeignKey<LegalRegistration>(lr => lr.UserId);
         }
     }
 }

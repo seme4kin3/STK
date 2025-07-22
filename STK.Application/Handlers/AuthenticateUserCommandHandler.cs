@@ -7,7 +7,6 @@ using STK.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using STK.Application.Middleware;
 using STK.Application.DTOs.AuthDto;
-using Newtonsoft.Json.Linq;
 
 namespace STK.Application.Handlers
 {
@@ -88,9 +87,12 @@ namespace STK.Application.Handlers
                     {
                         Email = user.Email,
                         UserId = user.Id,
-                        Subscription = Enum.TryParse<SubscriptionType>(user.SubscriptionType, true, out var subscriptionType)
-                              ? subscriptionType
-                              : SubscriptionType.BaseQuarter,
+                        //Subscription = Enum.TryParse<SubscriptionType>(user.SubscriptionType, true, out var subscriptionType)
+                        //      ? subscriptionType
+                        //      : SubscriptionType.BaseQuarter,
+                        SubscriptionType = user.SubscriptionType,
+                        SubscriptionEndTime = user.SubscriptionEndTime,
+                        CustomerType = user.CustomerType,
                         CountRequest = user.CountRequestAI ?? 0
                     }
                 };

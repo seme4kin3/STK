@@ -1,0 +1,86 @@
+﻿using MediatR;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using STK.Application.DTOs.AuthDto;
+using STK.Application.Services;
+
+namespace STK.Application.Handlers
+{
+    public class EmailSettings
+    {
+        public string SmtpHost { get; set; }
+        public int SmtpPort { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public bool EnableSsl { get; set; }
+        public string FromEmail { get; set; }
+        public string FromName { get; set; }
+        public string AdminEmail { get; set; }
+    }
+    public record LegalUserRegisteredEvent(
+       string Email,
+       string OrganizationName,
+       string INN,
+       string KPP,
+       string OGRN,
+       string Address,
+       string Phone,
+       SubscriptionType SubscriptionType,
+       DateTime RegisteredAt) : INotification;
+
+    public class LegalUserRegisteredEmailEventHandler : INotificationHandler<LegalUserRegisteredEvent>
+    {
+        private readonly IEmailService _emailService;
+        private readonly ILogger<LegalUserRegisteredEmailEventHandler> _logger;
+        private readonly EmailSettings _emailSettings;
+
+        public LegalUserRegisteredEmailEventHandler(
+            IEmailService emailService,
+            ILogger<LegalUserRegisteredEmailEventHandler> logger,
+            IOptions<EmailSettings> emailSettings)
+        {
+            _emailService = emailService;
+            _logger = logger;
+            _emailSettings = emailSettings.Value;
+        }
+
+        public async Task Handle(LegalUserRegisteredEvent notification, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var timeSubscription = notification.SubscriptionType switch
+                {
+                    SubscriptionType.BaseQuarter => "3 месяца",
+                    SubscriptionType.BaseYear => "1 год",
+                    _ => "неизвестный"
+                };
+
+                var body = $@"<h2>Поступила заявка на регистрацию от юридического лица</h2>
+                                <p><strong>Организация:</strong> {notification.OrganizationName}</p>
+                                <p><strong>ИНН:</strong> {notification.INN}</p>
+                                <p><strong>КПП:</strong> {notification.KPP}</p>
+                                <p><strong>ОГРН:</strong> {notification.OGRN}</p>
+                                <p><strong>Email:</strong> {notification.Email}</p>
+                                <p><strong>Телефон:</strong> {notification.Phone}</p>
+                                <p><strong>Адрес:</strong> {notification.Address}</p>
+                                <p><strong>Срок доступа:</strong> {timeSubscription}</p>
+                                <p><strong>Время регистрации:</strong> {notification.RegisteredAt:dd.MM.yyyy HH:mm:ss}</p>";
+
+                var emailContent = new EmailContent
+                {
+                    To = _emailSettings.AdminEmail,
+                    Subject = "Заявка на регистрацию юридического лица",
+                    Body = body,
+                    IsHtml = true
+                };
+
+                await _emailService.SendEmailAsync(emailContent);
+                _logger.LogInformation("Email with legal registration info sent");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending legal registration email");
+            }
+        }
+    }
+}
