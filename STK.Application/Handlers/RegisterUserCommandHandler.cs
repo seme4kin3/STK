@@ -79,7 +79,7 @@ namespace STK.Application.Handlers
                 {
                     Id = Guid.Parse(orderId),
                     UserId = user.Id,
-                    Amount = request.RegisterDto.Amount,
+                    Amount = amount,
                     PaymentUrl = payment.PaymentURL,
                     CreatedAt = DateTime.UtcNow,
                     PaymentId = payment.PaymentId,

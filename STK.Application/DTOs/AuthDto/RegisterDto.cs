@@ -1,6 +1,4 @@
 ﻿
-using System.ComponentModel.DataAnnotations;
-
 namespace STK.Application.DTOs.AuthDto
 {
     public class RegisterDto : BaseUserDto
@@ -9,7 +7,7 @@ namespace STK.Application.DTOs.AuthDto
         //public SubscriptionType Subscription { get; set; }
         public CustomerTypeEnum CustomerType { get; set; }
         public SubscriptionType SubscriptionType { get; set; }
-        [Required]
-        public decimal Amount { get; set; }
+        //[Required]
+        //public decimal Amount { get; set; }
     }
 }
