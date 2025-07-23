@@ -26,9 +26,9 @@ namespace STK.Application.Services
 
         public async Task<TBankInitResponseDto> InitPaymentAsync(string orderId, decimal amount, string description, string notificationUrl, string email)
         {
-            //var url = "https://securepay.tinkoff.ru/v2/Init";
+            var url = "https://securepay.tinkoff.ru/v2/Init";
 
-            var url = "https://rest-api-test.tinkoff.ru/v2/Init";
+            //var url = "https://rest-api-test.tinkoff.ru/v2/Init";
 
             var amountKop = (int)(amount * 100);
 
@@ -39,8 +39,7 @@ namespace STK.Application.Services
                 ["Amount"] = amountKop,
                 ["OrderId"] = orderId,
                 ["Description"] = description,
-                ["NotificationURL"] = notificationUrl,
-                //["DATA"] = new { Email = email }
+                ["NotificationURL"] = notificationUrl
             };
 
             // Генерируем токен согласно новой спецификации
@@ -48,6 +47,8 @@ namespace STK.Application.Services
 
             // Добавляем токен в параметры запроса
             requestParams["Token"] = token;
+            requestParams["DATA"] = new {Email = email};
+            requestParams["Receipt"] = GenerateReceipt(email, string.Empty, amountKop);
 
             var json = JsonConvert.SerializeObject(requestParams);
 
@@ -93,6 +94,64 @@ namespace STK.Application.Services
                 var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(valuesString));
                 return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
             }
+        }
+
+        private Dictionary<string, object> GenerateReceipt(string email, string phone, decimal amountRub)
+        {
+            //int amountKop = (int)(amountRub * 100);
+            string itemName;
+            if (amountRub == 3000000)
+            {
+                itemName = "Подписка к сервису РейлСтат на 3 месяца";
+            }
+            else if (amountRub == 6000000)
+            {
+                itemName = "Подписка к сервису РейлСтат на 1 год";
+            }
+            else if (amountRub == 490000)
+            {
+                itemName = "Пакет 30 запросов к AI-чату RailStat (на месяц)";
+            }
+            else if (amountRub == 1390000)
+            {
+                itemName = "Пакет 100 запросов к AI-чату RailStat (на месяц)";
+            }
+            else if (amountRub == 3490000)
+            {
+                itemName = "Пакет 300 запросов к AI-чату RailStat (на месяц)";
+            }
+            else
+            {
+                // Если сумма не совпадает с известными тарифами, используем общее название
+                throw new Exception($"Ошибка при формировании чека");
+            }
+            var receiptItem = new
+            {
+                Name = itemName,
+                Price = amountRub,
+                Quantity = 1.0,
+                Amount = amountRub,
+                Tax = "none",
+                PaymentMethod = "full_payment",
+                PaymentObject = "service"
+            };
+
+            var companyInfo = new
+            {
+                Email = "admin@rail-stat.ru",
+                Name = "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"ПАРТНЕРВИЗОР\"",
+                Inn = "9721253967",
+                PaymentAddress = "109428, г. Москва, пр-кт Рязанский, д. 10, стр. 2, помещ. 5/5/3"
+            };
+
+            return new Dictionary<string, object>
+            {
+                ["Email"] = email ?? "",
+                ["Phone"] = phone ?? "",
+                ["Taxation"] = "usn_income",
+                ["Items"] = new[] { receiptItem },
+                ["Company"] = companyInfo
+            };
         }
     }
 
