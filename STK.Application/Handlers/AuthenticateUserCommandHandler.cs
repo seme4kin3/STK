@@ -55,11 +55,11 @@ namespace STK.Application.Handlers
                     throw DomainException.Unauthorized("Неверные учетные данные.");
                 }
 
-                // 4. Проверка активности аккаунта
-                if (!user.IsActive)
-                {
-                    throw DomainException.Forbidden("Аккаунт неактивен.");
-                }
+                //// 4. Проверка активности аккаунта
+                //if (!user.IsActive)
+                //{
+                //    throw DomainException.Forbidden("Аккаунт неактивен.");
+                //}
 
                 // 6. Успешная аутентификация
                 _loginAttemptTracker.ResetAttempts(request.AuthDto.Email);

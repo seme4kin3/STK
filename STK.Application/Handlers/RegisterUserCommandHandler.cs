@@ -51,13 +51,6 @@ namespace STK.Application.Handlers
                     IsActive = false
                 };
 
-                //var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == request.RegisterDto.Role.ToString(), cancellationToken);
-                //if (role == null)
-                //{
-                //    role = new Role { Id = Guid.NewGuid(), Name = request.RegisterDto.Role.ToString() };
-                //    _dataContext.Roles.Add(role);
-                //}
-
                 //if(request.RegisterDto.CustomerType == CustomerTypeEnum.Legal)
                 //{
                 //    await _mediator.Publish(new UserRegisteredEvent(
@@ -65,12 +58,20 @@ namespace STK.Application.Handlers
                 //        user.CreatedAt), cancellationToken);
                 //}
 
-                //user.UserRoles.Add(new UserRole { Role = role });
+                var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == "free", cancellationToken);
+                if (role == null)
+                {
+                    throw new ArgumentException("Роль не найдена");
+                }
+
+                user.UserRoles.Add(new UserRole { Role = role });
                 user.PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password);
                 _dataContext.Users.Add(user);
                 //await _dataContext.SaveChangesAsync(cancellationToken);
 
                 var orderId = Guid.NewGuid().ToString();
+
+                //Изменить URL для калбека от т -банка
                 var notificationUrl = $"https://lbzw3n2sr.localto.net/api/payment-callback";
                 var amount = GetInitialRequestCount(request.RegisterDto.SubscriptionType);
 

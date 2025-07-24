@@ -5,7 +5,7 @@ using STK.Application.Queries;
 
 namespace STK.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/predictai")]
     public class PredictAiController : ControllerBase

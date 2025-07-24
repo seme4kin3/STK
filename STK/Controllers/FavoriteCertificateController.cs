@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace STK.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/favoritescertificates")]
     public class FavoriteCertificateController : Controller

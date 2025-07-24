@@ -20,7 +20,7 @@ namespace STK.API.Controllers
             _mediator = mediator;
         }
 
-        [Authorize]
+        [Authorize(Roles = "user, admin")]
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
@@ -46,7 +46,7 @@ namespace STK.API.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "user, admin")]
         [HttpPost("decrementrequest")]
         public async Task<IActionResult> DecrementCount()
         {
@@ -70,7 +70,7 @@ namespace STK.API.Controllers
             return Ok(new {Message = "Подписка продлена", DateOfStopSub = result});
         }
 
-        [HttpPut("changepassword")]
+        [Authorize(Roles = "user, admin")]
         public async Task<IActionResult> ChangePasswordUser([FromBody] BaseUserDto user)
         {
             var command = new ChangeUserPasswordCommand(user);

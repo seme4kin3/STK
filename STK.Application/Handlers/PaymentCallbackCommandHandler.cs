@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using STK.Application.Commands;
+using STK.Domain.Entities;
 using STK.Persistance;
 
 
@@ -25,12 +27,38 @@ namespace STK.Application.Handlers
             if (request.Success && request.Status == "CONFIRMED" && !payReq.IsPaid)
             {
                 payReq.IsPaid = true;
-                var user = await _dataContext.Users.FindAsync(payReq.UserId);
+                var user = await _dataContext.Users
+                    .Include(u => u.UserRoles) // Подгружаем роли пользователя
+                    .FirstOrDefaultAsync(u => u.Id == payReq.UserId, cancellationToken);
+
+                if (user == null)
+                    throw new Exception("User not found");
+
                 user.UpdatedAt = timeUpdate;
-                //user.CountRequestAI = 3;
                 user.IsActive = true;
-                await _dataContext.SaveChangesAsync();
+
+                // Проверяем, есть ли уже у пользователя роль "user"
+                var userRoleExists = user.UserRoles.Any(ur => ur.Role.Name == "user");
+
+                if (!userRoleExists)
+                {
+                    // Находим роль "user" в базе
+                    var userRole = await _dataContext.Roles
+                        .FirstOrDefaultAsync(r => r.Name == "user", cancellationToken);
+
+                    if (userRole == null)
+                        throw new Exception("Role 'user' not found in database");
+
+                    // Добавляем связь пользователя с ролью
+                    user.UserRoles.Add(new UserRole
+                    {
+                        RoleId = userRole.Id
+                    });
+                }
+
+                await _dataContext.SaveChangesAsync(cancellationToken);
             }
+
             return Unit.Value;
         }
     }

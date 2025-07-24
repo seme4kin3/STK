@@ -9,7 +9,7 @@ namespace STK.API.Controllers
 {
     public class NotificationController : Controller
     {
-        [Authorize]
+        [Authorize(Roles = "user, admin")]
         [ApiController]
         [Route("api/[controller]")]
         public class NotificationsController : ControllerBase

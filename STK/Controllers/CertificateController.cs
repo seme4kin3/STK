@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/")]
     public class CertificateController : ControllerBase
