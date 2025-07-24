@@ -13,5 +13,6 @@ namespace STK.Application.DTOs.AuthDto
         public int CountRequest { get; set; }
         public DateTime? SubscriptionEndTime { get; set; }
         public string CustomerType { get; set; }
+        public bool IsActive { get; set; }
     }
 }

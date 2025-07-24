@@ -93,7 +93,8 @@ namespace STK.Application.Handlers
                         SubscriptionType = user.SubscriptionType,
                         SubscriptionEndTime = user.SubscriptionEndTime,
                         CustomerType = user.CustomerType,
-                        CountRequest = user.CountRequestAI ?? 0
+                        CountRequest = user.CountRequestAI ?? 0,
+                        IsActive = user.IsActive,
                     }
                 };
             }

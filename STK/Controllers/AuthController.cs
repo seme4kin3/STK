@@ -25,8 +25,8 @@ namespace STK.API.Controllers
 
         //[Authorize(Roles = "admin")]
         [AllowAnonymous]
-        [HttpPost("register")]
         [EnableRateLimiting("RegisterPolicy")]
+        [HttpPost("register")]
 
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -47,6 +47,7 @@ namespace STK.API.Controllers
         }
 
         [AllowAnonymous]
+        [EnableRateLimiting("RegisterPolicy")]
         [HttpPost("register-legal")]
         public async Task<IActionResult> RegisterLegal([FromBody] LegalRegisterDto dto)
         {
