@@ -9,9 +9,9 @@ namespace STK.API.Controllers
 {
     public class NotificationController : Controller
     {
-        [Authorize(Roles = "user, admin")]
         [ApiController]
-        [Route("api/[controller]")]
+        [Route("api/notifications")]
+        [Authorize(Roles = "admin,user")]
         public class NotificationsController : ControllerBase
         {
             private readonly IMediator _mediator;

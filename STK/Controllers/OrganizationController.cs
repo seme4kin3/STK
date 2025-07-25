@@ -9,9 +9,10 @@ using System.Text.Json;
 
 namespace STK.API.Controllers
 {
-    [Authorize(Roles = "user, admin")]
-    [Route("api/")]
+    
     [ApiController]
+    [Route("api/")]
+    [Authorize(Roles = "admin,user")]
     public class OrganizationController : ControllerBase
     {
         private readonly IMediator _mediator;

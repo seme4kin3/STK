@@ -5,9 +5,9 @@ using STK.Application.Queries;
 
 namespace STK.API.Controllers
 {
-    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/predictai")]
+    [Authorize(Roles = "admin,user")]
     public class PredictAiController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -168,28 +168,6 @@ namespace STK.API.Controllers
             return Ok(new { url });
         }
 
-        //[HttpPost("test-email")]
-        //public async Task<IActionResult> TestEmail([FromQuery] string request)
-        //{
-        //    try
-        //    {
-        //        var emailContent = new EmailContent
-        //        {
-        //            To = request,
-        //            Subject = "Тестовое письмо",
-        //            Body = $"<h2>Это тестовое письмо</h2><p>Отправлено в {DateTime.Now:dd.MM.yyyy HH:mm:ss}</p>",
-        //            IsHtml = true
-        //        };
-
-        //        await _emailService.SendEmailAsync(emailContent);
-        //        return Ok(new { message = "Тестовое письмо успешно отправлено" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { message = $"Ошибка отправки: {ex.Message}" });
-        //    }
-        //}
-
         private void SetRefreshTokenCookie(string refreshToken)
         {
             var cookieOptions = new CookieOptions

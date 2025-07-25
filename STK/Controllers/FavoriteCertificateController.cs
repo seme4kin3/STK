@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace STK.API.Controllers
 {
-    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/favoritescertificates")]
+    [Authorize(Roles = "admin,user")]
     public class FavoriteCertificateController : Controller
     {
         private readonly IMediator _mediator;

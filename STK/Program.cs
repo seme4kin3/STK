@@ -6,6 +6,7 @@ using STK.API.SignalR;
 using STK.Application.Handlers;
 using STK.Application.Services;
 using STK.Persistance;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -74,7 +75,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true, // Проверять ключ подписи
         ValidIssuer = jwtSettings["Issuer"], // Издатель токена
         ValidAudience = jwtSettings["Audience"], // Аудитория токена
-        IssuerSigningKey = new SymmetricSecurityKey(key) // Ключ подписи
+        IssuerSigningKey = new SymmetricSecurityKey(key), // Ключ подписи
+        RoleClaimType = ClaimTypes.Role
     };
     options.Events = new JwtBearerEvents
     {

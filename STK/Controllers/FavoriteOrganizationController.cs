@@ -9,9 +9,10 @@ using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
-    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/favoritesorganizations")]
+    [Authorize(Roles = "admin,user")]
+
     public class FavoriteOrganizationController : Controller
     {
         private readonly IMediator _mediator;

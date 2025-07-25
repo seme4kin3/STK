@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
-    [Authorize(Roles = "user, admin")]
     [ApiController]
     [Route("api/")]
+    [Authorize(Roles = "admin,user")]
     public class CertificateController : ControllerBase
     {
         private readonly IMediator _mediator;

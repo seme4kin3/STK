@@ -32,23 +32,12 @@ namespace STK.Application.Handlers
                     {
                         OrganizationId = ac.OrganizationId,
                         Id = ac.Id,
-                        Role = ac.Role,
-                        Type = ac.Type,
+                        Instance = ac.Instance,
                         DateOfCreateCase = ac.DateOfCreateCase,
-                        Court = ac.Court,
-                        Magistrate = ac.Magistrate,
-                        Url = ac.Url,
-                        AmountOfClaim = ac.AmountOfClaim,
-                        Status = ac.Status,
-                        DateOfStatus = ac.DateOfStatus,
-                        Authority = ac.Authority,
-                        CourtJudgment = ac.CourtJudgment,
-                        CaseRegisterNumber = ac.CaseRegisterNumber,
-                        TypeOfJudicialAct = ac.TypeOfJudicialAct,
-                        NameOfJudicialAct = ac.NameOfJudicialAct,
-                        UrlOfJudicialAct = ac.UrlOfJudicialAct,
-                        AdditionalInformation = ac.AdditionalInformation,
-                        DateOfJudicialAct = ac.DateOfJudicialAct
+                        Claimant = ac.Claimant,
+                        Respondent = ac.Respondent,
+                        Judge = ac.Judge,
+                        Url = ac.Url
                     }).ToListAsync(cancellationToken);
 
                 return arbitrationCase;
