@@ -45,7 +45,8 @@ namespace STK.Application.Handlers
                     PasswordHash = string.Empty, // будет установлен позже
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
-                    SubscriptionType = CustomerTypeEnum.Individual.ToString().ToLower(),
+                    SubscriptionType = request.RegisterDto.SubscriptionType.ToString().ToLower(),
+                    CustomerType = CustomerTypeEnum.Individual.ToString().ToLower(),
                     CountRequestAI = 3,
                     //CustomerType = request.RegisterDto.CustomerType.ToString().ToLower(),
                     IsActive = false
