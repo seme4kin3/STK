@@ -12,6 +12,7 @@ namespace STK.API.Controllers
         private readonly IMediator _mediator;
         public PaymentCallbackController(IMediator mediator) => _mediator = mediator;
 
+        [HttpPost]
         public async Task<IActionResult> Callback([FromBody] Dictionary<string, object> payload)
         {
             try
