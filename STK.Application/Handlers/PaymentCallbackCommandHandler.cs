@@ -27,8 +27,10 @@ namespace STK.Application.Handlers
             if (request.Success && request.Status == "CONFIRMED" && !payReq.IsPaid)
             {
                 payReq.IsPaid = true;
+
                 var user = await _dataContext.Users
-                    .Include(u => u.UserRoles) // Подгружаем роли пользователя
+                    .Include(u => u.UserRoles)
+                        .ThenInclude(ur => ur.Role)
                     .FirstOrDefaultAsync(u => u.Id == payReq.UserId, cancellationToken);
 
                 if (user == null)
@@ -37,26 +39,30 @@ namespace STK.Application.Handlers
                 user.UpdatedAt = timeUpdate;
                 user.IsActive = true;
 
-                // Проверяем, есть ли уже у пользователя роль "user"
-                var userRoleExists = user.UserRoles.Any(ur => ur.Role.Name == "user");
+                var targetRole = await _dataContext.Roles
+                    .FirstOrDefaultAsync(r => r.Name == "user", cancellationToken);
 
-                if (!userRoleExists)
+                if (targetRole == null)
+                    throw new Exception("Role 'user' not found in database");
+
+                // Удаляем существующие роли пользователя
+                foreach (var ur in user.UserRoles.ToList())
                 {
-                    // Находим роль "user" в базе
-                    var userRole = await _dataContext.Roles
-                        .FirstOrDefaultAsync(r => r.Name == "user", cancellationToken);
-
-                    if (userRole == null)
-                        throw new Exception("Role 'user' not found in database");
-
-                    // Добавляем связь пользователя с ролью
-                    user.UserRoles.Add(new UserRole
-                    {
-                        RoleId = userRole.Id
-                    });
+                    _dataContext.UserRoles.Remove(ur);
                 }
 
+                // Добавляем новую связь с ролью 'user'
+                _dataContext.UserRoles.Add(new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = targetRole.Id
+                });
+
                 await _dataContext.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                throw new Exception("Payment request with not status CONFIRMED");
             }
 
             return Unit.Value;

@@ -12,18 +12,19 @@ namespace STK.API.Controllers
         private readonly IMediator _mediator;
         public PaymentCallbackController(IMediator mediator) => _mediator = mediator;
 
-        [HttpPost()]
+        [HttpPost]
         public async Task<IActionResult> Callback([FromBody] TBankInitResponseDto payload)
         {
             var cmd = new PaymentCallbackCommand
             {
                 OrderId = Guid.Parse(payload.OrderId),
                 Status = payload.Status,
-                Success = payload.Success
+                Success = payload.Success,
+                PaymentId = payload.PaymentId
             };
 
             await _mediator.Send(cmd);
-            return Ok();
+            return Ok("OK");
         }
     }
 }

@@ -7,5 +7,6 @@ namespace STK.Application.Commands
         public Guid OrderId { get; set; }
         public string Status { get; set; }
         public bool Success { get; set; }
+        public string PaymentId { get; set; }
     }
 }
