@@ -35,6 +35,7 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
+builder.Services.AddHostedService<SubscriptionExpirationBackgroundService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<TBankPaymentService>();
 
