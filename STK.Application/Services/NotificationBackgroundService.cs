@@ -14,7 +14,7 @@ namespace STK.Application.Services
     {
         private readonly IServiceProvider _services;
         private readonly ILogger<NotificationBackgroundService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(10);
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(60);
         private DateTime _lastCheckTime = DateTime.UtcNow;
 
         public NotificationBackgroundService(

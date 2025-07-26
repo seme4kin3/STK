@@ -47,16 +47,8 @@ namespace STK.Application.Handlers
                     CreatedAt = DateTime.UtcNow,
                     SubscriptionType = CustomerTypeEnum.Individual.ToString().ToLower(),
                     CountRequestAI = 3,
-                    //CustomerType = request.RegisterDto.CustomerType.ToString().ToLower(),
                     IsActive = false
                 };
-
-                //if(request.RegisterDto.CustomerType == CustomerTypeEnum.Legal)
-                //{
-                //    await _mediator.Publish(new UserRegisteredEvent(
-                //        user.Email,
-                //        user.CreatedAt), cancellationToken);
-                //}
 
                 var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == "free", cancellationToken);
                 if (role == null)
@@ -67,15 +59,15 @@ namespace STK.Application.Handlers
                 user.UserRoles.Add(new UserRole { Role = role });
                 user.PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password);
                 _dataContext.Users.Add(user);
-                //await _dataContext.SaveChangesAsync(cancellationToken);
 
                 var orderId = Guid.NewGuid().ToString();
 
                 //Изменить URL для калбека от т -банка
-                var notificationUrl = "https://rail-stat.ru/api/payment-callback";
+                //var notificationUrl = "https://rail-stat.ru/api/payment-callback";
+
                 var amount = GetInitialRequestCount(request.RegisterDto.SubscriptionType);
 
-                var payment = await _payment.InitPaymentAsync(orderId, amount, "Доступ к сервису", notificationUrl, user.Email);
+                var payment = await _payment.InitPaymentAsync(orderId, amount, "Доступ к сервису", user.Email);
 
                 var payRequest = new PaymentRequest
                 {

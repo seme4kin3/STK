@@ -12,21 +12,21 @@ namespace STK.Application.Services
         private readonly HttpClient _client;
         private readonly string _terminalKey;
         private readonly string _password;
-        private readonly IEmailService _emailService;
+        private readonly string _url;
+        private readonly string _notificationUrl;
 
         public TBankPaymentService(HttpClient client, IConfiguration config, IEmailService emailService)
         {
             _client = client;
-            _terminalKey = "1752526672336DEMO";
-            _password = "JLrExNCw&n!e2p01";
-            //_terminalKey = config["TBank:TerminalKey"];
-            //_password = config["TBank:Password"];
-            _emailService = emailService;
+            _terminalKey = config["TBankSettings:TerminalKey"];
+            _password = config["TBankSettings:Password"];
+            _url = config["TBankSettings:UrlRequest"];
+            _notificationUrl = config["TBankSettings:NotificationURL"];
         }
 
-        public async Task<TBankInitResponseDto> InitPaymentAsync(string orderId, decimal amount, string description, string notificationUrl, string email)
+        public async Task<TBankInitResponseDto> InitPaymentAsync(string orderId, decimal amount, string description, string email)
         {
-            var url = "https://securepay.tinkoff.ru/v2/Init";
+            //var url = "https://securepay.tinkoff.ru/v2/Init";
 
             //var url = "https://rest-api-test.tinkoff.ru/v2/Init";
 
@@ -39,7 +39,7 @@ namespace STK.Application.Services
                 ["Amount"] = amountKop,
                 ["OrderId"] = orderId,
                 ["Description"] = description,
-                ["NotificationURL"] = notificationUrl
+                ["NotificationURL"] = _notificationUrl
             };
 
             // Генерируем токен согласно новой спецификации
@@ -52,7 +52,7 @@ namespace STK.Application.Services
 
             var json = JsonConvert.SerializeObject(requestParams);
 
-            var response = await _client.PostAsync(url,
+            var response = await _client.PostAsync(_url,
                 new StringContent(json, Encoding.UTF8, "application/json"));
 
             if (!response.IsSuccessStatusCode)
