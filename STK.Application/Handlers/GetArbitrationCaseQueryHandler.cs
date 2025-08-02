@@ -37,7 +37,8 @@ namespace STK.Application.Handlers
                         Claimant = ac.Claimant,
                         Respondent = ac.Respondent,
                         Judge = ac.Judge,
-                        Url = ac.Url
+                        Url = ac.Url,
+                        CaseNumber = ac.CaseNumber,
                     }).ToListAsync(cancellationToken);
 
                 return arbitrationCase;

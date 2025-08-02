@@ -10,6 +10,7 @@ namespace STK.Domain.Entities
         public string Respondent { get; set; }
         public string Url { get; set; }
         public string Judge { get; set; }
+        public string CaseNumber { get; set; }
         public Guid OrganizationId { get; set; }
         public Organization Organization { get; set; }
     }
