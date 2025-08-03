@@ -14,7 +14,7 @@ namespace STK.Application.Services
     {
         private readonly IServiceProvider _services;
         private readonly ILogger<NotificationBackgroundService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(60);
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1);
         private DateTime _lastCheckTime = DateTime.UtcNow;
 
         public NotificationBackgroundService(
@@ -91,7 +91,8 @@ namespace STK.Application.Services
                             .OrderByDescending(co => co.ChangedAt)
                             .First();
 
-                        org.LastChangedAtDate = latestChange.ChangedAt;
+                        //org.LastChangedAtDate = latestChange.ChangedAt;
+                        org.LastChangedAtDate = DateTime.SpecifyKind(latestChange.ChangedAt, DateTimeKind.Utc);
                     }
 
                     await context.SaveChangesAsync(cancellationToken);
