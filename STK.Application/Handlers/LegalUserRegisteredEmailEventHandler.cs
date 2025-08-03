@@ -28,7 +28,19 @@ namespace STK.Application.Handlers
        SubscriptionType SubscriptionType,
        DateTime RegisteredAt) : INotification;
 
-    public class LegalUserRegisteredEmailEventHandler : INotificationHandler<LegalUserRegisteredEvent>
+    public record LegalUserSubscriptionUpdatedEvent(
+        string Email,
+        string OrganizationName,
+        string INN,
+        string KPP,
+        string OGRN,
+        string Address,
+        string Phone,
+        SubscriptionType? SubscriptionType,
+        bool IsAdditionalFeature,
+        int CountRequestAI,
+        DateTime RequestedAt) : INotification;
+    public class LegalUserRegisteredEmailEventHandler : INotificationHandler<LegalUserRegisteredEvent>, INotificationHandler<LegalUserSubscriptionUpdatedEvent>
     {
         private readonly IEmailService _emailService;
         private readonly ILogger<LegalUserRegisteredEmailEventHandler> _logger;
@@ -80,6 +92,52 @@ namespace STK.Application.Handlers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending legal registration email");
+            }
+        }
+
+        public async Task Handle(LegalUserSubscriptionUpdatedEvent notification, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var operation = notification.IsAdditionalFeature
+                ? "Дополнительные запросы к сервису AI"
+                : "Продление основной подписки";
+
+                var details = notification.IsAdditionalFeature
+                ? $"Количество запросов: {notification.CountRequestAI}"
+                : $"Тип подписки: {notification.SubscriptionType switch
+                {
+                    SubscriptionType.BaseQuarter => "3 месяца",
+                    SubscriptionType.BaseYear => "1 год",
+                    _ => "неизвестный"
+                }}";
+
+                var body = $@"<h2>Поступил запрос на обновление подписки от юридического лица</h2>
+                                <p><strong>Организация:</strong> {notification.OrganizationName}</p>
+                                <p><strong>ИНН:</strong> {notification.INN}</p>
+                                <p><strong>КПП:</strong> {notification.KPP}</p>
+                                <p><strong>ОГРН:</strong> {notification.OGRN}</p>
+                                <p><strong>Email:</strong> {notification.Email}</p>
+                                <p><strong>Телефон:</strong> {notification.Phone}</p>
+                                <p><strong>Адрес:</strong> {notification.Address}</p>
+                                <p><strong>Операция:</strong> {operation}</p>
+                                <p><strong>Детали:</strong> {details}</p>
+                                <p><strong>Время запроса:</strong> {notification.RequestedAt:dd.MM.yyyy HH:mm:ss}</p>";
+
+                var emailContent = new EmailContent
+                {
+                    To = _emailSettings.AdminEmail,
+                    Subject = "Запрос на обновление подписки юридического лица",
+                    Body = body,
+                    IsHtml = true
+                };
+
+                await _emailService.SendEmailAsync(emailContent);
+                _logger.LogInformation("Email with legal subscription update info sent");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending legal subscription update email");
             }
         }
     }

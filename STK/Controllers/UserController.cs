@@ -65,9 +65,24 @@ namespace STK.API.Controllers
         [HttpPut("subscription")]
         public async Task<IActionResult> UpdateSubscription([FromBody] UpdateSubscriptionDto updateSubscription)
         {
-            var command = new UpdateUserSubscriptionCommand(updateSubscription);
-            var result = await _mediator.Send(command);
-            return Ok(new {Message = "Подписка продлена", DateOfStopSub = result});
+            try
+            {
+                var command = new UpdateUserSubscriptionCommand(updateSubscription);
+                var result = await _mediator.Send(command);
+                if (string.IsNullOrEmpty(result))
+                {
+                    return Ok(new { Message = "Запрос на обновление подписки был направлен администратору" });
+                }
+                return Ok(new { PaymentUrl = result });
+            }
+            catch (DomainException ex)
+            {
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "An error occurred during update subscription.", Detail = ex.Message });
+            }
         }
 
         [Authorize(Roles = "admin,user")]

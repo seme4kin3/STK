@@ -29,6 +29,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<LoginAttemptTracker>();
 builder.Services.AddScoped<TBankPaymentService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IIndividualSubscriptionUpdateService, IndividualSubscriptionUpdateService>();
+builder.Services.AddScoped<ILegalSubscriptionUpdateService, LegalSubscriptionUpdateService>();
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
