@@ -69,6 +69,7 @@ namespace STK.Application.Services
             foreach (var user in expiredUsers)
             {
                 user.IsActive = false;
+                user.CountRequestAI = 0;
                 context.UserRoles.RemoveRange(user.UserRoles);
                 context.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = freeRole.Id });
             }
