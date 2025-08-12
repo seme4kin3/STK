@@ -126,7 +126,7 @@ namespace STK.Application.Handlers
                     user.SubscriptionEndTime = (user.SubscriptionEndTime ?? timeUpdate) > timeUpdate
                         ? user.SubscriptionEndTime.Value.AddMonths(3)
                         : timeUpdate.AddMonths(3);
-                    user.CountRequestAI = 3;
+                    user.CountRequestAI += 3;
                 }
                 else if (payReq.Amount == YearAmount)
                 {
@@ -134,7 +134,7 @@ namespace STK.Application.Handlers
                     user.SubscriptionEndTime = (user.SubscriptionEndTime ?? timeUpdate) > timeUpdate
                         ? user.SubscriptionEndTime.Value.AddYears(1)
                         : timeUpdate.AddYears(1);
-                    user.CountRequestAI = 3;
+                    user.CountRequestAI += 3;
                 }
                 // Покупка дополнительных запросов — расширяем лимит, не меняем подписку
                 else if (payReq.Amount == Extra30Amount)
