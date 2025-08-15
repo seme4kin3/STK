@@ -100,8 +100,8 @@ namespace STK.Application.Handlers
         {
             return subscriptionType switch
             {
-                SubscriptionType.BaseQuarter => 30000,
-                SubscriptionType.BaseYear => 60000,
+                SubscriptionType.BaseQuarter => 60000,
+                SubscriptionType.BaseYear => 120000,
                 _ => throw new ArgumentOutOfRangeException(nameof(subscriptionType), "Некорректно задан тип подписки.")
             };
         }
