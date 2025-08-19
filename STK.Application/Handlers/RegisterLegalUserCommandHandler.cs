@@ -44,7 +44,14 @@ namespace STK.Application.Handlers
                 CountRequestAI = 3
             };
 
+            var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == "free", cancellationToken);
+            if (role == null)
+            {
+                throw new ArgumentException("Роль не найдена");
+            }
+
             user.PasswordHash = _passwordHasher.HashPassword(request.LegalRegisterDto.Password);
+            user.UserRoles.Add(new UserRole { Role = role });
 
             _dataContext.Users.Add(user);
 

@@ -63,9 +63,6 @@ namespace STK.Application.Handlers
 
                 var orderId = Guid.NewGuid().ToString();
 
-                //Изменить URL для калбека от т -банка
-                //var notificationUrl = "https://rail-stat.ru/api/payment-callback";
-
                 var amount = GetInitialRequestCount(request.RegisterDto.SubscriptionType);
 
                 var payment = await _payment.InitPaymentAsync(orderId, amount, "Доступ к сервису", user.Email);

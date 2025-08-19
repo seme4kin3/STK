@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using STK.Application.DTOs;
 using STK.Application.Queries;
+using STK.Domain.Entities;
 using STK.Persistance;
+using System.Linq;
 using System.Text.Json;
 
 namespace STK.Application.Handlers
@@ -33,27 +35,27 @@ namespace STK.Application.Handlers
                 // Определяем допустимые таблицы
                 var validTableNames = new[] { "Organizations", "Requisites", "Managements", "Certificates" };
 
-                // Выполняем запрос к базе данных
-                var changes = await _dataContext.AuditLog
-                    .AsNoTracking()
-                    .Where(log => validTableNames.Contains(log.TableName))
-                    .Where(log => log.Operation == "UPDATE")
-                    .Where(log => log.ChangedAt >= dateFrom && log.ChangedAt <= now)
-                    .Where(log => log.TableName == "Organizations"
-                        ? log.RecordId == query.OrganizationId
-                        : log.RelatedOrganizationId != null && log.RelatedOrganizationId == query.OrganizationId)
-                    .Select(log => new
-                    {
-                        log.Id,
-                        log.TableName,
-                        log.RecordId,
-                        log.RelatedOrganizationId,
-                        log.Operation,
-                        log.OldData,
-                        log.NewData,
-                        log.ChangedAt
-                    })
-                    .ToListAsync(cancellationToken);
+                //Выполняем запрос к базе данных
+               var changes = await _dataContext.AuditLog
+                   .AsNoTracking()
+                   .Where(log => validTableNames.Contains(log.TableName))
+                   .Where(log => log.Operation == "UPDATE")
+                   .Where(log => log.ChangedAt >= dateFrom && log.ChangedAt <= now)
+                   .Where(log => log.TableName == "Organizations"
+                       ? log.RecordId == query.OrganizationId
+                       : log.RelatedOrganizationId != null && log.RelatedOrganizationId == query.OrganizationId)
+                   .Select(log => new
+                   {
+                       log.Id,
+                       log.TableName,
+                       log.RecordId,
+                       log.RelatedOrganizationId,
+                       log.Operation,
+                       log.OldData,
+                       log.NewData,
+                       log.ChangedAt
+                   })
+                   .ToListAsync(cancellationToken);
 
                 // Группировка и выбор последней записи для каждой таблицы на клиентской стороне
                 var groupedChanges = changes
@@ -71,8 +73,8 @@ namespace STK.Application.Handlers
                         RecordId = log.RecordId,
                         RelatedOrganizationId = log.RelatedOrganizationId,
                         Operation = log.Operation,
-                        OldData = log.OldData != null ? JsonSerializer.Deserialize<object>(log.OldData) : null,
-                        NewData = log.NewData != null ? JsonSerializer.Deserialize<object>(log.NewData) : null,
+                        OldData = log.OldData != null ? JsonSerializer.Deserialize<JsonElement?>(log.OldData) : null,
+                        NewData = log.NewData != null ? JsonSerializer.Deserialize<JsonElement?>(log.NewData) : null,
                         ChangedAt = log.ChangedAt
                     })
                     .ToList();
