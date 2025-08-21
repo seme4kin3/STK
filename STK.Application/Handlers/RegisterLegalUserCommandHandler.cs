@@ -70,6 +70,18 @@ namespace STK.Application.Handlers
 
             _dataContext.LegalRegistrations.Add(registration);
 
+            string submissionNumber = GenerateSubmissionNumber();
+
+            var legalSubmis = new LegalSubmission
+            {
+                Id = Guid.NewGuid(),
+                SubmissionNumber = submissionNumber,
+                TypeSubmission = "register",
+                LegalRegistrationId = registration.Id
+            };
+
+            _dataContext.LegalSubmissions.Add(legalSubmis);
+
             await _dataContext.SaveChangesAsync(cancellationToken);
 
             await _mediator.Publish(new LegalUserRegisteredEvent(
@@ -80,10 +92,16 @@ namespace STK.Application.Handlers
                 request.LegalRegisterDto.OGRN,
                 request.LegalRegisterDto.Address,
                 request.LegalRegisterDto.Phone,
+                submissionNumber,
                 request.LegalRegisterDto.SubscriptionType,
                 registration.CreatedAt), cancellationToken);
 
             return Unit.Value;
+        }
+
+        private string GenerateSubmissionNumber()
+        {
+            return $"REQ-{DateTime.Now:yyyyMMddHHmmss}-{new Random().Next(10000, 99999)}";
         }
     }
 }

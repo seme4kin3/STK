@@ -25,6 +25,7 @@ namespace STK.Application.Handlers
        string OGRN,
        string Address,
        string Phone,
+       string SubmissionNumber,
        SubscriptionType SubscriptionType,
        DateTime RegisteredAt) : INotification;
 
@@ -36,6 +37,7 @@ namespace STK.Application.Handlers
         string OGRN,
         string Address,
         string Phone,
+        string SubmissionNumber,
         SubscriptionType? SubscriptionType,
         bool IsAdditionalFeature,
         int CountRequestAI,
@@ -81,7 +83,7 @@ namespace STK.Application.Handlers
                 var emailContent = new EmailContent
                 {
                     To = _emailSettings.AdminEmail,
-                    Subject = "Заявка на регистрацию юридического лица",
+                    Subject = $"Заявка на регистрацию юридического лица.  Номер заявки: <strong>{notification.SubmissionNumber}</strong>",
                     Body = body,
                     IsHtml = true
                 };
@@ -127,7 +129,7 @@ namespace STK.Application.Handlers
                 var emailContent = new EmailContent
                 {
                     To = _emailSettings.AdminEmail,
-                    Subject = "Запрос на обновление подписки юридического лица",
+                    Subject = $"Запрос на обновление подписки юридического лица.  Номер заявки: <strong>{notification.SubmissionNumber}</strong>",
                     Body = body,
                     IsHtml = true
                 };

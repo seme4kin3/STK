@@ -15,21 +15,35 @@ namespace STK.Application.Services
 
     public class LegalSubscriptionUpdateService : ILegalSubscriptionUpdateService
     {
-        private readonly DataContext _db;
+        private readonly DataContext _dataContext;
         private readonly IMediator _mediator;
         private readonly ILogger<LegalSubscriptionUpdateService> _logger;
 
-        public LegalSubscriptionUpdateService(DataContext db, IMediator mediator, ILogger<LegalSubscriptionUpdateService> logger)
+        public LegalSubscriptionUpdateService(DataContext dataContext, IMediator mediator, ILogger<LegalSubscriptionUpdateService> logger)
         {
-            _db = db;
+            _dataContext = dataContext;
             _mediator = mediator;
             _logger = logger;
         }
 
         public async Task<string> ProcessAsync(User user, UpdateSubscriptionDto dto, CancellationToken cancellationToken)
         {
-            var legal = await _db.LegalRegistrations.AsNoTracking()
+            var legal = await _dataContext.LegalRegistrations.AsNoTracking()
                 .FirstOrDefaultAsync(l => l.UserId == user.Id, cancellationToken);
+
+            string submissionNumber = GenerateSubmissionNumber();
+
+            var legalSubmis = new LegalSubmission
+            {
+                Id = Guid.NewGuid(),
+                SubmissionNumber = submissionNumber,
+                TypeSubmission = "update",
+                LegalRegistrationId = legal.Id
+            };
+
+            _dataContext.LegalSubmissions.Add(legalSubmis);
+
+            await _dataContext.SaveChangesAsync(cancellationToken);
 
             await _mediator.Publish(new LegalUserSubscriptionUpdatedEvent(
                     user.Email,
@@ -39,6 +53,7 @@ namespace STK.Application.Services
                     legal?.OGRN ?? string.Empty,
                     legal?.Address ?? string.Empty,
                     legal?.Phone ?? string.Empty,
+                    submissionNumber,
                     dto.Subscription,
                     dto.IsAdditionalFeature,
                     dto.CountRequestAI,
@@ -46,6 +61,11 @@ namespace STK.Application.Services
 
             _logger.LogInformation("Subscription update event published for legal user {UserId}", user.Id);
             return string.Empty;
+        }
+
+        private string GenerateSubmissionNumber()
+        {
+            return $"REQ-{DateTime.Now:yyyyMMddHHmmss}-{new Random().Next(10000, 99999)}";
         }
     }
 }

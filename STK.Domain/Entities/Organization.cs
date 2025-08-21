@@ -23,7 +23,7 @@ namespace STK.Domain.Entities
         public ICollection<License> Licenses { get; set; } = new List<License>();
         public ICollection<TaxMode> TaxesModes { get; set; } = new List<TaxMode>();
         public ICollection<Stamp> Stamps { get; set; } = new List<Stamp>();
-        public ICollection<Bankruptcy> Bankruptcies { get; set; }
+        public ICollection<Bankruptcy> Bankruptcies { get; set; } = new List<Bankruptcy>();
         public ICollection<ArbitrationCase> ArbitrationsCases { get; set; } = new List<ArbitrationCase>();
         public ICollection<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; } = new List<OrganizationEconomicActivity>();
         public ICollection<UserFavoriteOrganization> FavoritedByUsers { get; set;} = new List<UserFavoriteOrganization>();
