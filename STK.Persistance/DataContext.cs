@@ -36,6 +36,7 @@ namespace STK.Persistance
         public DbSet<Bankruptcy> Bankruptcy { get; set; }
         public DbSet<PaymentRequest> PaymentRequests { get; set; }
         public DbSet<LegalRegistration> LegalRegistrations { get; set; }
+        public DbSet<LegalSubmission> LegalSubmissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -174,6 +175,11 @@ namespace STK.Persistance
                 .HasOne(lr => lr.User)
                 .WithOne()
                 .HasForeignKey<LegalRegistration>(lr => lr.UserId);
+
+            modelBuilder.Entity<LegalSubmission>()
+                .HasOne(ls => ls.LegalRegistration)
+                .WithMany(lr => lr.LegalSubmissions)
+                .HasForeignKey(ls => ls.LegalRegistrationId);
         }
     }
 }
