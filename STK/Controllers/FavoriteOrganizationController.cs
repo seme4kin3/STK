@@ -13,7 +13,7 @@ namespace STK.API.Controllers
     [Route("api/favoritesorganizations")]
     [Authorize(Roles = "admin,user")]
 
-    public class FavoriteOrganizationController : Controller
+    public class FavoriteOrganizationController : ControllerBase
     {
         private readonly IMediator _mediator;
         public FavoriteOrganizationController(IMediator mediator)

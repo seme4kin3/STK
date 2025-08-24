@@ -12,7 +12,7 @@ namespace STK.API.Controllers
     [ApiController]
     [Route("api/favoritescertificates")]
     [Authorize(Roles = "admin,user")]
-    public class FavoriteCertificateController : Controller
+    public class FavoriteCertificateController : ControllerBase
     {
         private readonly IMediator _mediator;
 

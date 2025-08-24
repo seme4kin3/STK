@@ -69,7 +69,7 @@ namespace STK.Application.Handlers
                     _ => "неизвестный"
                 };
 
-                var body = $@"<h2>Поступила заявка на регистрацию от юридического лица</h2>
+                var body = $@"<h2>Поступила заявка <strong>{notification.SubmissionNumber}</strong> на регистрацию от юридического лица</h2>
                                 <p><strong>Организация:</strong> {notification.OrganizationName}</p>
                                 <p><strong>ИНН:</strong> {notification.INN}</p>
                                 <p><strong>КПП:</strong> {notification.KPP}</p>
@@ -83,7 +83,7 @@ namespace STK.Application.Handlers
                 var emailContent = new EmailContent
                 {
                     To = _emailSettings.AdminEmail,
-                    Subject = $"Заявка на регистрацию юридического лица.  Номер заявки: <strong>{notification.SubmissionNumber}</strong>",
+                    Subject = $"Заявка на регистрацию юридического лица.  Номер заявки: {notification.SubmissionNumber}",
                     Body = body,
                     IsHtml = true
                 };
@@ -114,7 +114,7 @@ namespace STK.Application.Handlers
                     _ => "неизвестный"
                 }}";
 
-                var body = $@"<h2>Поступил запрос на обновление подписки от юридического лица</h2>
+                var body = $@"<h2>Поступила заявка <strong>{notification.SubmissionNumber}</strong> на обновление подписки от юридического лица</h2>
                                 <p><strong>Организация:</strong> {notification.OrganizationName}</p>
                                 <p><strong>ИНН:</strong> {notification.INN}</p>
                                 <p><strong>КПП:</strong> {notification.KPP}</p>
@@ -129,7 +129,7 @@ namespace STK.Application.Handlers
                 var emailContent = new EmailContent
                 {
                     To = _emailSettings.AdminEmail,
-                    Subject = $"Запрос на обновление подписки юридического лица.  Номер заявки: <strong>{notification.SubmissionNumber}</strong>",
+                    Subject = $"Запрос на обновление подписки юридического лица.  Номер заявки: {notification.SubmissionNumber}",
                     Body = body,
                     IsHtml = true
                 };

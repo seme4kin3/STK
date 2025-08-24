@@ -7,44 +7,43 @@ using System.Security.Claims;
 
 namespace STK.API.Controllers
 {
-    public class NotificationController : Controller
+
+    [ApiController]
+    [Route("api/notifications")]
+    [Authorize(Roles = "admin,user")]
+    public class NotificationsController : ControllerBase
     {
-        [ApiController]
-        [Route("api/notifications")]
-        [Authorize(Roles = "admin,user")]
-        public class NotificationsController : ControllerBase
+        private readonly IMediator _mediator;
+        private readonly ILogger<NotificationsController> _logger;
+
+        public NotificationsController(
+            IMediator mediator,
+            ILogger<NotificationsController> logger)
         {
-            private readonly IMediator _mediator;
-            private readonly ILogger<NotificationsController> _logger;
+            _mediator = mediator;
+            _logger = logger;
+        }
 
-            public NotificationsController(
-                IMediator mediator,
-                ILogger<NotificationsController> logger)
-            {
-                _mediator = mediator;
-                _logger = logger;
-            }
+        [HttpGet]
+        public async Task<IActionResult> GetUserNotifications()
+        {
+            var userId = GetCurrentUserId();
+            var notifications = await _mediator.Send(new GetUserNotificationsQuery(userId));
+            return Ok(notifications);
+        }
 
-            [HttpGet]
-            public async Task<IActionResult> GetUserNotifications()
-            {
-                var userId = GetCurrentUserId();
-                var notifications = await _mediator.Send(new GetUserNotificationsQuery(userId));
-                return Ok(notifications);
-            }
+        [HttpPost("{notificationId}/mark-as-read")]
+        public async Task<IActionResult> MarkAsRead(Guid notificationId)
+        {
+            var userId = GetCurrentUserId();
+            await _mediator.Send(new MarkNotificationAsReadCommand(notificationId, userId));
+            return NoContent();
+        }
 
-            [HttpPost("{notificationId}/mark-as-read")]
-            public async Task<IActionResult> MarkAsRead(Guid notificationId)
-            {
-                var userId = GetCurrentUserId();
-                await _mediator.Send(new MarkNotificationAsReadCommand(notificationId, userId));
-                return NoContent();
-            }
-
-            private Guid GetCurrentUserId()
-            {
-                return Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            }
+        private Guid GetCurrentUserId()
+        {
+            return Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }
     }
+    
 }
