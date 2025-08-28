@@ -37,6 +37,7 @@ namespace STK.Persistance
         public DbSet<PaymentRequest> PaymentRequests { get; set; }
         public DbSet<LegalRegistration> LegalRegistrations { get; set; }
         public DbSet<LegalSubmission> LegalSubmissions { get; set; }
+        public DbSet<UserConsent> UserConsents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -180,6 +181,13 @@ namespace STK.Persistance
                 .HasOne(ls => ls.LegalRegistration)
                 .WithMany(lr => lr.LegalSubmissions)
                 .HasForeignKey(ls => ls.LegalRegistrationId);
+
+            modelBuilder.Entity<UserConsent>()
+                .HasKey(uc => uc.Id);
+            modelBuilder.Entity<UserConsent>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserConsents)
+                .HasForeignKey(uc => uc.UserId);
         }
     }
 }

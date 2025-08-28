@@ -61,6 +61,19 @@ namespace STK.Application.Handlers
                 user.PasswordHash = _passwordHasher.HashPassword(request.RegisterDto.Password);
                 _dataContext.Users.Add(user);
 
+                var consent = new UserConsent
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    DocumentVersion = request.RegisterDto.OfferVersion,
+                    DocumentUrl = request.RegisterDto.OfferLink,
+                    AcceptedAt = DateTime.UtcNow,
+                    IpAddress = request.IpAddress,
+                    IsAccepted = request.RegisterDto.IsAccepted
+                };
+
+                _dataContext.UserConsents.Add(consent);
+
                 var orderId = Guid.NewGuid().ToString();
 
                 var amount = GetInitialRequestCount(request.RegisterDto.SubscriptionType);

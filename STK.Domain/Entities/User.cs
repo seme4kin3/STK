@@ -18,5 +18,6 @@ namespace STK.Domain.Entities
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public ICollection<UserFavoriteOrganization> FavoritesOrganizations { get; set; } = new List<UserFavoriteOrganization>();
         public ICollection<UserFavoriteCertificate> FavoritesCertificates { get; set;} = new List<UserFavoriteCertificate>();
+        public ICollection<UserConsent> UserConsents { get; set; } = new List<UserConsent>();
     }
 }

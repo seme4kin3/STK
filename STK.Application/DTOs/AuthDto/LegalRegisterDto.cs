@@ -14,5 +14,8 @@ namespace STK.Application.DTOs.AuthDto
         public string Phone { get; set; }
         [Required]
         public SubscriptionType SubscriptionType { get; set; }
+        public bool IsAccepted { get; set; }
+        public string? OfferVersion { get; set; }
+        public string? OfferLink { get; set; }
     }
 }

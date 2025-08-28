@@ -32,7 +32,8 @@ namespace STK.API.Controllers
         {
             try
             {
-                var command = new RegisterUserCommand(registerDto);
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+                var command = new RegisterUserCommand(registerDto, ipAddress);
                 var result = await _mediator.Send(command);
                 return Ok(new { PaymentUrl = result }); // 200 OK
             }
@@ -53,7 +54,8 @@ namespace STK.API.Controllers
         {
             try
             {
-                var command = new RegisterLegalUserCommand(dto);
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+                var command = new RegisterLegalUserCommand(dto, ipAddress);
                 await _mediator.Send(command);
                 return Ok();
             }

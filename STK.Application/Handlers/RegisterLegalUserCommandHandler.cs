@@ -55,6 +55,19 @@ namespace STK.Application.Handlers
 
             _dataContext.Users.Add(user);
 
+            var consent = new UserConsent
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                DocumentVersion = request.LegalRegisterDto.OfferVersion,
+                DocumentUrl = request.LegalRegisterDto.OfferLink,
+                AcceptedAt = DateTime.UtcNow,
+                IpAddress = request.IpAddress,
+                IsAccepted = request.LegalRegisterDto.IsAccepted
+            };
+
+            _dataContext.UserConsents.Add(consent);
+
             var registration = new LegalRegistration
             {
                 Id = Guid.NewGuid(),
