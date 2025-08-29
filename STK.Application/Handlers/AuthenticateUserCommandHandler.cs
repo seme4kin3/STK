@@ -42,6 +42,7 @@ namespace STK.Application.Handlers
                 var user = await _dataContext.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
+                    .Include(u => u.RefreshTokens)
                     .FirstOrDefaultAsync(u => u.Username == request.AuthDto.Email, cancellationToken);
 
                 // 3. Проверка учетных данных
@@ -55,11 +56,7 @@ namespace STK.Application.Handlers
                     throw DomainException.Unauthorized("Неверные учетные данные.");
                 }
 
-                //// 4. Проверка активности аккаунта
-                //if (!user.IsActive)
-                //{
-                //    throw DomainException.Forbidden("Аккаунт неактивен.");
-                //}
+                
 
                 // 6. Успешная аутентификация
                 _loginAttemptTracker.ResetAttempts(request.AuthDto.Email);
@@ -75,6 +72,22 @@ namespace STK.Application.Handlers
                     Created = DateTime.UtcNow,
                     UserId = user.Id
                 };
+
+                if(user.CustomerType.Equals(CustomerTypeEnum.Legal.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    var activeTokens = user.RefreshTokens.Where(rt => rt.IsActive).OrderBy(rt => rt.Created).ToList();
+                    if(activeTokens.Count >= 3)
+                    {
+                        activeTokens.First().Revoked = DateTime.UtcNow;
+                    }
+                }
+                else
+                {
+                    foreach(var token in user.RefreshTokens.Where(rt => rt.IsActive))
+                    {
+                        token.Revoked = DateTime.UtcNow;
+                    }
+                }
 
                 _dataContext.Add(refreshTokenEntity);
                 await _dataContext.SaveChangesAsync(cancellationToken);

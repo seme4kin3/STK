@@ -146,14 +146,17 @@ namespace STK.API.Controllers
                 return BadRequest("Invalid user in token.");
             }
 
+            var refreshToken = Request.Cookies["refreshToken"];
+
             try
             {
                 // Создаем команду для выхода из системы
-                var command = new LogoutCommand { UserId = userId };
+                var command = new LogoutCommand { UserId = userId, RefreshToken = refreshToken };
 
                 // Выполняем команду
                 var result = await _mediator.Send(command);
 
+                Response.Cookies.Delete("refreshToken");
                 return Ok(result);
             }
             catch (DomainException ex)

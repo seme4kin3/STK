@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using STK.Application.Commands;
+using STK.Application.DTOs.AuthDto;
 using STK.Application.Middleware;
 using STK.Persistance;
 
@@ -26,10 +27,18 @@ namespace STK.Application.Handlers
                 throw DomainException.UserNotFound("Пользователь не найден.");
             }
 
-            // Отзываем все активные refresh токены
-            foreach (var refreshToken in user.RefreshTokens)
+            if(!string.IsNullOrEmpty(request.RefreshToken) &&
+                user.CustomerType.Equals(CustomerTypeEnum.Legal.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                if (refreshToken.IsActive)
+                var token = user.RefreshTokens.FirstOrDefault(rt => rt.Token == request.RefreshToken && rt.IsActive);
+                if (token != null)
+                {
+                    token.Revoked = DateTime.UtcNow;
+                }
+            }
+            else
+            {
+                foreach(var refreshToken in user.RefreshTokens.Where(rt => rt.IsActive))
                 {
                     refreshToken.Revoked = DateTime.UtcNow;
                 }

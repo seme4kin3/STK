@@ -73,8 +73,21 @@ namespace STK.Application.Handlers
                 }
 
                 // 6. Удаление ВСЕХ старых refresh tokens
-                var oldTokensCount = user.RefreshTokens.Count;
-                _dataContext.RefreshTokens.RemoveRange(user.RefreshTokens);
+                //var oldTokensCount = user.RefreshTokens.Count;
+                //_dataContext.RefreshTokens.RemoveRange(user.RefreshTokens);
+
+                if(user.CustomerType.Equals(CustomerTypeEnum.Legal.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    currentRefreshToken.Revoked = DateTime.UtcNow;
+                }
+
+                else
+                {
+                    foreach (var token in user.RefreshTokens.Where(rt => rt.IsActive))
+                    {
+                        token.Revoked = DateTime.UtcNow;
+                    }
+                }
 
 
                 // 7. Генерация новых токенов
