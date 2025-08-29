@@ -6,6 +6,7 @@ using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace STK.API.Controllers
 {
@@ -39,6 +40,38 @@ namespace STK.API.Controllers
                 return Ok(new List<object>());
             }
             return Ok(result);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<SearchOrganizationDTO>>> SearchFavorites([FromQuery] string text, int page = 1, int limit = 20)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            var query = new GetFavoriteOrganizationBySearchQuery(text, page, limit, Guid.Parse(userId));
+            var organizations = await _mediator.Send(query);
+
+            if (organizations == null || !organizations.Any())
+            {
+                return Ok(new List<object>());
+            }
+
+            var metadata = new
+            {
+                totalCount = organizations.TotalCount,
+                limit = organizations.PageSize,
+                currentPage = organizations.CurrentPage,
+                totalPages = organizations.TotalPages,
+                hasNext = organizations.HasNext,
+                hasPrevious = organizations.HasPrevious,
+            };
+
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
+            return Ok(organizations);
         }
 
         [HttpPost("add")]
