@@ -59,7 +59,9 @@ namespace STK.Application.Handlers
                     CertificationType = c.CertificationType,
                     Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
                     OrganizationId = c.OrganizationId
-                }).ToListAsync(cancellationToken);
+                })
+                .OrderByDescending(c => c.DateOfIssueCertificate)
+                .ToListAsync(cancellationToken);
 
             return new PagedList<SearchCertificatesDto>(items, countCertificate, query.PageNumber, query.PageSize);
         }
