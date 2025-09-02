@@ -89,7 +89,31 @@ namespace STK.Application.Handlers
                 };
 
                 await _emailService.SendEmailAsync(emailContent);
-                _logger.LogInformation("Email with legal registration info sent");
+                _logger.LogInformation("Email with legal registration info sent to admin");
+
+                var userBody = @"
+                    <p>Благодарим вас за регистрацию в системе «РейлСтат».</p>
+<p>
+                    <p>В настоящий момент для вашей организации формируется счёт на оплату доступа к системе.</p>
+                    <p>Для корректного оформления счёта просим вас в ответном письме направить карточку предприятия (реквизиты вашей организации).</p>
+
+                    <p>После получения реквизитов мы подготовим и направим вам счёт на указанную электронную почту.</p>
+
+                    <p>Если у вас возникнут вопросы, пожалуйста, свяжитесь с нашей службой поддержки.</p>
+
+                    <p>С уважением,</p>
+                    <p>Команда RailStat</p>";
+
+                var userEmail = new EmailContent
+                {
+                    To = notification.Email,
+                    Subject = "Регистрация в системе «РейлСтат»",
+                    Body = userBody,
+                    IsHtml = true
+                };
+
+                await _emailService.SendEmailAsync(userEmail);
+                _logger.LogInformation("Email with registration instructions sent to legal user");
             }
             catch (Exception ex)
             {
@@ -129,13 +153,37 @@ namespace STK.Application.Handlers
                 var emailContent = new EmailContent
                 {
                     To = _emailSettings.AdminEmail,
-                    Subject = $"Запрос на обновление подписки юридического лица.  Номер заявки: {notification.SubmissionNumber}",
+                    Subject = $"Запрос на {operation} от юридического лица.  Номер заявки: {notification.SubmissionNumber}",
                     Body = body,
                     IsHtml = true
                 };
 
                 await _emailService.SendEmailAsync(emailContent);
-                _logger.LogInformation("Email with legal subscription update info sent");
+                _logger.LogInformation("Email with legal registration info sent to admin");
+
+                var userBody = @"
+                    <p>Благодарим вас за обновление подписки в системе «РейлСтат».</p>
+
+                    <p>В настоящий момент для вашей организации формируется счёт на оплату доступа к системе.</p>
+                    <p>Для корректного оформления счёта просим вас в ответном письме направить карточку предприятия (реквизиты вашей организации).</p>
+
+                    <p>После получения реквизитов мы подготовим и направим вам счёт на указанную электронную почту.</p>
+
+                    <p>Если у вас возникнут вопросы, пожалуйста, свяжитесь с нашей службой поддержки.</p>
+
+                    <p>С уважением,</p>
+                    <p>Команда RailStat</p>";
+
+                var userEmail = new EmailContent
+                {
+                    To = notification.Email,
+                    Subject = "Регистрация в системе «РейлСтат»",
+                    Body = userBody,
+                    IsHtml = true
+                };
+
+                await _emailService.SendEmailAsync(userEmail);
+                _logger.LogInformation("Email with registration instructions sent to legal user");
             }
             catch (Exception ex)
             {

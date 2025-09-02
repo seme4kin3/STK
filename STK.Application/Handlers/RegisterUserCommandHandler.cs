@@ -16,14 +16,16 @@ namespace STK.Application.Handlers
         private readonly IPasswordHasher _passwordHasher;
         private readonly IMediator _mediator;
         private readonly TBankPaymentService _payment;
+        private readonly IEmailService _emailService;
 
         public RegisterUserCommandHandler(DataContext dataContext, IPasswordHasher passwordHasher,
-            IMediator mediator, TBankPaymentService payment)
+            IMediator mediator, TBankPaymentService payment, IEmailService emailService)
         {
             _dataContext = dataContext;
             _passwordHasher = passwordHasher;
             _mediator = mediator;
             _payment = payment;
+            _emailService = emailService;
         }
 
         public async Task<string> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -95,6 +97,23 @@ namespace STK.Application.Handlers
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
+
+                try
+                {
+                    var emailContent = new EmailContent
+                    {
+                        To = user.Email,
+                        Subject = "Успешная регистрация в системе «РейлСтат»",
+                        Body = $"Вы успешно зарегистрировались в системе «РейлСтат». Ваш пароль: {request.RegisterDto.Password}",
+                        IsHtml = false
+                    };
+
+                    await _emailService.SendEmailAsync(emailContent);
+                }
+                catch
+                {
+                    
+                }
 
                 return payment.PaymentURL;
             }
