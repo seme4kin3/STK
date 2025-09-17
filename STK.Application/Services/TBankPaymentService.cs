@@ -100,11 +100,11 @@ namespace STK.Application.Services
         {
             //int amountKop = (int)(amountRub * 100);
             string itemName;
-            if (amountRub == 3000000)
+            if (amountRub == 6000000)
             {
                 itemName = "Подписка к сервису РейлСтат на 3 месяца";
             }
-            else if (amountRub == 6000000)
+            else if (amountRub == 12000000)
             {
                 itemName = "Подписка к сервису РейлСтат на 1 год";
             }
