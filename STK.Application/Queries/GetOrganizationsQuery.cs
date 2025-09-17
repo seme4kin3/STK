@@ -6,13 +6,12 @@ namespace STK.Application.Queries
     public class GetOrganizationsQuery : IRequest<IReadOnlyList<SearchOrganizationDTO>>
     {
         public Guid UserId { get; set; }
-        public bool? IsNew { get; set; }
-        public bool? IsChange {  get; set; }
-        public GetOrganizationsQuery(Guid userId, bool? isNew, bool? isChange)
+        public bool IsNew { get; set; }
+        //public bool? IsChange { get; set; }
+        public GetOrganizationsQuery(Guid userId, bool isNew)
         {
             UserId = userId;
             IsNew = isNew;
-            IsChange = isChange;
         }
     }
 }

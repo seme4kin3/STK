@@ -5,10 +5,11 @@ using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Queries;
 using STK.Domain.Entities;
 using STK.Persistance;
+using System.Linq.Expressions;
 
 namespace STK.Application.Handlers
 {
-    public class GetOrganizationsQueryHandler: IRequestHandler<GetOrganizationsQuery, IReadOnlyList<SearchOrganizationDTO>>
+    public class GetOrganizationsQueryHandler : IRequestHandler<GetOrganizationsQuery, IReadOnlyList<SearchOrganizationDTO>>
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<GetOrganizationsQueryHandler> _logger;
@@ -33,13 +34,13 @@ namespace STK.Application.Handlers
                     .Where(o => o.Name != null);
 
                 // 2. Применяем фильтрацию по типу записей
-                if (query.IsNew == true && query.IsChange != true)
+                if (query.IsNew)
                 {
                     // Только новые организации
                     organizationsQuery = organizationsQuery
                         .Where(o => o.CreatedAtDate >= monthAgo && o.CreatedAtDate <= now);
                 }
-                else if (query.IsChange == true && query.IsNew != true)
+                else
                 {
                     // Только измененные организации
                     organizationsQuery = organizationsQuery
@@ -48,20 +49,7 @@ namespace STK.Application.Handlers
                                    o.LastChangedAtDate <= now &&
                                    (o.CreatedAtDate < monthAgo || !o.CreatedAtDate.HasValue || o.CreatedAtDate != o.LastChangedAtDate));
                 }
-                else if (query.IsNew == true && query.IsChange == true)
-                {
-                    // И новые, и измененные
-                    organizationsQuery = organizationsQuery
-                        .Where(o => (o.CreatedAtDate >= monthAgo && o.CreatedAtDate <= now) ||
-                                   (o.LastChangedAtDate.HasValue && o.LastChangedAtDate >= monthAgo && o.LastChangedAtDate <= now));
-                }
-                else
-                {
-                    // По умолчанию - все последние записи (новые и измененные) за месяц
-                    organizationsQuery = organizationsQuery
-                        .Where(o => (o.CreatedAtDate >= monthAgo && o.CreatedAtDate <= now) ||
-                                   (o.LastChangedAtDate.HasValue && o.LastChangedAtDate >= monthAgo && o.LastChangedAtDate <= now));
-                }
+
 
                 // 3. Получаем организации с основными данными
                 var organizations = await organizationsQuery
@@ -159,4 +147,6 @@ namespace STK.Application.Handlers
             return "Неопределено";
         }
     }
+
+
 }
