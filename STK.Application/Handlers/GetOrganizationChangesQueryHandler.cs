@@ -33,29 +33,50 @@ namespace STK.Application.Handlers
                 var dateFrom = now.Date.AddMonths(-1);
 
                 // Определяем допустимые таблицы
-                var validTableNames = new[] { "Organizations", "Requisites", "Managements", "Certificates" };
+                var validTableNames = new[] { "Organizations", "Requisites", "Managements", "Certificates", "ArbitrationsCases" };
 
                 //Выполняем запрос к базе данных
-               var changes = await _dataContext.AuditLog
-                   .AsNoTracking()
-                   .Where(log => validTableNames.Contains(log.TableName))
-                   .Where(log => log.Operation == "UPDATE")
-                   .Where(log => log.ChangedAt >= dateFrom && log.ChangedAt <= now)
-                   .Where(log => log.TableName == "Organizations"
-                       ? log.RecordId == query.OrganizationId
-                       : log.RelatedOrganizationId != null && log.RelatedOrganizationId == query.OrganizationId)
-                   .Select(log => new
-                   {
-                       log.Id,
-                       log.TableName,
-                       log.RecordId,
-                       log.RelatedOrganizationId,
-                       log.Operation,
-                       log.OldData,
-                       log.NewData,
-                       log.ChangedAt
-                   })
-                   .ToListAsync(cancellationToken);
+                //var changes = await _dataContext.AuditLog
+                //    .AsNoTracking()
+                //    .Where(log => validTableNames.Contains(log.TableName))
+                //    .Where(log => log.Operation == "UPDATE")
+                //    .Where(log => log.ChangedAt >= dateFrom && log.ChangedAt <= now)
+                //    .Where(log => log.TableName == "Organizations"
+                //        ? log.RecordId == query.OrganizationId
+                //        : log.RelatedOrganizationId != null && log.RelatedOrganizationId == query.OrganizationId)
+                //    .Select(log => new
+                //    {
+                //        log.Id,
+                //        log.TableName,
+                //        log.RecordId,
+                //        log.RelatedOrganizationId,
+                //        log.Operation,
+                //        log.OldData,
+                //        log.NewData,
+                //        log.ChangedAt
+                //    })
+                //    .ToListAsync(cancellationToken);
+
+                var changes = await _dataContext.AuditLog
+                    .AsNoTracking()
+                    .Where(log => validTableNames.Contains(log.TableName))
+                    .Where(log => log.Operation == "UPDATE" || (log.TableName == "ArbitrationsCases" && log.Operation == "INSERT"))
+                    .Where(log => log.ChangedAt >= dateFrom && log.ChangedAt <= now)
+                    .Where(log => log.TableName == "Organizations"
+                        ? log.RecordId == query.OrganizationId
+                        : log.RelatedOrganizationId != null && log.RelatedOrganizationId == query.OrganizationId)
+                    .Select(log => new
+                    {
+                        log.Id,
+                        log.TableName,
+                        log.RecordId,
+                        log.RelatedOrganizationId,
+                        log.Operation,
+                        log.OldData,
+                        log.NewData,
+                        log.ChangedAt
+                    })
+                    .ToListAsync(cancellationToken);
 
                 // Группировка и выбор последней записи для каждой таблицы на клиентской стороне
                 var groupedChanges = changes
