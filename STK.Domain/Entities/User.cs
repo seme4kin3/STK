@@ -19,5 +19,6 @@ namespace STK.Domain.Entities
         public ICollection<UserFavoriteOrganization> FavoritesOrganizations { get; set; } = new List<UserFavoriteOrganization>();
         public ICollection<UserFavoriteCertificate> FavoritesCertificates { get; set;} = new List<UserFavoriteCertificate>();
         public ICollection<UserConsent> UserConsents { get; set; } = new List<UserConsent>();
+        public ICollection<UserCreatedOrganization> UserCreatedOrganizations { get; set;} = new List<UserCreatedOrganization>();
     }
 }

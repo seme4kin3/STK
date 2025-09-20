@@ -38,6 +38,8 @@ namespace STK.Persistance
         public DbSet<LegalRegistration> LegalRegistrations { get; set; }
         public DbSet<LegalSubmission> LegalSubmissions { get; set; }
         public DbSet<UserConsent> UserConsents { get; set; }
+        public DbSet<OrganizationDownload> OrganizationDownload { get; set; }
+        public DbSet<UserCreatedOrganization> UserCreatedOrganizations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -145,7 +147,7 @@ namespace STK.Persistance
 
             modelBuilder.Entity<UserFavoriteCertificate>()
                 .HasOne(ufo => ufo.Certificate)
-                .WithMany(o => o.FavoritedByUsers)
+                .WithMany(c => c.FavoritedByUsers)
                 .HasForeignKey(ufo => ufo.CertificateId);
 
             modelBuilder.Entity<AuditLog>()
@@ -184,10 +186,24 @@ namespace STK.Persistance
 
             modelBuilder.Entity<UserConsent>()
                 .HasKey(uc => uc.Id);
+
             modelBuilder.Entity<UserConsent>()
                 .HasOne(uc => uc.User)
                 .WithMany(u => u.UserConsents)
                 .HasForeignKey(uc => uc.UserId);
+
+            modelBuilder.Entity<UserCreatedOrganization>()
+                .HasKey(ufo => new { ufo.UserId, ufo.OrganizationId });
+
+            modelBuilder.Entity<UserCreatedOrganization>()
+                .HasOne(ufo => ufo.User)
+                .WithMany(u => u.UserCreatedOrganizations)
+                .HasForeignKey(ufo => ufo.UserId);
+
+            modelBuilder.Entity<UserCreatedOrganization>()
+                .HasOne(ufo => ufo.Organization)
+                .WithMany(o => o.UserCreatedOrganizations)
+                .HasForeignKey(ufo => ufo.OrganizationId);
         }
     }
 }

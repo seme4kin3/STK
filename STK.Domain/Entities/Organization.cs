@@ -27,5 +27,6 @@ namespace STK.Domain.Entities
         public ICollection<ArbitrationCase> ArbitrationsCases { get; set; } = new List<ArbitrationCase>();
         public ICollection<OrganizationEconomicActivity> OrganizationsEconomicActivities { get; set; } = new List<OrganizationEconomicActivity>();
         public ICollection<UserFavoriteOrganization> FavoritedByUsers { get; set;} = new List<UserFavoriteOrganization>();
+        public ICollection<UserCreatedOrganization> UserCreatedOrganizations { get; set; } = new List<UserCreatedOrganization>();
     }
 }

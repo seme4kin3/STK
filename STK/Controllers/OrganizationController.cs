@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using STK.Application.Commands;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
+using STK.Application.Handlers;
 using STK.Application.Queries;
 using System.Security.Claims;
 using System.Text.Json;
@@ -31,6 +33,33 @@ namespace STK.API.Controllers
             
             var organizations = await _mediator.Send(query);
             return Ok(organizations);
+        }
+        [Route("organizations")]
+        [HttpPost]
+        public async Task<ActionResult<OrganizationDto>> CreateOrganization([FromBody] CreateOrganizationDto request)
+        {
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var command = new CreateOrganizationCommand(request, userId);
+            var organization = await _mediator.Send(command);
+
+            return Ok();
+        }
+
+        [Route("organizations/created")]
+        [HttpGet]
+        public async Task<ActionResult<OrganizationDto>> GetCreatedOrganization()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+            var query = new GetUserCreatedOrganizationsQuery { UserId = Guid.Parse(userId) };
+
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
         }
 
         [HttpGet("organizations/{id}")]
