@@ -19,11 +19,10 @@ namespace STK.Application.DTOs
         public List<SearchEconomicActivityDto> EconomicActivities { get; set; } = new List<SearchEconomicActivityDto>();
         public List<CertificateDto> Certificates { get; set; } = new List<CertificateDto>();
         public List<BalanceSheetDto> BalanceSheets { get; set; } = new List<BalanceSheetDto>();
-        //public List<FinancialResultDto> FinancialResults { get; set; } = new List<FinancialResultDto>();
-        public List<FinancialResultsByYearDto> FinancialResultsByYear { get; set; } = new List<FinancialResultsByYearDto> { };
+        public List<FinancialResultsByYearDto> FinancialResultsByYear { get; set; } = new List<FinancialResultsByYearDto>();
         public List<LicenseDto> Licenses { get; set; } = new List<LicenseDto>();
-        public List<StampDto> Stamps { get; set; } = new List<StampDto> { };
-        public List<BankruptcyDto> Bankruptcies { get; set; } = new List<BankruptcyDto> { };
-
+        public List<StampDto> Stamps { get; set; } = new List<StampDto>();
+        public List<BankruptcyDto> Bankruptcies { get; set; } = new List<BankruptcyDto> ();
+        public List<BankruptcyIntentionDto> BankruptcyIntentions { get; set; } = new List<BankruptcyIntentionDto>();
     }
 }

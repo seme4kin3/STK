@@ -40,6 +40,7 @@ namespace STK.Persistance
         public DbSet<UserConsent> UserConsents { get; set; }
         public DbSet<OrganizationDownload> OrganizationDownload { get; set; }
         public DbSet<UserCreatedOrganization> UserCreatedOrganizations { get; set; }
+        public DbSet<BankruptcyIntention> BankruptcyIntentions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -204,6 +205,11 @@ namespace STK.Persistance
                 .HasOne(ufo => ufo.Organization)
                 .WithMany(o => o.UserCreatedOrganizations)
                 .HasForeignKey(ufo => ufo.OrganizationId);
+
+            modelBuilder.Entity<BankruptcyIntention>()
+                .HasOne(m => m.Organization)
+                .WithMany(o => o.BankruptcyIntentions)
+                .HasForeignKey(m => m.OrganizationId);
         }
     }
 }

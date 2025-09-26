@@ -165,7 +165,27 @@ namespace STK.Application.Handlers
                             StatusCase = b.StatusCase,
                             NumberCase = b.NumberCase,
                             OrganizationId = b.OrganizationId
-                        }).ToList()
+                        }).ToList(),
+                        BankruptcyIntentions = o.BankruptcyIntentions
+                            .Where(bi => !string.IsNullOrEmpty(bi.Text))
+                            .Select(bi => new BankruptcyIntentionDto
+                            {
+                                Id = bi.Id,
+                                Number = bi.Number,
+                                DatePublish = bi.DatePublish,
+                                TypeName = bi.TypeName,
+                                DebtorInn = bi.DebtorInn,
+                                DebtorName = bi.DebtorName,
+                                DebtorOgrn = bi.DebtorOgrn,
+                                PublisherFio = bi.PublisherFio,
+                                Text = bi.Text,
+                                PublisherInn = bi.PublisherInn,
+                                PublisherType = bi.PublisherType,
+                                CreatedAt = bi.CreatedAt,
+                                UpdatedAt = bi.UpdatedAt
+                            })
+                            .OrderByDescending(b => b.CreatedAt)
+                            .ToList(),
                     }).FirstOrDefaultAsync(cancellationToken);
  
                 if(organization.StatusOrg != null && statusOrg.TryGetValue(organization.StatusOrg, out string status))
