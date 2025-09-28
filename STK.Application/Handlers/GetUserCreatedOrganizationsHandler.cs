@@ -49,7 +49,7 @@ namespace STK.Application.Handlers
                 // 2) Загружаем организации и маппим в SearchOrganizationDTO
                 var organizations = await _dataContext.Organizations
                     .AsNoTracking()
-                    .Where(o => orgIds.Contains(o.Id))
+                    .Where(o => orgIds.Contains(o.Id) && !string.IsNullOrEmpty(o.Requisites.INN))
                     .Include(o => o.Requisites)
                     .Include(o => o.Managements)
                     .Include(o => o.FavoritedByUsers.Where(f => f.UserId == query.UserId))
