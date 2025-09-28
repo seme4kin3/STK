@@ -39,7 +39,7 @@ namespace STK.Application.Handlers
                         Judge = ac.Judge,
                         Url = ac.Url,
                         CaseNumber = ac.CaseNumber,
-                    }).ToListAsync(cancellationToken);
+                    }).OrderByDescending(ac => ac.DateOfCreateCase).ToListAsync(cancellationToken);
 
                 return arbitrationCase;
             }
