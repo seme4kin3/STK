@@ -111,7 +111,7 @@ namespace STK.Application.Services
             DateTime since,
             CancellationToken cancellationToken)
         {
-            // Получаем изменения в основной таблице Organizations
+            // Изменения в Organizations
             var organizationAuditLogs = await context.AuditLog
                 .Where(a => a.ChangedAt >= since && a.TableName == "Organizations")
                 .Select(a => new OrganizationChangeInfo
@@ -122,17 +122,16 @@ namespace STK.Application.Services
                 })
                 .ToListAsync(cancellationToken);
 
-            // Получаем изменения в связанных таблицах Requisites, Managements, Stamps, ArbitrationsCases
+            // Изменения в связанных таблицах (включая BankruptcyIntentions)
+            var relatedTables = new[] { "Requisites", "Managements", "Stamps", "ArbitrationsCases", "BankruptcyIntentions" };
+
             var relatedAuditLogs = await context.AuditLog
                 .Where(a => a.ChangedAt >= since &&
-                           (a.TableName == "Requisites" ||
-                            a.TableName == "Managements" ||
-                            a.TableName == "Stamps" ||
-                            a.TableName == "ArbitrationsCases") &&
-                           a.RelatedOrganizationId.HasValue)
+                            relatedTables.Contains(a.TableName) &&
+                            a.RelatedOrganizationId.HasValue)
                 .Select(a => new OrganizationChangeInfo
                 {
-                    OrganizationId = a.RelatedOrganizationId.Value,
+                    OrganizationId = a.RelatedOrganizationId!.Value,
                     ChangedAt = a.ChangedAt,
                     TableName = a.TableName
                 })
@@ -145,25 +144,50 @@ namespace STK.Application.Services
         {
             try
             {
-                // Organization changes
+                // Organization changes (включая изменения в BankruptcyIntentions)
                 var orgChanges = await GetOrganizationChanges(context, userId, lastCheckTime, cancellationToken);
                 foreach (var org in orgChanges)
                 {
+                    // таблица с самой свежей датой изменения
+                    var latestTable = org.ChangedTables.FirstOrDefault() ?? "Organizations";
+
+                    // подбираем специализированный заголовок
+                    string title = latestTable switch
+                    {
+                        "Organizations" => "Изменение в организации",
+                        "Requisites" => "Изменение в реквизитах организации",
+                        "Managements" => "Изменение в руководстве организации",
+                        "Stamps" => "Изменение в клеммах организации",
+                        "ArbitrationsCases" => "Изменение в судебных делах организации",
+                        "Certificates" => "Изменение в сертификате организации",
+                        "BankruptcyIntentions" => "Изменение в намерениях банкротства организации",
+                        _ => $"Изменение в {latestTable}"
+                    };
+
+                    // детали — список всех таблиц
+                    var details = org.ChangedTables.Any()
+                        ? $"Детали: изменения в таблиц(е/ах): {string.Join(", ", org.ChangedTables)}"
+                        : "Детали: таблицы изменений не определены";
+
                     await mediator.Send(new SendNotificationCommand(
                         userId,
-                        "Изменение в организации",
-                        org.FullName, "Организация", org.Id),
+                        title,
+                        $"{org.FullName}\n{details}",
+                        "Организация",
+                        org.Id),
                         cancellationToken);
                 }
 
-                // Certificate changes
+                // Certificate changes (как было)
                 var certChanges = await GetCertificateChanges(context, userId, lastCheckTime, cancellationToken);
                 foreach (var cert in certChanges)
                 {
                     await mediator.Send(new SendNotificationCommand(
                         userId,
                         "Изменение в сертификате",
-                        cert.Title, "Сертификат", cert.OrgId),
+                        cert.Title,
+                        "Сертификат",
+                        cert.OrgId),
                         cancellationToken);
                 }
 
@@ -180,11 +204,11 @@ namespace STK.Application.Services
             }
         }
 
-        private async Task<List<NotificationOrgDto>> GetOrganizationChanges(
-            DataContext context,
-            Guid userId,
-            DateTime since,
-            CancellationToken cancellationToken)
+        private async Task<List<NotificationOrgWithDetailsDto>> GetOrganizationChanges(
+           DataContext context,
+           Guid userId,
+           DateTime since,
+           CancellationToken cancellationToken)
         {
             var orgIds = await context.UsersFavoritesOrganizations
                 .Where(ufo => ufo.UserId == userId)
@@ -192,49 +216,51 @@ namespace STK.Application.Services
                 .ToListAsync(cancellationToken);
 
             if (!orgIds.Any())
-                return new List<NotificationOrgDto>();
+                return new List<NotificationOrgWithDetailsDto>();
+
+            // Таблицы организации + связанные (добавили BankruptcyIntentions)
+            var relatedTables = new[] { "Requisites", "Managements", "Stamps", "ArbitrationsCases", "BankruptcyIntentions" };
 
             var organizationAuditLogs = await context.AuditLog
                 .Where(a => a.ChangedAt >= since &&
-                           a.TableName == "Organizations" &&
-                           orgIds.Contains(a.RecordId))
+                            a.TableName == "Organizations" &&
+                            orgIds.Contains(a.RecordId))
                 .ToListAsync(cancellationToken);
 
             var relatedAuditLogs = await context.AuditLog
                 .Where(a => a.ChangedAt >= since &&
-                           (a.TableName == "Requisites" ||
-                            a.TableName == "Managements" ||
-                            a.TableName == "Stamps" ||
-                            a.TableName == "ArbitrationsCases") &&
-                           a.RelatedOrganizationId.HasValue &&
-                           orgIds.Contains(a.RelatedOrganizationId.Value))
+                            relatedTables.Contains(a.TableName) &&
+                            a.RelatedOrganizationId.HasValue &&
+                            orgIds.Contains(a.RelatedOrganizationId.Value))
                 .ToListAsync(cancellationToken);
 
             var allAuditLogs = organizationAuditLogs.Concat(relatedAuditLogs);
 
-            var groupedLogs = allAuditLogs
-                .GroupBy(a => a.TableName == "Organizations" ? a.RecordId : a.RelatedOrganizationId.Value)
+            // Группируем по организации, собираем список таблиц и последнюю дату
+            var grouped = allAuditLogs
+                .GroupBy(a => a.TableName == "Organizations" ? a.RecordId : a.RelatedOrganizationId!.Value)
                 .Select(g => new
                 {
                     OrganizationId = g.Key,
-                    LatestChange = g.OrderByDescending(a => a.ChangedAt).First()
+                    LatestChangeAt = g.Max(x => x.ChangedAt),
+                    Tables = g.Select(x => x.TableName).Distinct().OrderBy(t => t).ToList()
                 })
                 .ToList();
 
-            var organizationNames = await context.Organizations
-                .Where(o => groupedLogs.Select(gl => gl.OrganizationId).Contains(o.Id))
+            var names = await context.Organizations
+                .Where(o => grouped.Select(x => x.OrganizationId).Contains(o.Id))
                 .Select(o => new { o.Id, o.FullName })
                 .ToDictionaryAsync(o => o.Id, o => o.FullName, cancellationToken);
 
-            return groupedLogs
-                .Select(gl => new NotificationOrgDto
+            return grouped
+                .Select(g => new NotificationOrgWithDetailsDto
                 {
-                    Id = gl.OrganizationId,
-                    FullName = organizationNames.TryGetValue(gl.OrganizationId, out var name)
-                        ? name
-                        : "Неизвестная организация"
+                    Id = g.OrganizationId,
+                    FullName = names.TryGetValue(g.OrganizationId, out var name) ? name : "Неизвестная организация",
+                    LatestChangeAt = g.LatestChangeAt,
+                    ChangedTables = g.Tables
                 })
-                .OrderByDescending(n => groupedLogs.First(gl => gl.OrganizationId == n.Id).LatestChange.ChangedAt)
+                .OrderByDescending(x => x.LatestChangeAt)
                 .ToList();
         }
 
@@ -302,10 +328,12 @@ namespace STK.Application.Services
         public DateTime ChangedAt { get; set; }
         public string TableName { get; set; }
     }
-    public class NotificationOrgDto
+    public class NotificationOrgWithDetailsDto
     {
         public Guid Id { get; set; }
-        public string FullName { get; set; }
+        public string FullName { get; set; } = "Неизвестная организация";
+        public DateTime LatestChangeAt { get; set; }
+        public List<string> ChangedTables { get; set; } = new();
     }
 
     public class NotificationCertDto
