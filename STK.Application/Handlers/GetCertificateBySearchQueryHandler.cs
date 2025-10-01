@@ -37,11 +37,13 @@ namespace STK.Application.Handlers
                 throw new ArgumentException("Page number and page size must be greater than 0.");
             }
 
-            var countCertificate = await _dataContext.Certificates.CountAsync(cancellationToken);
+            //var countCertificate = await _dataContext.Certificates.CountAsync(cancellationToken);
 
             var certificateQuery = _dataContext.Certificates
                 .AsNoTracking()
                 .Where(c => c.CertificationObject.ToLower().Contains(query.Search.ToLower()));
+
+            var countCertificate = certificateQuery.Count();
 
             var items = await certificateQuery
                 .Skip((query.PageNumber - 1) * query.PageSize)

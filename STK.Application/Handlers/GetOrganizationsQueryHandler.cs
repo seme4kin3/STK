@@ -128,46 +128,59 @@ namespace STK.Application.Handlers
             try
             {
                 var monthAgo = DateTime.UtcNow.Date.AddMonths(-1);
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.AddHours(3);
 
-                // Видимость:
+                // Базовая видимость:
                 //  - Публичные (нет записей в UserCreatedOrganizations) — видны всем
                 //  - Приватные (есть запись в UserCreatedOrganizations) — видны только своему создателю
-                var organizationsQuery = _dataContext.Organizations
+                var baseQuery = _dataContext.Organizations
                     .AsNoTracking()
                     .Where(o => o.Name != null)
                     .Where(o =>
-                        !_dataContext.UserCreatedOrganizations
-                            .Any(uc => uc.OrganizationId == o.Id) // публичные
-                        ||
-                        _dataContext.UserCreatedOrganizations
-                            .Any(uc => uc.OrganizationId == o.Id && uc.UserId == query.UserId) // приватные автора
+                        !_dataContext.UserCreatedOrganizations.Any(uc => uc.OrganizationId == o.Id) || // публичные
+                        _dataContext.UserCreatedOrganizations.Any(uc => uc.OrganizationId == o.Id && uc.UserId == query.UserId) // приватные автора
                     );
 
-                // Фильтрация по типу записей
+                IQueryable<Organization> organizationsQuery;
+
+                //if (query.IsNew)
+                //{
+                //    // Только недавно СОЗДАННЫЕ
+                //    organizationsQuery = baseQuery
+                //        .Where(o => o.CreatedAtDate.HasValue &&
+                //                    o.CreatedAtDate.Value >= monthAgo &&
+                //                    o.CreatedAtDate.Value <= now)
+                //        .OrderByDescending(o => o.CreatedAtDate);
+                //}
                 if (query.IsNew)
                 {
-                    organizationsQuery = organizationsQuery
-                        .Where(o => o.CreatedAtDate >= monthAgo && o.CreatedAtDate <= now);
+                    // Только недавно СОЗДАННЫЕ
+                    organizationsQuery = baseQuery
+                        .Where(o => o.Requisites.DateCreation.HasValue &&
+                                    o.Requisites.DateCreation.Value >= monthAgo &&
+                                    o.Requisites.DateCreation.Value <= now)
+                        .OrderByDescending(o => o.Requisites.DateCreation.Value);
                 }
                 else
                 {
-                    organizationsQuery = organizationsQuery
+                    // Только недавно ИЗМЕНЁННЫЕ
+                    // Исключаем случаи, когда "изменение" равно дате создания (т.е. это фактически создание)
+                    organizationsQuery = baseQuery
                         .Where(o => o.LastChangedAtDate.HasValue &&
-                                    o.LastChangedAtDate >= monthAgo &&
-                                    o.LastChangedAtDate <= now &&
-                                    (o.CreatedAtDate < monthAgo || !o.CreatedAtDate.HasValue || o.CreatedAtDate != o.LastChangedAtDate));
+                                    o.LastChangedAtDate.Value >= monthAgo &&
+                                    o.LastChangedAtDate.Value <= now &&
+                                    (!o.CreatedAtDate.HasValue ||
+                                     o.CreatedAtDate.Value < monthAgo ||
+                                     o.CreatedAtDate != o.LastChangedAtDate))
+                        .OrderByDescending(o => o.LastChangedAtDate);
                 }
 
-                // Основные данные
+                // Подгружаем связанные данные
                 var organizations = await organizationsQuery
                     .Include(o => o.Requisites)
                     .Include(o => o.Managements)
                     .Include(o => o.FavoritedByUsers.Where(f => f.UserId == query.UserId))
                     .AsSplitQuery()
-                    .OrderByDescending(o => o.LastChangedAtDate.HasValue
-                        ? (o.CreatedAtDate > o.LastChangedAtDate ? o.CreatedAtDate : o.LastChangedAtDate)
-                        : o.CreatedAtDate)
                     .Take(50)
                     .ToListAsync(cancellationToken);
 
@@ -176,10 +189,11 @@ namespace STK.Application.Handlers
 
                 // Экономические активности
                 var orgIds = organizations.Select(o => o.Id).ToList();
+
                 var economicActivities = await _dataContext.OrganizationsEconomicActivities
                     .AsNoTracking()
                     .Where(oea => orgIds.Contains(oea.OrganizationId) &&
-                                 (oea.IsMain || AllowedOkvdCodes.Contains(oea.EconomicActivities.OKVDNumber)))
+                                  (oea.IsMain || AllowedOkvdCodes.Contains(oea.EconomicActivities.OKVDNumber)))
                     .Select(oea => new
                     {
                         oea.OrganizationId,
@@ -188,43 +202,42 @@ namespace STK.Application.Handlers
                     })
                     .ToListAsync(cancellationToken);
 
-                // Результат
-                return organizations
-                    .Select(o =>
-                    {
-                        var requisites = o.Requisites;
-                        var activities = economicActivities
-                            .Where(ea => ea.OrganizationId == o.Id)
-                            .Select(ea => new SearchEconomicActivityDto
-                            {
-                                OKVDNumber = ea.OKVDNumber,
-                                Description = ea.Description
-                            }).ToList();
+                // Готовим DTO
+                var statusForAll = query.IsNew ? "Новая" : "Изменённая";
 
-                        var statusChange = DetermineOrganizationStatus(o, monthAgo);
+                return organizations.Select(o =>
+                {
+                    var req = o.Requisites;
 
-                        return new SearchOrganizationDTO
+                    var activities = economicActivities
+                        .Where(ea => ea.OrganizationId == o.Id)
+                        .Select(ea => new SearchEconomicActivityDto
                         {
-                            Id = o.Id,
-                            Name = o.Name,
-                            FullName = o.FullName,
-                            Address = $"{o.Address} {o.IndexAddress}".Trim(),
-                            Inn = requisites?.INN,
-                            Ogrn = requisites?.OGRN,
-                            Kpp = requisites?.KPP,
-                            CreationDate = requisites?.DateCreation,
-                            IsFavorite = o.FavoritedByUsers.Any(),
-                            StatusChange = statusChange,
-                            Managements = o.Managements?.Select(m => new SearchManagementDTO
-                            {
-                                FullName = m.FullName,
-                                Position = m.Position
-                            }).ToList() ?? new List<SearchManagementDTO>(),
-                            SearchEconomicActivities = activities
-                        };
-                    })
-                    .OrderByDescending(o => o.CreationDate)
-                    .ToList();
+                            OKVDNumber = ea.OKVDNumber,
+                            Description = ea.Description
+                        })
+                        .ToList();
+
+                    return new SearchOrganizationDTO
+                    {
+                        Id = o.Id,
+                        Name = o.Name,
+                        FullName = o.FullName,
+                        Address = $"{o.Address} {o.IndexAddress}".Trim(),
+                        Inn = req?.INN,
+                        Ogrn = req?.OGRN,
+                        Kpp = req?.KPP,
+                        CreationDate = req?.DateCreation,
+                        IsFavorite = o.FavoritedByUsers.Any(),
+                        StatusChange = statusForAll, // везде проставлен статус
+                        Managements = o.Managements?.Select(m => new SearchManagementDTO
+                        {
+                            FullName = m.FullName,
+                            Position = m.Position
+                        }).ToList() ?? new List<SearchManagementDTO>(),
+                        SearchEconomicActivities = activities
+                    };
+                }).ToList();
             }
             catch (Exception ex)
             {
@@ -233,30 +246,6 @@ namespace STK.Application.Handlers
             }
         }
 
-        private string DetermineOrganizationStatus(Organization organization, DateTime monthAgo)
-        {
-            var createdDate = organization.CreatedAtDate;
-            var changedDate = organization.LastChangedAtDate;
 
-            // Если организация создана в последний месяц
-            if (createdDate.HasValue && createdDate >= monthAgo)
-            {
-                return "Новая";
-            }
-
-            // Если организация изменена в последний месяц (и создана раньше месяца назад или дата создания неизвестна)
-            if (changedDate.HasValue && changedDate >= monthAgo)
-            {
-                // Дополнительная проверка: если дата изменения отличается от даты создания
-                if (!createdDate.HasValue || createdDate < monthAgo || createdDate != changedDate)
-                {
-                    return "Изменённая";
-                }
-            }
-
-            return "Неопределено";
-        }
     }
-
-
 }

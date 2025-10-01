@@ -5,6 +5,7 @@ using STK.Application.Commands;
 using STK.Application.DTOs;
 using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Handlers;
+using STK.Application.Middleware;
 using STK.Application.Queries;
 using System.Security.Claims;
 using System.Text.Json;
@@ -34,15 +35,27 @@ namespace STK.API.Controllers
             var organizations = await _mediator.Send(query);
             return Ok(organizations);
         }
-        [Route("organizations")]
-        [HttpPost]
-        public async Task<ActionResult<OrganizationDto>> CreateOrganization([FromBody] CreateOrganizationDto request)
-        {
-            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var command = new CreateOrganizationCommand(request, userId);
-            var organization = await _mediator.Send(command);
 
-            return Ok();
+
+        [HttpPost("organizations/create")]
+        public async Task<IActionResult> Create([FromBody] CreateOrganizationDto dto, CancellationToken ct)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrWhiteSpace(userId))
+                    return Unauthorized("User ID not found in token.");
+
+                var cmd = new CreateOrganizationCommand(dto, Guid.Parse(userId));
+
+                await _mediator.Send(cmd, ct);
+
+                return NoContent();
+            }
+            catch(DomainException ex)
+            {
+                return StatusCode(ex.StatusCode, new { Message = ex.Message });
+            }
         }
 
         [Route("organizations/created")]
