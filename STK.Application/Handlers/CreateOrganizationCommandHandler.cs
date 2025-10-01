@@ -4,6 +4,8 @@ using STK.Application.Commands;
 using STK.Persistance;
 using STK.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using STK.Application.Middleware;
 
 namespace STK.Application.Handlers
 {
@@ -20,26 +22,26 @@ namespace STK.Application.Handlers
 
         public async Task<Unit> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
         {
+            if (request.Organization == null)
+                throw new ArgumentNullException(nameof(request.Organization));
+
+            if (string.IsNullOrWhiteSpace(request.Organization.Name))
+                throw new ArgumentException("Organization name is required.", nameof(request.Organization.Name));
+
+            if (request.Organization.RequisiteDto == null || string.IsNullOrWhiteSpace(request.Organization.RequisiteDto.INN))
+                throw new ArgumentException("Organization INN is required.", nameof(request.Organization.RequisiteDto));
+
+            static string? N(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
             try
             {
-                if (request.Organization == null)
-                    throw new ArgumentNullException(nameof(request.Organization));
-
-                if (string.IsNullOrWhiteSpace(request.Organization.Name))
-                    throw new ArgumentException("Organization name is required.", nameof(request.Organization.Name));
-
-                if (request.Organization.RequisiteDto == null || string.IsNullOrWhiteSpace(request.Organization.RequisiteDto.INN))
-                    throw new ArgumentException("Organization INN is required.", nameof(request.Organization.RequisiteDto));
-
-                // локальная нормализация строк только для присвоений (поведение поиска не меняем)
-                static string? N(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
-
                 var existing = await _dataContext.OrganizationDownload
                     .AsNoTracking()
                     .FirstOrDefaultAsync(o => o.Inn == request.Organization.RequisiteDto.INN, cancellationToken);
 
                 var orgId = existing?.Id ?? Guid.NewGuid();
 
+                // если организации нет — создаём каркас
                 if (existing == null)
                 {
                     var orgDownload = new OrganizationDownload
@@ -62,6 +64,14 @@ namespace STK.Application.Handlers
                     _dataContext.OrganizationDownload.Add(orgDownload);
                 }
 
+
+                var linkExists = await _dataContext.UserCreatedOrganizations
+                    .AsNoTracking()
+                    .AnyAsync(x => x.OrganizationId == orgId && x.UserId == request.UserId, cancellationToken);
+
+                if (linkExists)
+                    throw DomainException.Conflict("Для указанного пользователя данная организация уже существует");
+
                 _dataContext.UserCreatedOrganizations.Add(new UserCreatedOrganization
                 {
                     OrganizationId = orgId,
@@ -72,11 +82,33 @@ namespace STK.Application.Handlers
                 await _dataContext.SaveChangesAsync(cancellationToken);
                 return Unit.Value;
             }
+            catch (DomainException)
+            {
+                throw;
+            }
+            catch (DbUpdateException ex)
+            {
+                // защита от гонок: если сработал уникальный индекс
+                if (IsUniqueLinkViolation(ex))
+                    throw DomainException.Conflict("Для указанного пользователя данная организация уже существует");
+
+                _logger.LogError(ex, "DB error while creating organization for user {UserId}", request.UserId);
+                throw new DomainException("Ошибка при сохранении организации.", StatusCodes.Status500InternalServerError);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create organization for user {UserId}", request.UserId);
-                throw new ApplicationException("An error occurred while creating the organization.", ex);
+                throw new DomainException("Произошла ошибка при создании организации.", StatusCodes.Status500InternalServerError);
             }
         }
+
+        private static bool IsUniqueLinkViolation(DbUpdateException ex)
+        {
+            var msg = ex.InnerException?.Message ?? ex.Message;
+            return msg.Contains("IX_UserCreatedOrganizations_UserId_OrganizationId", StringComparison.OrdinalIgnoreCase)
+                || msg.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase)
+                || msg.Contains("duplicate key", StringComparison.OrdinalIgnoreCase);
+        }
+
     }
 }
