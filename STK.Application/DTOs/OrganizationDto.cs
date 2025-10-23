@@ -13,6 +13,7 @@ namespace STK.Application.DTOs
         public string Website { get; set; }
         public string StatusOrg { get; set; }
         public bool IsFavorite { get; set; }
+        public bool AddressBool { get; set; }
         public string TaxMode { get; set; }
         public RequisiteDto Requisites { get; set; } = new RequisiteDto();
         public List<ManagementDto> Managements { get; set; } = new List<ManagementDto>();
@@ -24,5 +25,7 @@ namespace STK.Application.DTOs
         public List<StampDto> Stamps { get; set; } = new List<StampDto>();
         public List<BankruptcyDto> Bankruptcies { get; set; } = new List<BankruptcyDto> ();
         public List<BankruptcyIntentionDto> BankruptcyIntentions { get; set; } = new List<BankruptcyIntentionDto>();
+        public List<TaxArrearsDto> TaxArrears { get; set; } = new List<TaxArrearsDto> ();
+
     }
 }

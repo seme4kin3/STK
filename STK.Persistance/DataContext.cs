@@ -41,9 +41,14 @@ namespace STK.Persistance
         public DbSet<OrganizationDownload> OrganizationDownload { get; set; }
         public DbSet<UserCreatedOrganization> UserCreatedOrganizations { get; set; }
         public DbSet<BankruptcyIntention> BankruptcyIntentions { get; set; }
+        public DbSet<TaxArrears> TaxArrears { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Для теста
+            modelBuilder.HasPostgresExtension("pg_trgm");
+
+
             modelBuilder.Entity<OrganizationEconomicActivity>()
                 .HasKey(oe => new { oe.OrganizationId, oe.EconomicActivityId });
 
@@ -210,6 +215,11 @@ namespace STK.Persistance
                 .HasOne(m => m.Organization)
                 .WithMany(o => o.BankruptcyIntentions)
                 .HasForeignKey(m => m.OrganizationId);
+
+            modelBuilder.Entity<TaxArrears>()
+                .HasOne(ta => ta.Organization)
+                .WithMany(o => o.TaxesArrears)
+                .HasForeignKey(ta =>  ta.OrganizationId);
         }
     }
 }

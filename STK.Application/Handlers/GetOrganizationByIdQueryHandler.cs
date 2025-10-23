@@ -49,12 +49,12 @@ namespace STK.Application.Handlers
                         Id = o.Id,
                         Name = o.Name,
                         FullName = o.FullName,
-                        Address = $"{o.Address} {o.IndexAddress}",
+                        Address = $"{o.IndexAddress}",
+                        AddressBool = o.Address,
                         Email = o.Email,
                         Website = o.Website,
                         StatusOrg = o.StatusOrg,
                         IsFavorite = query.UserId != null ? o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId) : false,
-                        //IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Requisites = new RequisiteDto
                         {
                             INN = o.Requisites.INN,
@@ -186,6 +186,13 @@ namespace STK.Application.Handlers
                             })
                             .OrderByDescending(b => b.CreatedAt)
                             .ToList(),
+                        TaxArrears = o.TaxesArrears.Select(ta => new TaxArrearsDto
+                        {
+                            Amount = ta.Amount,
+                            Description = ta.Description,
+                            DateAdded = ta.DateAdded,
+                            IsPayOff = ta.IsPayOff,
+                        }).ToList()
                     }).FirstOrDefaultAsync(cancellationToken);
  
                 if(organization.StatusOrg != null && statusOrg.TryGetValue(organization.StatusOrg, out string status))

@@ -14,11 +14,11 @@ namespace STK.Application.Services
     {
         private readonly IServiceProvider _services;
         private readonly ILogger<SubscriptionExpirationBackgroundService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromHours(24);
+        private readonly TimeSpan _checkInterval = TimeSpan.FromHours(12); // Тест: каждые 30 сек
 
         public SubscriptionExpirationBackgroundService(
-        IServiceProvider services,
-        ILogger<SubscriptionExpirationBackgroundService> logger)
+            IServiceProvider services,
+            ILogger<SubscriptionExpirationBackgroundService> logger)
         {
             _services = services;
             _logger = logger;
@@ -42,22 +42,33 @@ namespace STK.Application.Services
                     _logger.LogError(ex, "Error occurred executing subscription expiration check.");
                 }
 
-                await Task.Delay(_checkInterval, stoppingToken);
+                //Ждём до следующей полуночи (локальное время)
+                var now = DateTime.Now;
+                var nextRun = now.Date.AddDays(1); // следующая полночь
+                var delay = nextRun - now;
+
+                _logger.LogInformation("Next check scheduled at {NextRun}", nextRun);
+
+                await Task.Delay(delay, stoppingToken);
             }
         }
 
         private async Task ProcessExpiredUsers(DataContext context, CancellationToken cancellationToken)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.UtcNow; // <--- важно! не .Date
 
             var expiredUsers = await context.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                .Where(u => u.IsActive && u.SubscriptionEndTime.HasValue && u.SubscriptionEndTime < now)
+                .Where(u => u.IsActive &&
+                            u.SubscriptionEndTime.HasValue &&
+                            u.SubscriptionEndTime.Value < now)
                 .ToListAsync(cancellationToken);
 
             if (!expiredUsers.Any())
+            {
+                _logger.LogInformation("No expired users found at {Time}", now);
                 return;
+            }
 
             var freeRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "free", cancellationToken);
             if (freeRole == null)
@@ -70,12 +81,15 @@ namespace STK.Application.Services
             {
                 user.IsActive = false;
                 user.CountRequestAI = 0;
+
                 context.UserRoles.RemoveRange(user.UserRoles);
                 context.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = freeRole.Id });
+
+                _logger.LogInformation("User {UserId} deactivated due to expired subscription (ended {EndTime})", user.Id, user.SubscriptionEndTime);
             }
 
             await context.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Deactivated {Count} users due to expired subscription", expiredUsers.Count);
+            _logger.LogInformation("Deactivated {Count} users due to expired subscription at {Time}", expiredUsers.Count, now);
         }
     }
 }

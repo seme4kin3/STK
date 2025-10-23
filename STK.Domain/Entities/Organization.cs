@@ -6,7 +6,7 @@ namespace STK.Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string FullName { get; set; }
-        public string Address { get; set; }
+        public bool Address { get; set; }
         public string IndexAddress { get; set; }
         public Guid? ParentOrganizationId { get; set; }
         public string PhoneNumber { get; set; }
@@ -29,5 +29,6 @@ namespace STK.Domain.Entities
         public ICollection<UserFavoriteOrganization> FavoritedByUsers { get; set;} = new List<UserFavoriteOrganization>();
         public ICollection<UserCreatedOrganization> UserCreatedOrganizations { get; set; } = new List<UserCreatedOrganization>();
         public ICollection<BankruptcyIntention> BankruptcyIntentions { get; set; } = new List<BankruptcyIntention>();
+        public ICollection<TaxArrears> TaxesArrears { get; set; } = new HashSet<TaxArrears>();
     }
 }

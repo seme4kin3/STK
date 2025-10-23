@@ -172,7 +172,7 @@ namespace STK.Application.Services
                     await mediator.Send(new SendNotificationCommand(
                         userId,
                         title,
-                        $"{org.FullName}\n{details}",
+                        $"{org.FullName}",
                         "Организация",
                         org.Id),
                         cancellationToken);

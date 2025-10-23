@@ -11,6 +11,7 @@ namespace STK.Application.DTOs.SearchOrganizations
         public string Ogrn { get; set; }
         public string Kpp { get; set; }
         public bool IsFavorite { get; set; }
+        public bool AddressBool { get; set; }
         public string StatusChange { get; set; }
         public DateTime? CreationDate { get; set; }
         public List<SearchManagementDTO> Managements { get; set; }
