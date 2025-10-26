@@ -35,13 +35,35 @@ namespace STK.Application.Handlers
 
             try
             {
+                var inn = request.Organization?.RequisiteDto?.INN?.Trim();
+
+                if (!string.IsNullOrWhiteSpace(inn))
+                {
+                    var publicOrgWithSameInn = await _dataContext.Organizations
+                        .AsNoTracking()
+                        .Where(o => o.Requisites != null && o.Requisites.INN == inn)
+                        .Where(o => !_dataContext.UserCreatedOrganizations
+                            .Any(uc => uc.OrganizationId == o.Id))
+                        .Select(o => new { o.Id, o.Name })
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    if (publicOrgWithSameInn != null)
+                    {
+                        _logger.LogWarning(
+                            "Орг с ИНН {Inn} уже существует как общедоступная (OrgId={OrgId})",
+                            inn, publicOrgWithSameInn.Id);
+
+                        throw DomainException.Conflict(
+                            $"Организация с ИНН {inn} уже существует. Найдите ее в поиске");
+                    }
+                }
+
                 var existing = await _dataContext.OrganizationDownload
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(o => o.Inn == request.Organization.RequisiteDto.INN, cancellationToken);
+                    .FirstOrDefaultAsync(o => o.Inn == inn, cancellationToken);
 
                 var orgId = existing?.Id ?? Guid.NewGuid();
 
-                // если организации нет — создаём каркас
                 if (existing == null)
                 {
                     var orgDownload = new OrganizationDownload
@@ -63,7 +85,6 @@ namespace STK.Application.Handlers
                     _dataContext.Organizations.Add(new Organization { Id = orgId });
                     _dataContext.OrganizationDownload.Add(orgDownload);
                 }
-
 
                 var linkExists = await _dataContext.UserCreatedOrganizations
                     .AsNoTracking()
@@ -101,6 +122,7 @@ namespace STK.Application.Handlers
                 throw new DomainException("Произошла ошибка при создании организации.", StatusCodes.Status500InternalServerError);
             }
         }
+
 
         private static bool IsUniqueLinkViolation(DbUpdateException ex)
         {
