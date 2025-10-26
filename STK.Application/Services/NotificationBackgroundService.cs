@@ -122,8 +122,7 @@ namespace STK.Application.Services
                 })
                 .ToListAsync(cancellationToken);
 
-            // Изменения в связанных таблицах (включая BankruptcyIntentions)
-            var relatedTables = new[] { "Requisites", "Managements", "Stamps", "ArbitrationsCases", "BankruptcyIntentions" };
+            var relatedTables = new[] { "Requisites", "Managements", "Stamps", "ArbitrationsCases", "BankruptcyIntentions", "TaxArrears" };
 
             var relatedAuditLogs = await context.AuditLog
                 .Where(a => a.ChangedAt >= since &&
@@ -161,6 +160,7 @@ namespace STK.Application.Services
                         "ArbitrationsCases" => "Изменение в судебных делах организации",
                         "Certificates" => "Изменение в сертификате организации",
                         "BankruptcyIntentions" => "Изменение в намерениях банкротства организации",
+                        "TaxArrears" => "Изменение в налоговых задолжностях",
                         _ => $"Изменение в {latestTable}"
                     };
 
@@ -218,8 +218,8 @@ namespace STK.Application.Services
             if (!orgIds.Any())
                 return new List<NotificationOrgWithDetailsDto>();
 
-            // Таблицы организации + связанные (добавили BankruptcyIntentions)
-            var relatedTables = new[] { "Requisites", "Managements", "Stamps", "ArbitrationsCases", "BankruptcyIntentions" };
+
+            var relatedTables = new[] { "Requisites", "Managements", "Stamps", "ArbitrationsCases", "BankruptcyIntentions", "TaxArrears" };
 
             var organizationAuditLogs = await context.AuditLog
                 .Where(a => a.ChangedAt >= since &&
