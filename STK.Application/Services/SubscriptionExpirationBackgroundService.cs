@@ -55,7 +55,7 @@ namespace STK.Application.Services
 
         private async Task ProcessExpiredUsers(DataContext context, CancellationToken cancellationToken)
         {
-            var now = DateTime.UtcNow; // <--- важно! не .Date
+            var now = DateTime.UtcNow; 
 
             var expiredUsers = await context.Users
                 .Include(u => u.UserRoles)
