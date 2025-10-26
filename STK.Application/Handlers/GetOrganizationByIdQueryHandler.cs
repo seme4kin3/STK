@@ -55,6 +55,7 @@ namespace STK.Application.Handlers
                         Website = o.Website,
                         StatusOrg = o.StatusOrg,
                         IsFavorite = query.UserId != null ? o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId) : false,
+                        AddressAdded = o.AddressAdded,
                         Requisites = new RequisiteDto
                         {
                             INN = o.Requisites.INN,

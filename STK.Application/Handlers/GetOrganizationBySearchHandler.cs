@@ -170,6 +170,7 @@ namespace STK.Application.Handlers
                         Ogrn = o.Requisites.OGRN,
                         Kpp = o.Requisites.KPP,
                         CreationDate = o.Requisites.DateCreation,
+                        AddressAdded = o.AddressAdded,
                         IsFavorite = o.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         Managements = o.Managements
                             .Select(m => new SearchManagementDTO

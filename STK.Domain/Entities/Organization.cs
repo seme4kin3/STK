@@ -6,7 +6,7 @@ namespace STK.Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string FullName { get; set; }
-        public bool Address { get; set; }
+        public bool? Address { get; set; }
         public string IndexAddress { get; set; }
         public Guid? ParentOrganizationId { get; set; }
         public string PhoneNumber { get; set; }
@@ -15,6 +15,7 @@ namespace STK.Domain.Entities
         public string StatusOrg { get; set; }
         public DateTime? CreatedAtDate { get; set; }
         public DateTime? LastChangedAtDate { get; set; }
+        public DateTime? AddressAdded { get; set; }
         public Requisite Requisites { get; set; }
         public ICollection<Management> Managements { get; set; } = new List<Management>();
         public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();

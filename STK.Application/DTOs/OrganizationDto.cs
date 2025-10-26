@@ -13,8 +13,9 @@ namespace STK.Application.DTOs
         public string Website { get; set; }
         public string StatusOrg { get; set; }
         public bool IsFavorite { get; set; }
-        public bool AddressBool { get; set; }
+        public bool? AddressBool { get; set; }
         public string TaxMode { get; set; }
+        public DateTime? AddressAdded { get; set; }
         public RequisiteDto Requisites { get; set; } = new RequisiteDto();
         public List<ManagementDto> Managements { get; set; } = new List<ManagementDto>();
         public List<SearchEconomicActivityDto> EconomicActivities { get; set; } = new List<SearchEconomicActivityDto>();

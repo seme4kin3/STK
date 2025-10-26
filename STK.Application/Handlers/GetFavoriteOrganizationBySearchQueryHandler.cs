@@ -70,6 +70,7 @@ namespace STK.Application.Handlers
                         Ogrn = ufo.Organization.Requisites.OGRN,
                         Kpp = ufo.Organization.Requisites.KPP,
                         CreationDate = ufo.Organization.Requisites.DateCreation,
+                        AddressAdded = ufo.Organization.AddressAdded,
                         IsFavorite = true,
                         Managements = ufo.Organization.Managements
                             .Select(m => new SearchManagementDTO

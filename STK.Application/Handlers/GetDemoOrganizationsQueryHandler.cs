@@ -28,9 +28,9 @@ namespace STK.Application.Handlers
                 .Include(o => o.Managements)
                 .Include(o => o.OrganizationsEconomicActivities)
                     .ThenInclude(oea => oea.EconomicActivities)
-                //.Where(o => o.Id == Guid.Parse("ca7d718a-3cc2-46f3-aa81-db26c923b9ef")
-                //    || o.Id == Guid.Parse("f6b96bb2-552b-4796-a6f0-a83e57f59bb0")
-                //    || o.Id == Guid.Parse("ba927673-e2c0-45cb-bfbd-5170c8577a34"))
+                .Where(o => o.Id == Guid.Parse("ca7d718a-3cc2-46f3-aa81-db26c923b9ef")
+                    || o.Id == Guid.Parse("f6b96bb2-552b-4796-a6f0-a83e57f59bb0")
+                    || o.Id == Guid.Parse("ba927673-e2c0-45cb-bfbd-5170c8577a34"))
                 .ToListAsync(cancellationToken);
 
             return organizations.Select(o => new SearchOrganizationDTO

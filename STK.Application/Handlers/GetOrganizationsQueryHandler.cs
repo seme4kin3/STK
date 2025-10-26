@@ -229,6 +229,7 @@ namespace STK.Application.Handlers
                         Ogrn = req?.OGRN,
                         Kpp = req?.KPP,
                         CreationDate = req?.DateCreation,
+                        AddressAdded = o.AddressAdded,
                         IsFavorite = o.FavoritedByUsers.Any(),
                         StatusChange = statusForAll, // везде проставлен статус
                         Managements = o.Managements?.Select(m => new SearchManagementDTO
