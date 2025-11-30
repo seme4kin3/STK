@@ -62,6 +62,8 @@ namespace STK.Application.Handlers
                         DateOfCertificateExpiration = ufc.Certificate.DateOfCertificateExpiration,
                         DateOfIssueCertificate = ufc.Certificate.DateOfIssueCertificate,
                         CertificationType = ufc.Certificate.CertificationType,
+                        Manufacturer = ufc.Certificate.Manufacturer,
+                        ManufacturerCountry = ufc.Certificate.ManufacturerCountry,
                         Status = statusCertificate.GetValueOrDefault(ufc.Certificate.Status, ufc.Certificate.Status),
                         OrganizationId = ufc.Certificate.OrganizationId,
                         IsFavorite = true

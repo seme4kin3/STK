@@ -90,6 +90,7 @@ namespace STK.Application.Handlers
                             DateOfIssueCertificate = c.DateOfIssueCertificate,
                             Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
                             Manufacturer = c.Manufacturer,
+                            ManufacturerCountry = c.ManufacturerCountry,
                         }).ToList(),
                         BalanceSheets = o.BalanceSheets.Select(bs => new BalanceSheetDto
                         {

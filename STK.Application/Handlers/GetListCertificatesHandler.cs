@@ -65,6 +65,8 @@ namespace STK.Application.Handlers
                         DateOfIssueCertificate = c.DateOfIssueCertificate,
                         DateOfCertificateExpiration = c.DateOfCertificateExpiration,
                         CertificationType = c.CertificationType,
+                        Manufacturer = c.Manufacturer,
+                        ManufacturerCountry = c.ManufacturerCountry,
                         Status = statusCertificate.GetValueOrDefault(c.Status, c.Status),
                         IsFavorite = c.FavoritedByUsers.Any(fu => fu.UserId == query.UserId),
                         OrganizationId = c.OrganizationId,

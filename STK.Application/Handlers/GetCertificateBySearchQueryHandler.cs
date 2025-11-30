@@ -44,25 +44,6 @@ namespace STK.Application.Handlers
             var baseQuery = _dataContext.Certificates
                 .Where(c => !string.IsNullOrEmpty(c.CertificationObject));
 
-            //var certificateQuery = searchTerm.Length >= 3
-            //    ? baseQuery
-            //        .Select(c => new
-            //        {
-            //            Certificate = c,
-            //            Similarity = EF.Functions.TrigramsSimilarity(c.CertificationObject!, searchTerm)
-            //        })
-            //        .Where(c => c.Similarity >= similarityThreshold
-            //                    || EF.Functions.ILike(c.Certificate.CertificationObject!, $"%{searchTerm}%")
-            //                    || (stemPattern != null && EF.Functions.ILike(c.Certificate.CertificationObject!, stemPattern)))
-            //    : baseQuery
-            //        .Where(c => EF.Functions.ILike(c.CertificationObject!, $"%{searchTerm}%")
-            //                    || (stemPattern != null && EF.Functions.ILike(c.CertificationObject!, stemPattern)))
-            //        .Select(c => new
-            //        {
-            //            Certificate = c,
-            //            Similarity = 1.0
-            //        });
-
             var certificateQuery = searchTerm.Length >= 3
             ? baseQuery
                 .Select(c => new
@@ -104,6 +85,8 @@ namespace STK.Application.Handlers
                     DateOfCertificateExpiration = c.Certificate.DateOfCertificateExpiration,
                     DateOfIssueCertificate = c.Certificate.DateOfIssueCertificate,
                     CertificationType = c.Certificate.CertificationType,
+                    Manufacturer = c.Certificate.Manufacturer,
+                    ManufacturerCountry = c.Certificate.ManufacturerCountry,
                     Status = statusCertificate.GetValueOrDefault(c.Certificate.Status, c.Certificate.Status),
                     OrganizationId = c.Certificate.OrganizationId
                 }).ToListAsync(cancellationToken);

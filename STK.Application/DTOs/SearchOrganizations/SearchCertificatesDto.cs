@@ -13,6 +13,8 @@ namespace STK.Application.DTOs.SearchOrganizations
         public DateTime? DateOfCertificateExpiration { get; set; }
         public string CertificationType { get; set; }
         public string Status { get; set; }
+        public string Manufacturer { get; set; }
+        public string ManufacturerCountry { get; set; }
         public bool IsFavorite { get; set; }
         public string StatusChange { get; set; }
         public Guid OrganizationId { get; set; }

@@ -52,6 +52,8 @@ namespace STK.Application.Handlers
                     DateOfIssueCertificate = c.Certificate.DateOfIssueCertificate,
                     DateOfCertificateExpiration = c.Certificate.DateOfCertificateExpiration,
                     CertificationType = c.Certificate.CertificationType,
+                    Manufacturer = c.Certificate.Manufacturer,
+                    ManufacturerCountry = c.Certificate.ManufacturerCountry,
                     Status = statusCertificate.GetValueOrDefault(c.Certificate.Status, c.Certificate.Status),
                     OrganizationId = c.Certificate.OrganizationId
 
