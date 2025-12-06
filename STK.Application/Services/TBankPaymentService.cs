@@ -108,18 +108,19 @@ namespace STK.Application.Services
             {
                 itemName = "Подписка к сервису РейлСтат на 1 год";
             }
-            else if (amountRub == 490000)
+            else if (amountRub == 190000)
             {
                 itemName = "Пакет 30 запросов к AI-чату RailStat (на месяц)";
             }
-            else if (amountRub == 1390000)
+            else if (amountRub == 550000)
             {
                 itemName = "Пакет 100 запросов к AI-чату RailStat (на месяц)";
             }
-            else if (amountRub == 3490000)
+            else if (amountRub == 1890000)
             {
                 itemName = "Пакет 300 запросов к AI-чату RailStat (на месяц)";
             }
+
             else
             {
                 // Если сумма не совпадает с известными тарифами, используем общее название

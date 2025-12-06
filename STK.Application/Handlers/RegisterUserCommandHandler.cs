@@ -44,7 +44,7 @@ namespace STK.Application.Handlers
                 {
                     Id = Guid.NewGuid(),
                     Username = request.RegisterDto.Email,
-                    PasswordHash = string.Empty, // будет установлен позже
+                    PasswordHash = string.Empty, 
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
                     SubscriptionType = request.RegisterDto.SubscriptionType.ToString().ToLower(),

@@ -65,9 +65,9 @@ namespace STK.Application.Services
             {
                 return dto.CountRequestAI switch
                 {
-                    30 => 4900,
-                    100 => 13900,
-                    300 => 34900,
+                    30 => 1900,
+                    100 => 5500,
+                    300 => 18900,
                     _ => throw new ArgumentOutOfRangeException(nameof(dto.CountRequestAI), "Некорректное количество доп. запросов.")
                 };
             }
