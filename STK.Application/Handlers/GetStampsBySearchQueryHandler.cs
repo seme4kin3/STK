@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using STK.Application.DTOs;
-using STK.Application.DTOs.SearchOrganizations;
 using STK.Application.Pagination;
 using STK.Application.Queries;
 using STK.Persistance;
@@ -9,7 +8,8 @@ using STK.Persistance;
 
 namespace STK.Application.Handlers
 {
-    public class GetStampsBySearchQueryHandler : IRequestHandler<GetStampsBySearchQuery, PagedList<StampDto>>
+    public class GetStampsBySearchQueryHandler
+        : IRequestHandler<GetStampsBySearchQuery, PagedList<StampDto>>
     {
         private readonly DataContext _dataContext;
 
@@ -20,6 +20,9 @@ namespace STK.Application.Handlers
 
         public async Task<PagedList<StampDto>> Handle(GetStampsBySearchQuery query, CancellationToken cancellationToken)
         {
+            if (query is null)
+                throw new ArgumentNullException(nameof(query));
+
             if (string.IsNullOrWhiteSpace(query.Search))
             {
                 throw new ArgumentException("Search term cannot be null or whitespace.", nameof(query.Search));
@@ -31,9 +34,17 @@ namespace STK.Application.Handlers
             }
 
             var searchTerm = query.Search.Trim();
+            var pattern = $"%{searchTerm}%";
 
-            var stamps = await _dataContext.Stamps
-                .Where(s => EF.Functions.ILike(s.Title!, $"%{searchTerm}%") || EF.Functions.ILike(s.StampNum!, $"%{searchTerm}%"))
+            var baseQuery = _dataContext.Stamps
+                .AsNoTracking()
+                .Where(s =>
+                    EF.Functions.ILike(s.Title ?? string.Empty, pattern) ||
+                    EF.Functions.ILike(s.StampNum ?? string.Empty, pattern));
+
+            var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+            var stamps = await baseQuery
                 .OrderByDescending(s => s.Registration)
                 .Skip((query.PageNumber - 1) * query.PageSize)
                 .Take(query.PageSize)
@@ -53,7 +64,8 @@ namespace STK.Application.Handlers
                 })
                 .ToListAsync(cancellationToken);
 
-            return new PagedList<StampDto>(stamps, stamps.Count, query.PageNumber, query.PageSize);
+            return new PagedList<StampDto>(stamps, totalCount, query.PageNumber, query.PageSize);
         }
     }
+
 }
