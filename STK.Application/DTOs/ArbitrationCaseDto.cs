@@ -13,4 +13,11 @@ namespace STK.Application.DTOs
         public string CaseNumber { get; set; }
         public Guid OrganizationId { get; set; }
     }
+
+    public enum ArbitrationPartyRole
+    {
+        Any = 0,       // без фильтра
+        Claimant = 1,  // истец
+        Respondent = 2 // ответчик
+    }
 }

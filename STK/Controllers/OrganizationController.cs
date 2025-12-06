@@ -125,15 +125,18 @@ namespace STK.API.Controllers
         }
 
         [HttpGet("organizations/arbitration/{organizationId}")]
-        public async Task<IActionResult> GetArbitrationOfOrganization(Guid organizationId)
+        public async Task<IActionResult> GetArbitrationOfOrganization(
+            Guid organizationId,
+            [FromQuery] ArbitrationPartyRole role = ArbitrationPartyRole.Any)
         {
-            var query = new GetArbitrationCaseQuery(organizationId);
+            var query = new GetArbitrationCaseQuery(organizationId, role);
 
             var arbitration = await _mediator.Send(query);
-            if(arbitration == null || !arbitration.Any())
+            if (arbitration == null || !arbitration.Any())
             {
                 return Ok(new List<object>());
             }
+
             return Ok(arbitration);
         }
     }

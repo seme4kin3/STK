@@ -3,12 +3,8 @@ using STK.Application.DTOs;
 
 namespace STK.Application.Queries
 {
-    public class GetArbitrationCaseQuery : IRequest<IReadOnlyList<ArbitrationCaseDto>>
-    {
-        public Guid OrganizationId { get; set; }
-        public GetArbitrationCaseQuery(Guid organizationId) 
-        {
-            OrganizationId = organizationId;
-        }
-    }
+    public record GetArbitrationCaseQuery(
+        Guid OrganizationId,
+        ArbitrationPartyRole Role
+    ) : IRequest<IReadOnlyList<ArbitrationCaseDto>>;
 }
