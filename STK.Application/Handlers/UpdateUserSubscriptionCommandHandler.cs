@@ -13,19 +13,16 @@ namespace STK.Application.Handlers
     public class UpdateUserSubscriptionCommandHandler : IRequestHandler<UpdateUserSubscriptionCommand, string>
     {
         private readonly DataContext _db;
-        private readonly TBankPaymentService _payment;
         private readonly ILogger<UpdateUserSubscriptionCommandHandler> _logger;
         private readonly ILegalSubscriptionUpdateService _legalSubscriptionUpdateService;
         private readonly IIndividualSubscriptionUpdateService _individualSubscriptionUpdateService;
 
         public UpdateUserSubscriptionCommandHandler(DataContext db,
-            TBankPaymentService payment,
             ILogger<UpdateUserSubscriptionCommandHandler> logger,
             ILegalSubscriptionUpdateService legalService,
             IIndividualSubscriptionUpdateService individualService)
         {
             _db = db;
-            _payment = payment;
             _logger = logger;
             _legalSubscriptionUpdateService = legalService;
             _individualSubscriptionUpdateService = individualService;

@@ -48,7 +48,7 @@ namespace STK.Application.Services
             // Добавляем токен в параметры запроса
             requestParams["Token"] = token;
             requestParams["DATA"] = new {Email = email};
-            requestParams["Receipt"] = GenerateReceipt(email, string.Empty, amountKop);
+            requestParams["Receipt"] = GenerateReceipt(email, string.Empty, amountKop, description);
 
             var json = JsonConvert.SerializeObject(requestParams);
 
@@ -96,42 +96,19 @@ namespace STK.Application.Services
             }
         }
 
-        private Dictionary<string, object> GenerateReceipt(string email, string phone, decimal amountRub)
+        private Dictionary<string, object> GenerateReceipt(string email, string phone, int amountKopecks, string description)
         {
-            //int amountKop = (int)(amountRub * 100);
-            string itemName;
-            if (amountRub == 6000000)
-            {
-                itemName = "Подписка к сервису РейлСтат на 3 месяца";
-            }
-            else if (amountRub == 12000000)
-            {
-                itemName = "Подписка к сервису РейлСтат на 1 год";
-            }
-            else if (amountRub == 190000)
-            {
-                itemName = "Пакет 30 запросов к AI-чату RailStat (на месяц)";
-            }
-            else if (amountRub == 550000)
-            {
-                itemName = "Пакет 100 запросов к AI-чату RailStat (на месяц)";
-            }
-            else if (amountRub == 1890000)
-            {
-                itemName = "Пакет 300 запросов к AI-чату RailStat (на месяц)";
-            }
 
-            else
-            {
-                // Если сумма не совпадает с известными тарифами, используем общее название
-                throw new Exception($"Ошибка при формировании чека");
-            }
+            var itemName = string.IsNullOrWhiteSpace(description)
+                ? "Подписка к сервису РейлСтат"
+                : description;
+
             var receiptItem = new
             {
                 Name = itemName,
-                Price = amountRub,
+                Price = amountKopecks,
                 Quantity = 1.0,
-                Amount = amountRub,
+                Amount = amountKopecks,
                 Tax = "none",
                 PaymentMethod = "full_payment",
                 PaymentObject = "service"

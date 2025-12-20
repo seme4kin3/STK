@@ -42,6 +42,7 @@ namespace STK.Persistance
         public DbSet<UserCreatedOrganization> UserCreatedOrganizations { get; set; }
         public DbSet<BankruptcyIntention> BankruptcyIntentions { get; set; }
         public DbSet<TaxArrears> TaxArrears { get; set; }
+        public DbSet<SubscriptionPrice> SubscriptionPrices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -220,6 +221,11 @@ namespace STK.Persistance
                 .HasOne(ta => ta.Organization)
                 .WithMany(o => o.TaxesArrears)
                 .HasForeignKey(ta =>  ta.OrganizationId);
+
+            modelBuilder.Entity<PaymentRequest>()
+                .HasOne(pr => pr.SubscriptionPrice)
+                .WithMany()
+                .HasForeignKey(pr => pr.SubscriptionPriceId);
         }
     }
 }

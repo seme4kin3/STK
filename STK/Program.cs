@@ -31,6 +31,7 @@ builder.Services.AddScoped<TBankPaymentService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IIndividualSubscriptionUpdateService, IndividualSubscriptionUpdateService>();
 builder.Services.AddScoped<ILegalSubscriptionUpdateService, LegalSubscriptionUpdateService>();
+builder.Services.AddScoped<ISubscriptionPriceProvider, SubscriptionPriceProvider>();
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 

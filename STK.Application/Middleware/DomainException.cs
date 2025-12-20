@@ -32,5 +32,8 @@ namespace STK.Application.Middleware
             new DomainException(message, StatusCodes.Status404NotFound);
         public static DomainException TooManyAttempts(string message) =>
             new DomainException(message, StatusCodes.Status429TooManyRequests, "TOO_MANY_ATTEMPTS");
+
+        public static DomainException BadRequest(string message) =>
+            new DomainException(message, StatusCodes.Status400BadRequest);
     }
 }

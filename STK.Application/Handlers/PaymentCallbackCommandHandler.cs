@@ -12,85 +12,19 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly ILogger<PaymentCallbackCommandHandler> _logger;
-        private const int QuarterAmount = 30000;
-        private const int YearAmount = 60000;
-        private const int Extra30Amount = 4900;
-        private const int Extra100Amount = 13900;
-        private const int Extra300Amount = 34900;
+
         public PaymentCallbackCommandHandler(DataContext dataContext, ILogger<PaymentCallbackCommandHandler> logger)
         {
             _dataContext = dataContext;
             _logger = logger;
         }
 
-        //public async Task<Unit> Handle(PaymentCallbackCommand request, CancellationToken cancellationToken)
-        //{
-        //    var payReq = await _dataContext.PaymentRequests.FindAsync(request.OrderId);
-        //    var timeUpdate = DateTime.UtcNow;
-
-        //    if (payReq == null)
-        //        throw new Exception("Payment request not found");
-
-        //    if (request.Status == "REJECTED") // Обработка отклоненного платежа
-        //    {
-        //        payReq.Description = "REJECTED";
-        //        payReq.CompletedAt = timeUpdate;
-        //        payReq.IsPaid = false;
-        //        await _dataContext.SaveChangesAsync(cancellationToken);
-        //        return Unit.Value;
-        //    }
-
-        //    if (request.Success && request.Status == "CONFIRMED" && !payReq.IsPaid) // Обработка успешного платежа
-        //    {
-        //        payReq.IsPaid = true;
-        //        payReq.Description = "CONFIRMED";
-        //        payReq.CompletedAt = timeUpdate;
-
-        //        var user = await _dataContext.Users
-        //            .Include(u => u.UserRoles)
-        //                .ThenInclude(ur => ur.Role)
-        //            .FirstOrDefaultAsync(u => u.Id == payReq.UserId, cancellationToken);
-
-        //        if (user == null)
-        //            throw new Exception("User not found");
-
-        //        user.UpdatedAt = timeUpdate;
-        //        user.IsActive = true;
-
-        //        user.SubscriptionEndTime = payReq.Amount switch
-        //        {
-        //            30000 => (user.SubscriptionEndTime ?? DateTime.UtcNow).AddMonths(3),
-        //            60000 => (user.SubscriptionEndTime ?? DateTime.UtcNow).AddYears(1),
-        //            _ => user.SubscriptionEndTime 
-        //        };
-
-        //        var targetRole = await _dataContext.Roles
-        //            .FirstOrDefaultAsync(r => r.Name == "user", cancellationToken);
-
-        //        if (targetRole == null)
-        //            throw new Exception("Role 'user' not found in database");
-
-        //        // Удаляем существующие роли пользователя
-        //        foreach (var ur in user.UserRoles.ToList())
-        //        {
-        //            _dataContext.UserRoles.Remove(ur);
-        //        }
-
-        //        // Добавляем новую связь с ролью 'user'
-        //        _dataContext.UserRoles.Add(new UserRole
-        //        {
-        //            UserId = user.Id,
-        //            RoleId = targetRole.Id
-        //        });
-
-        //        await _dataContext.SaveChangesAsync(cancellationToken);
-        //    }
-        //    return Unit.Value;
-        //}
-
         public async Task<Unit> Handle(PaymentCallbackCommand request, CancellationToken cancellationToken)
         {
-            var payReq = await _dataContext.PaymentRequests.FindAsync(request.OrderId);
+            var payReq = await _dataContext.PaymentRequests
+                .Include(pr => pr.SubscriptionPrice)
+                .FirstOrDefaultAsync(pr => pr.Id == request.OrderId, cancellationToken);
+
             if (payReq == null)
             {
                 _logger.LogWarning("Payment request not found: {OrderId}", request.OrderId);
@@ -102,10 +36,25 @@ namespace STK.Application.Handlers
                     .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Id == payReq.UserId, cancellationToken);
 
+            var price = payReq.SubscriptionPrice
+                ?? (payReq.SubscriptionPriceId.HasValue
+                    ? await _dataContext.SubscriptionPrices.FirstOrDefaultAsync(sp => sp.Id == payReq.SubscriptionPriceId.Value, cancellationToken)
+                    : null)
+                ?? await _dataContext.SubscriptionPrices
+                    .Where(sp => sp.Price == payReq.Amount && sp.IsActive)
+                    .OrderByDescending(sp => sp.UpdatedAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+
             if (user == null)
             {
                 _logger.LogWarning("User not found: {UserId}", payReq.UserId);
                 throw new Exception("User not found");
+            }
+
+            if (price == null)
+            {
+                _logger.LogWarning("Subscription price not found for payment request {OrderId}", request.OrderId);
+                throw new Exception("Subscription price not found");
             }
 
             var timeUpdate = DateTime.UtcNow;
@@ -119,35 +68,22 @@ namespace STK.Application.Handlers
                 user.UpdatedAt = timeUpdate;
                 user.IsActive = true;
 
-                // Основные подписки
-                if (payReq.Amount == QuarterAmount)
+                var currentEndTime = (user.SubscriptionEndTime ?? timeUpdate) > timeUpdate
+                    ? user.SubscriptionEndTime.Value
+                    : timeUpdate;
+
+                if (price.Category == SubscriptionPriceCategory.Base)
                 {
-                    user.SubscriptionType = "basequarter";
-                    user.SubscriptionEndTime = (user.SubscriptionEndTime ?? timeUpdate) > timeUpdate
-                        ? user.SubscriptionEndTime.Value.AddMonths(3)
-                        : timeUpdate.AddMonths(3);
-                    user.CountRequestAI += 3;
+                    user.SubscriptionType = price.Code;
+                    user.SubscriptionEndTime = price.DurationInMonths.HasValue && price.DurationInMonths.Value > 0
+                        ? currentEndTime.AddMonths(price.DurationInMonths.Value)
+                        : currentEndTime;
+                    user.CountRequestAI = (user.CountRequestAI ?? 0) + price.RequestCount;
                 }
-                else if (payReq.Amount == YearAmount)
+
+                else if (price.Category == SubscriptionPriceCategory.AiRequests)
                 {
-                    user.SubscriptionType = "baseyear";
-                    user.SubscriptionEndTime = (user.SubscriptionEndTime ?? timeUpdate) > timeUpdate
-                        ? user.SubscriptionEndTime.Value.AddYears(1)
-                        : timeUpdate.AddYears(1);
-                    user.CountRequestAI += 3;
-                }
-                // Покупка дополнительных запросов — расширяем лимит, не меняем подписку
-                else if (payReq.Amount == Extra30Amount)
-                {
-                    user.CountRequestAI += 30;
-                }
-                else if (payReq.Amount == Extra100Amount)
-                {
-                    user.CountRequestAI += 100;
-                }
-                else if (payReq.Amount == Extra300Amount)
-                {
-                    user.CountRequestAI += 300;
+                    user.CountRequestAI = (user.CountRequestAI ?? 0) + price.RequestCount;
                 }
 
                 // Обновление ролей: оставить только "user"

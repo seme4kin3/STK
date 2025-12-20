@@ -15,12 +15,15 @@ namespace STK.Application.Handlers
         private readonly DataContext _dataContext;
         private readonly IMediator _mediator;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly ISubscriptionPriceProvider _subscriptionPriceProvider;
 
-        public RegisterLegalUserCommandHandler(DataContext dataContext, IMediator mediator, IPasswordHasher passwordHasher)
+        public RegisterLegalUserCommandHandler(DataContext dataContext, IMediator mediator,
+            IPasswordHasher passwordHasher, ISubscriptionPriceProvider subscriptionPriceProvider)
         {
             _dataContext = dataContext;
             _mediator = mediator;
             _passwordHasher = passwordHasher;
+            _subscriptionPriceProvider = subscriptionPriceProvider;
         }
 
         public async Task<Unit> Handle(RegisterLegalUserCommand request, CancellationToken cancellationToken)
@@ -31,6 +34,8 @@ namespace STK.Application.Handlers
                 throw DomainException.Conflict("Пользователь с таким email уже существует.");
             }
 
+            var subscriptionPrice = await _subscriptionPriceProvider.GetBasePriceAsync(request.LegalRegisterDto.SubscriptionType, cancellationToken);
+
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -40,8 +45,8 @@ namespace STK.Application.Handlers
                 CreatedAt = DateTime.UtcNow,
                 IsActive = false,
                 CustomerType = CustomerTypeEnum.Legal.ToString().ToLower(),
-                SubscriptionType = request.LegalRegisterDto.SubscriptionType.ToString(),
-                CountRequestAI = 3
+                SubscriptionType = subscriptionPrice.Code,
+                CountRequestAI = subscriptionPrice.RequestCount
             };
 
             var role = await _dataContext.Roles.FirstOrDefaultAsync(r => r.Name == "free", cancellationToken);

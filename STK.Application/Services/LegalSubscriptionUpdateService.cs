@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using STK.Application.DTOs.AuthDto;
 using STK.Application.Handlers;
+using STK.Application.Middleware;
 using STK.Domain.Entities;
 using STK.Persistance;
 
@@ -18,18 +19,25 @@ namespace STK.Application.Services
         private readonly DataContext _dataContext;
         private readonly IMediator _mediator;
         private readonly ILogger<LegalSubscriptionUpdateService> _logger;
+        private readonly ISubscriptionPriceProvider _subscriptionPriceProvider;
 
-        public LegalSubscriptionUpdateService(DataContext dataContext, IMediator mediator, ILogger<LegalSubscriptionUpdateService> logger)
+        public LegalSubscriptionUpdateService(DataContext dataContext, IMediator mediator, ILogger<LegalSubscriptionUpdateService> logger,
+            ISubscriptionPriceProvider subscriptionPriceProvider)
         {
             _dataContext = dataContext;
             _mediator = mediator;
             _logger = logger;
+            _subscriptionPriceProvider = subscriptionPriceProvider;
         }
 
         public async Task<string> ProcessAsync(User user, UpdateSubscriptionDto dto, CancellationToken cancellationToken)
         {
             var legal = await _dataContext.LegalRegistrations.AsNoTracking()
                 .FirstOrDefaultAsync(l => l.UserId == user.Id, cancellationToken);
+
+            var subscriptionPrice = dto.IsAdditionalFeature
+                ? await _subscriptionPriceProvider.GetAiRequestsPriceAsync(dto.CountRequestAI, cancellationToken)
+                : await _subscriptionPriceProvider.GetBasePriceAsync(dto.Subscription ?? throw DomainException.BadRequest("Не указан тип подписки"), cancellationToken);
 
             string submissionNumber = GenerateSubmissionNumber();
 
@@ -56,7 +64,7 @@ namespace STK.Application.Services
                     submissionNumber,
                     dto.Subscription,
                     dto.IsAdditionalFeature,
-                    dto.CountRequestAI,
+                    subscriptionPrice.RequestCount,
                     DateTime.UtcNow), cancellationToken);
 
             _logger.LogInformation("Subscription update event published for legal user {UserId}", user.Id);

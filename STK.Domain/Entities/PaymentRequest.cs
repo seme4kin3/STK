@@ -6,6 +6,8 @@ namespace STK.Domain.Entities
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public decimal Amount { get; set; }
+        public Guid? SubscriptionPriceId { get; set; }
+        public SubscriptionPrice SubscriptionPrice { get; set; }
         public string PaymentUrl { get; set; }
         public bool IsPaid { get; set; }
         public DateTime CreatedAt { get; set; }

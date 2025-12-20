@@ -14,18 +14,18 @@ namespace STK.Application.Handlers
     {
         private readonly DataContext _dataContext;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IMediator _mediator;
         private readonly TBankPaymentService _payment;
         private readonly IEmailService _emailService;
+        private readonly ISubscriptionPriceProvider _subscriptionPriceProvider;
 
         public RegisterUserCommandHandler(DataContext dataContext, IPasswordHasher passwordHasher,
-            IMediator mediator, TBankPaymentService payment, IEmailService emailService)
+            TBankPaymentService payment, IEmailService emailService, ISubscriptionPriceProvider subscriptionPriceProvider)
         {
             _dataContext = dataContext;
             _passwordHasher = passwordHasher;
-            _mediator = mediator;
             _payment = payment;
             _emailService = emailService;
+            _subscriptionPriceProvider = subscriptionPriceProvider;
         }
 
         public async Task<string> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -40,6 +40,8 @@ namespace STK.Application.Handlers
                     throw DomainException.Conflict("Пользователь с таким email уже существует.");
                 }
 
+                var subscriptionPrice = await _subscriptionPriceProvider.GetBasePriceAsync(request.RegisterDto.SubscriptionType, cancellationToken);
+
                 var user = new User
                 {
                     Id = Guid.NewGuid(),
@@ -47,9 +49,9 @@ namespace STK.Application.Handlers
                     PasswordHash = string.Empty, 
                     Email = request.RegisterDto.Email,
                     CreatedAt = DateTime.UtcNow,
-                    SubscriptionType = request.RegisterDto.SubscriptionType.ToString().ToLower(),
+                    SubscriptionType = subscriptionPrice.Code,
                     CustomerType = CustomerTypeEnum.Individual.ToString().ToLower(),
-                    CountRequestAI = 3,
+                    CountRequestAI = subscriptionPrice.RequestCount,
                     IsActive = false
                 };
 
@@ -78,19 +80,18 @@ namespace STK.Application.Handlers
 
                 var orderId = Guid.NewGuid().ToString();
 
-                var amount = GetInitialRequestCount(request.RegisterDto.SubscriptionType);
-
-                var payment = await _payment.InitPaymentAsync(orderId, amount, "Доступ к сервису", user.Email);
+                var payment = await _payment.InitPaymentAsync(orderId, subscriptionPrice.Price, subscriptionPrice.Description, user.Email);
 
                 var payRequest = new PaymentRequest
                 {
                     Id = Guid.Parse(orderId),
                     UserId = user.Id,
-                    Amount = amount,
+                    Amount = subscriptionPrice.Price,
                     PaymentUrl = payment.PaymentURL,
                     CreatedAt = DateTime.UtcNow,
                     PaymentId = payment.PaymentId,
-                    Description = "Доступ к сервису"
+                    Description = subscriptionPrice.Description,
+                    SubscriptionPriceId = subscriptionPrice.Id
                 };
                 _dataContext.PaymentRequests.Add(payRequest);
 
@@ -125,15 +126,6 @@ namespace STK.Application.Handlers
             }
         }
 
-        private int GetInitialRequestCount(SubscriptionType subscriptionType)
-        {
-            return subscriptionType switch
-            {
-                SubscriptionType.BaseQuarter => 60000,
-                SubscriptionType.BaseYear => 120000,
-                _ => throw new ArgumentOutOfRangeException(nameof(subscriptionType), "Некорректно задан тип подписки.")
-            };
-        }
     }
 }
 

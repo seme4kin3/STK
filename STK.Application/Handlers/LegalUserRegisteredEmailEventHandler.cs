@@ -40,7 +40,7 @@ namespace STK.Application.Handlers
         string SubmissionNumber,
         SubscriptionType? SubscriptionType,
         bool IsAdditionalFeature,
-        int CountRequestAI,
+        int? CountRequestAI,
         DateTime RequestedAt) : INotification;
     public class LegalUserRegisteredEmailEventHandler : INotificationHandler<LegalUserRegisteredEvent>, INotificationHandler<LegalUserSubscriptionUpdatedEvent>
     {
