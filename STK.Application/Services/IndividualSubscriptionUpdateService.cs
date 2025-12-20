@@ -30,9 +30,7 @@ namespace STK.Application.Services
         public async Task<string> ProcessAsync(User user, UpdateSubscriptionDto dto, CancellationToken cancellationToken)
         {
             var orderId = Guid.NewGuid();
-            var price = dto.IsAdditionalFeature
-                ? await _subscriptionPriceProvider.GetAiRequestsPriceAsync(dto.CountRequestAI, cancellationToken)
-                : await _subscriptionPriceProvider.GetBasePriceAsync(dto.Subscription ?? throw DomainException.BadRequest("Не указан тип подписки"), cancellationToken);
+            var price = await _subscriptionPriceProvider.GetPriceByIdAsync(dto.SubscriptionPriceId, cancellationToken);
 
             try
             {

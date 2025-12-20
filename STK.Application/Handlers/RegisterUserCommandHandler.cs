@@ -40,7 +40,12 @@ namespace STK.Application.Handlers
                     throw DomainException.Conflict("Пользователь с таким email уже существует.");
                 }
 
-                var subscriptionPrice = await _subscriptionPriceProvider.GetBasePriceAsync(request.RegisterDto.SubscriptionType, cancellationToken);
+                var subscriptionPrice = await _subscriptionPriceProvider.GetPriceByIdAsync(request.RegisterDto.SubscriptionPriceId, cancellationToken);
+                if (subscriptionPrice.Category != SubscriptionPriceCategory.Base)
+                {
+                    throw DomainException.BadRequest("Некорректный идентификатор базовой подписки.");
+                }
+
 
                 var user = new User
                 {

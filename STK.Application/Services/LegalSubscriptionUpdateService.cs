@@ -35,9 +35,13 @@ namespace STK.Application.Services
             var legal = await _dataContext.LegalRegistrations.AsNoTracking()
                 .FirstOrDefaultAsync(l => l.UserId == user.Id, cancellationToken);
 
-            var subscriptionPrice = dto.IsAdditionalFeature
-                ? await _subscriptionPriceProvider.GetAiRequestsPriceAsync(dto.CountRequestAI, cancellationToken)
-                : await _subscriptionPriceProvider.GetBasePriceAsync(dto.Subscription ?? throw DomainException.BadRequest("Не указан тип подписки"), cancellationToken);
+            if (legal == null)
+            {
+                _logger.LogWarning("Legal registration not found for user {UserId}", user.Id);
+                throw DomainException.BadRequest("Регистрационные данные не найдены.");
+            }
+
+            var subscriptionPrice = await _subscriptionPriceProvider.GetPriceByIdAsync(dto.SubscriptionPriceId, cancellationToken);
 
             string submissionNumber = GenerateSubmissionNumber();
 
@@ -62,8 +66,9 @@ namespace STK.Application.Services
                     legal?.Address ?? string.Empty,
                     legal?.Phone ?? string.Empty,
                     submissionNumber,
-                    dto.Subscription,
-                    dto.IsAdditionalFeature,
+                    subscriptionPrice.Category,
+                    subscriptionPrice.Description,
+                    subscriptionPrice.DurationInMonths,
                     subscriptionPrice.RequestCount,
                     DateTime.UtcNow), cancellationToken);
 

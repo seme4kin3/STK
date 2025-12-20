@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using STK.Application.DTOs.AuthDto;
 using STK.Application.Services;
+using STK.Domain.Entities;
 
 namespace STK.Application.Handlers
 {
@@ -26,7 +27,9 @@ namespace STK.Application.Handlers
        string Address,
        string Phone,
        string SubmissionNumber,
-       SubscriptionType SubscriptionType,
+       string SubscriptionDescription,
+       int? SubscriptionDurationInMonths,
+       int? SubscriptionRequestCount,
        DateTime RegisteredAt) : INotification;
 
     public record LegalUserSubscriptionUpdatedEvent(
@@ -38,9 +41,10 @@ namespace STK.Application.Handlers
         string Address,
         string Phone,
         string SubmissionNumber,
-        SubscriptionType? SubscriptionType,
-        bool IsAdditionalFeature,
-        int? CountRequestAI,
+        SubscriptionPriceCategory Category,
+        string SubscriptionDescription,
+        int? SubscriptionDurationInMonths,
+        int? SubscriptionRequestCount,
         DateTime RequestedAt) : INotification;
     public class LegalUserRegisteredEmailEventHandler : INotificationHandler<LegalUserRegisteredEvent>, INotificationHandler<LegalUserSubscriptionUpdatedEvent>
     {
@@ -62,12 +66,9 @@ namespace STK.Application.Handlers
         {
             try
             {
-                var timeSubscription = notification.SubscriptionType switch
-                {
-                    SubscriptionType.BaseQuarter => "3 месяца",
-                    SubscriptionType.BaseYear => "1 год",
-                    _ => "неизвестный"
-                };
+                var timeSubscription = notification.SubscriptionDurationInMonths.HasValue
+                    ? $"{notification.SubscriptionDurationInMonths.Value} мес."
+                    : "неизвестный";
 
                 var body = $@"<h2>Поступила заявка <strong>{notification.SubmissionNumber}</strong> на регистрацию от юридического лица</h2>
                                 <p><strong>Организация:</strong> {notification.OrganizationName}</p>
@@ -77,6 +78,7 @@ namespace STK.Application.Handlers
                                 <p><strong>Email:</strong> {notification.Email}</p>
                                 <p><strong>Телефон:</strong> {notification.Phone}</p>
                                 <p><strong>Адрес:</strong> {notification.Address}</p>
+                                <p><strong>Описание подписки:</strong> {notification.SubscriptionDescription}</p>
                                 <p><strong>Срок доступа:</strong> {timeSubscription}</p>
                                 <p><strong>Время регистрации:</strong> {notification.RegisteredAt:dd.MM.yyyy HH:mm:ss}</p>";
 
@@ -125,18 +127,14 @@ namespace STK.Application.Handlers
         {
             try
             {
-                var operation = notification.IsAdditionalFeature
-                ? "Дополнительные запросы к сервису AI"
-                : "Продление основной подписки";
+                var operation = notification.Category == SubscriptionPriceCategory.AiRequests
+                    ? "Дополнительные запросы к сервису AI"
+                    : "Продление основной подписки";
 
-                var details = notification.IsAdditionalFeature
-                ? $"Количество запросов: {notification.CountRequestAI}"
-                : $"Тип подписки: {notification.SubscriptionType switch
-                {
-                    SubscriptionType.BaseQuarter => "3 месяца",
-                    SubscriptionType.BaseYear => "1 год",
-                    _ => "неизвестный"
-                }}";
+                var details = notification.Category == SubscriptionPriceCategory.AiRequests
+                   ? $"Количество запросов: {notification.SubscriptionRequestCount}"
+                   : $"Описание подписки: {notification.SubscriptionDescription}. " +
+                     $"Срок: {(notification.SubscriptionDurationInMonths.HasValue ? $"{notification.SubscriptionDurationInMonths} мес." : "неизвестный")}";
 
                 var body = $@"<h2>Поступила заявка <strong>{notification.SubmissionNumber}</strong> на обновление подписки от юридического лица</h2>
                                 <p><strong>Организация:</strong> {notification.OrganizationName}</p>

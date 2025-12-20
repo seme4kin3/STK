@@ -34,7 +34,11 @@ namespace STK.Application.Handlers
                 throw DomainException.Conflict("Пользователь с таким email уже существует.");
             }
 
-            var subscriptionPrice = await _subscriptionPriceProvider.GetBasePriceAsync(request.LegalRegisterDto.SubscriptionType, cancellationToken);
+            var subscriptionPrice = await _subscriptionPriceProvider.GetPriceByIdAsync(request.LegalRegisterDto.SubscriptionPriceId, cancellationToken);
+            if (subscriptionPrice.Category != SubscriptionPriceCategory.Base)
+            {
+                throw DomainException.BadRequest("Некорректный идентификатор базовой подписки.");
+            }
 
             var user = new User
             {
@@ -111,7 +115,9 @@ namespace STK.Application.Handlers
                 request.LegalRegisterDto.Address,
                 request.LegalRegisterDto.Phone,
                 submissionNumber,
-                request.LegalRegisterDto.SubscriptionType,
+                subscriptionPrice.Description,
+                subscriptionPrice.DurationInMonths,
+                subscriptionPrice.RequestCount,
                 registration.CreatedAt), cancellationToken);
 
             return Unit.Value;
