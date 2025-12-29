@@ -8,5 +8,7 @@ namespace STK.Application.DTOs.Subscription
         public int? DurationInMonths { get; set; }
         public int? RequestCount { get; set; }
         public decimal? Price { get; set; }
+        public string Icon { get; set; }
+        public string Title { get; set; }
     }
 }

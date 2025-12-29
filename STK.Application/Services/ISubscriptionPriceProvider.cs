@@ -39,6 +39,26 @@ namespace STK.Application.Services
                     DurationInMonths = sp.DurationInMonths,
                     RequestCount = sp.RequestCount,
                     Price = sp.Price,
+                    Icon = null,
+                    Title = sp.Category == SubscriptionPriceCategory.Base
+                        ? (sp.DurationInMonths == 1
+                            ? "Ежемесячная"
+                            : sp.DurationInMonths == 3
+                                ? "Квартальная"
+                                : sp.DurationInMonths == 6
+                                    ? "Полугодовая"
+                                    : sp.DurationInMonths == 12
+                                        ? "Годовая"
+                                        : null)
+                        : sp.Category == SubscriptionPriceCategory.AiRequests
+                            ? (sp.RequestCount == null
+                                ? null
+                                : sp.RequestCount <= 30
+                                    ? "Базовый"
+                                    : sp.RequestCount <= 100
+                                        ? "Стандарт"
+                                        : "Премиум")
+                            : null,
                 })
                 .ToListAsync(cancellationToken);
 

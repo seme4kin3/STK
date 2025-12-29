@@ -26,13 +26,9 @@ namespace STK.Application.Services
 
         public async Task<TBankInitResponseDto> InitPaymentAsync(string orderId, decimal amount, string description, string email)
         {
-            //var url = "https://securepay.tinkoff.ru/v2/Init";
-
-            //var url = "https://rest-api-test.tinkoff.ru/v2/Init";
 
             var amountKop = (int)(amount * 100);
 
-            // Формируем параметры запроса
             var requestParams = new Dictionary<string, object>
             {
                 ["TerminalKey"] = _terminalKey,
